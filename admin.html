@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Workspace - Campus Innovate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); display: flex; color: var(--text); }
+        
+        .sidebar { width: 250px; background: var(--primary); height: 100vh; padding: 20px; color: var(--white); position: fixed; }
+        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; }
+        .sidebar-subtitle { font-size: 0.8rem; color: #aaa; margin-bottom: 30px; line-height: 1.4; }
+        .nav-item { padding: 12px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--secondary); }
+        
+        .main-content { margin-left: 250px; padding: 40px; width: 100%; min-height: 100vh; }
+        .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        
+        /* Form Buat Workspace */
+        #setup-workspace-section { display: none; text-align: center; max-width: 600px; margin: 50px auto; }
+        .input-group { margin: 20px 0; text-align: left; }
+        .input-group label { font-weight: 600; color: var(--primary); display: block; margin-bottom: 8px; }
+        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 1rem; outline: none; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--secondary); }
+        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; width: 100%; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.3); }
+
+        /* Dashboard Workspace Aktif */
+        #active-workspace-section { display: none; }
+        .quota-box { display: flex; gap: 20px; margin-top: 20px; }
+        .quota-item { flex: 1; padding: 30px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; text-align: center; transition: 0.3s; }
+        .quota-item.filled { border-style: solid; border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); }
+        .quota-item i { font-size: 2.5rem; margin-bottom: 15px; }
+        .quota-item.filled i { color: var(--primary); }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: var(--bg); color: var(--primary); }
+        .btn-sm { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
+        .btn-danger { background: #ff4757; color: white; }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>CI Admin</h2>
+        <div class="sidebar-subtitle">
+            Ruang Kerja:<br>
+            <strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong>
+        </div>
+        
+        <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-layer-group"></i> Setup Project</div>
+        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Kelola User</div>
+        <div class="nav-item" style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 0; padding-top: 20px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
+    </div>
+
+    <div class="main-content">
+        
+        <div id="setup-workspace-section" class="card">
+            <i class="fa-solid fa-building-flag" style="font-size: 4rem; color: var(--secondary); margin-bottom: 20px;"></i>
+            <h1 style="color: var(--primary);">Selamat Datang, Admin!</h1>
+            <p style="color: #777; margin-bottom: 30px;">Anda belum memiliki Ruang Kerja. Silakan buat identitas organisasi Anda terlebih dahulu.</p>
+            
+            <form onsubmit="createWorkspace(event)">
+                <div class="input-group">
+                    <label>Nama Organisasi / Ruang Kerja</label>
+                    <input type="text" id="orgName" placeholder="Contoh: BEM Fakultas Kedokteran, HIMA Manajemen..." required>
+                </div>
+                <button type="submit" class="btn-primary" id="btn-create-ws">Membangun Ruang Kerja...</button>
+            </form>
+        </div>
+
+        <div id="active-workspace-section">
+            <h1 style="color: var(--primary); margin-bottom: 10px;">Manajemen: <span id="header-workspace-name" style="color: var(--secondary);">...</span></h1>
+            <p style="color: #666; margin-bottom: 30px;">Kelola konfigurasi dan anggota ruang kerja Anda di sini.</p>
+
+            <div id="menu-setup" class="card menu-content">
+                <h2>Konfigurasi Ruang Kerja (Kuota)</h2>
+                <div class="quota-box">
+                    <div class="quota-item filled">
+                        <i class="fa-solid fa-globe"></i>
+                        <h3>Landing Page (1/1)</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">Otomatis dibuat.</p>
+                        <button class="btn-sm" style="background: var(--primary); color: white; margin-top: 15px;" onclick="alert('Fitur Editor Landing Page sedang dalam pengembangan.')"><i class="fa-solid fa-pen"></i> Edit Landing Page</button>
+                    </div>
+                    <div class="quota-item filled">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        <h3>Sistem Dashboard (1/1)</h3>
+                        <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">Otomatis dibuat.</p>
+                        <button class="btn-sm" style="background: var(--secondary); color: var(--primary); margin-top: 15px;" onclick="goToUserDashboard()"><i class="fa-solid fa-external-link-alt"></i> Buka Dashboard Utama</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="menu-users" class="card menu-content" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2>Daftar Anggota / Peserta</h2>
+                    <button class="btn-sm" style="background: var(--secondary); color: var(--primary);" onclick="showInviteCode()"><i class="fa-solid fa-user-plus"></i> Kode Undangan Workspace</button>
+                </div>
+                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
+                    <strong>Cara menambahkan User:</strong> Berikan <b>ID Workspace</b> Anda kepada User biasa. Mereka dapat memasukkan ID tersebut setelah mendaftar di halaman Login untuk bergabung ke organisasi ini.
+                </p>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nama Anggota</th>
+                            <th>Tanggal Bergabung</th>
+                            <th>Status Akses</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="member-list">
+                        <tr><td colspan="4" style="text-align: center; color: #777;">Belum ada anggota yang bergabung.</td></tr>
+                        </tbody>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // 1. KONEKSI SUPABASE
+        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentAdminSession = null;
+        let currentWorkspaceId = null;
+
+        // 2. CEK SESI & ROLE SAAT HALAMAN DIMUAT
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            currentAdminSession = session.user;
+
+            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', session.user.id).single();
+            if (!roleData || roleData.role !== 'admin') {
+                alert("Peringatan Keamanan: Anda bukan Admin Workspace!");
+                window.location.href = 'index.html';
+                return;
+            }
+
+            checkWorkspace();
+        });
+
+        // 3. CEK APAKAH ADMIN INI SUDAH PUNYA WORKSPACE
+        async function checkWorkspace() {
+            const { data: wsData, error } = await supabaseClient
+                .from('workspaces')
+                .select('*')
+                .eq('admin_id', currentAdminSession.id)
+                .single(); // Kita asumsikan 1 Admin = 1 Workspace sesuai standar umum
+
+            if (wsData) {
+                // Admin SUDAH punya workspace
+                currentWorkspaceId = wsData.id;
+                document.getElementById('setup-workspace-section').style.display = 'none';
+                document.getElementById('active-workspace-section').style.display = 'block';
+                
+                // Update UI dengan nama workspace
+                document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+                document.getElementById('header-workspace-name').innerText = wsData.nama_organisasi;
+                
+                loadMembers(); // Muat daftar anggota
+            } else {
+                // Admin BELUM punya workspace
+                document.getElementById('setup-workspace-section').style.display = 'block';
+                document.getElementById('active-workspace-section').style.display = 'none';
+                document.getElementById('sidebar-workspace-name').innerText = "Belum Dibuat";
+            }
+        }
+
+        // 4. FUNGSI MEMBUAT WORKSPACE BARU
+        async function createWorkspace(e) {
+            e.preventDefault();
+            const orgName = document.getElementById('orgName').value;
+            const btn = document.getElementById('btn-create-ws');
+            
+            btn.disabled = true;
+            btn.innerText = "Membangun Sistem...";
+
+            const { data, error } = await supabaseClient
+                .from('workspaces')
+                .insert([{ 
+                    admin_id: currentAdminSession.id, 
+                    nama_organisasi: orgName,
+                    has_landing_page: true, // Otomatis aktif
+                    has_dashboard: true     // Otomatis aktif
+                }])
+                .select();
+
+            if (error) {
+                alert("Gagal membuat Ruang Kerja: " + error.message);
+                btn.disabled = false;
+                btn.innerText = "Membangun Ruang Kerja...";
+                return;
+            }
+
+            alert(`Ruang Kerja "${orgName}" berhasil dibuat!`);
+            checkWorkspace(); // Refresh tampilan
+        }
+
+        // 5. FUNGSI BUKA DASHBOARD USER (Preview)
+        function goToUserDashboard() {
+            if (currentWorkspaceId) {
+                // Melempar Admin ke halaman User (sebagai preview) dengan membawa ID workspace
+                window.location.href = `user.html?workspace=${currentWorkspaceId}`;
+            }
+        }
+
+        // 6. FUNGSI UNTUK MENGUNDANG USER
+        function showInviteCode() {
+            if(currentWorkspaceId) {
+                // Menggunakan prompt agar admin bisa langsung Copy kodenya
+                prompt("Berikan KODE WORKSPACE ini kepada anggota Anda agar mereka bisa bergabung:", currentWorkspaceId);
+            }
+        }
+
+        // 7. FUNGSI MUAT DAFTAR ANGGOTA (DUMMY SEMENTARA KARENA BELUM ADA MENU GABUNG DI USER)
+        async function loadMembers() {
+            // Logika aslinya akan di-query ke tabel workspace_members
+            // Namun karena belum ada user yang bergabung, kita biarkan kosong dulu
+        }
+
+        // 8. LOGIKA MENU SIDEBAR (Single Page App)
+        function switchMenu(menu) {
+            document.querySelectorAll('.menu-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`menu-${menu}`).style.display = 'block';
+            event.currentTarget.classList.add('active');
+        }
+
+        // 9. LOGOUT
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

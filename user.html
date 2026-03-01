@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workspace Dashboard - Campus Innovate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --white: #fff; --text: #333; --green: #2ecc71; --red: #e74c3c; --blue: #3498db;}
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--primary); height: 100vh; color: var(--white); display: flex; flex-direction: column; position: fixed; z-index: 100;}
+        .brand { padding: 20px; font-size: 1.2rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .brand span { color: var(--secondary); }
+        .menu-container { overflow-y: auto; flex: 1; padding: 15px 0; }
+        .nav-item { padding: 12px 20px; display: flex; align-items: center; gap: 15px; color: rgba(255,255,255,0.7); cursor: pointer; transition: 0.3s; border-left: 4px solid transparent; font-size: 0.95rem;}
+        .nav-item i { width: 20px; text-align: center; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: var(--secondary); border-left-color: var(--secondary); }
+        
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 30px; min-height: 100vh;}
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .workspace-badge { background: rgba(246, 178, 59, 0.2); color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; border: 1px solid var(--secondary); }
+        
+        .view-section { display: none; animation: fadeIn 0.4s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS & GRIDS */
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .card { background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .finance-card h3 { color: #777; font-size: 0.9rem; margin-bottom: 10px; }
+        .finance-card .amount { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .finance-card .badge { display: inline-block; padding: 4px 8px; border-radius: 5px; font-size: 0.8rem; margin-top: 10px; font-weight: bold; }
+        
+        .bg-green { background: rgba(46, 204, 113, 0.2); color: var(--green); }
+        .bg-red { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+        .bg-blue { background: rgba(52, 152, 219, 0.2); color: var(--blue); }
+        
+        .timeline-box { border-left: 3px solid var(--secondary); margin-left: 10px; padding-left: 20px; }
+        .event { margin-bottom: 20px; position: relative; }
+        .event::before { content: ''; position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: var(--secondary); border-radius: 50%; }
+        
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .folder { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.2s; }
+        .folder:hover { border-color: var(--secondary); transform: translateY(-5px); }
+        .folder i { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
+        
+        .btn-action { background: var(--secondary); color: var(--primary); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;}
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.3); }
+
+        /* KANBAN BOARD */
+        .kanban-board { display: flex; gap: 20px; align-items: flex-start; margin-top: 20px;}
+        .kanban-col { flex: 1; background: #f8fafc; padding: 15px; border-radius: 10px; min-height: 200px;}
+        .kanban-col.belum { border-top: 4px solid #95a5a6; }
+        .kanban-col.progress { border-top: 4px solid #e67e22; background: #fdf2e9;}
+        .kanban-col.selesai { border-top: 4px solid #2ecc71; background: #e9f7ef;}
+        .k-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative;}
+        .k-card h4 { color: var(--primary); font-size: 1rem; margin-bottom: 5px; padding-right: 40px;}
+        .k-card span.dept-tag { font-size: 0.75rem; background: #eee; padding: 3px 8px; border-radius: 10px; color: #555; display: inline-block; margin-bottom: 8px;}
+        
+        /* Tombol Aksi Kanban & Tabel */
+        .k-card-actions { position: absolute; top: 15px; right: 10px; display: flex; gap: 5px; }
+        .btn-k-action { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 3px; border-radius: 4px;}
+        .btn-k-action.edit { color: var(--blue); }
+        .btn-k-action.edit:hover { background: rgba(52, 152, 219, 0.1); }
+        .btn-k-action.del { color: var(--red); }
+        .btn-k-action.del:hover { background: rgba(231, 76, 60, 0.1); }
+
+        .rab-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+        .table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        .table-custom th, .table-custom td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
+        .table-custom th { background: var(--primary); color: white; }
+        .table-custom tr:nth-child(even) { background-color: #f8fafc; }
+        .btn-table-edit { background: var(--blue); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem; margin-right: 5px;}
+        .btn-table-del { background: var(--red); color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 0.8rem;}
+
+        /* MODAL POPUP */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 1000; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--white); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; transform: translateY(30px) scale(0.9); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { color: var(--primary); font-size: 1.3rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: #aaa; cursor: pointer; transition: 0.2s; }
+        .close-btn:hover { color: var(--red); transform: rotate(90deg); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; color: var(--primary); font-weight: 500; font-size: 0.9rem; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; outline: none; transition: 0.3s; font-family: 'Poppins', sans-serif;}
+        .input-group input:focus, .input-group select:focus { border-color: var(--secondary); }
+
+        /* ABSENSI STYLE */
+        .absen-btn-group { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
+        .btn-absen { flex: 1; max-width: 250px; padding: 20px; border-radius: 15px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .btn-masuk { background: var(--green); }
+        .btn-masuk:hover { background: #27ae60; transform: translateY(-3px); }
+        .btn-keluar { background: var(--red); }
+        .btn-keluar:hover { background: #c0392b; transform: translateY(-3px); }
+        .btn-absen:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="brand"><i class="fa-solid fa-chart-pie"></i> Campus <span>Innovate</span></div>
+        <div class="menu-container">
+            <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fa-solid fa-border-all"></i> Dashboard Utama</div>
+            
+            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Manajemen Inti</p>
+            <div class="nav-item" onclick="switchTab('program-event')"><i class="fa-solid fa-clipboard-list"></i> Program & Event</div>
+            <div class="nav-item" onclick="switchTab('input-rab')"><i class="fa-solid fa-file-invoice-dollar"></i> Input RAB Detail</div>
+            <div class="nav-item" onclick="switchTab('rekap-rab')"><i class="fa-solid fa-scale-balanced"></i> Rekapitulasi RAB</div>
+            
+            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Operasional</p>
+            <div class="nav-item" onclick="switchTab('absensi')"><i class="fa-solid fa-calendar-check"></i> Absensi Peserta</div>
+            <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi (Folder)</div>
+            <div class="nav-item" onclick="switchTab('timeline')"><i class="fa-regular fa-calendar-days"></i> Kalender & Zoom</div>
+            <div class="nav-item" onclick="switchTab('kpi')"><i class="fa-solid fa-bullseye"></i> Indikator KPI</div>
+            <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-envelope-open-text"></i> Pengajuan Surat</div>
+        </div>
+        <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1);" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
+    </div>
+
+    <div class="main-content">
+        <div class="topbar">
+            <div>
+                <h1 id="welcomeText" style="color: var(--primary); font-size: 1.5rem;">Memuat Data... <i class="fa-solid fa-spinner fa-spin"></i></h1>
+                <p style="color: #777; font-size: 0.9rem;">Selamat datang di Workspace Anda. Akses Anda: <strong id="user-role-badge" style="color: var(--secondary);">...</strong></p>
+            </div>
+            <div class="workspace-badge"><i class="fa-solid fa-building-columns"></i> <span id="workspace-name-display">Mencari Identitas...</span></div>
+        </div>
+
+        <div id="view-dashboard" class="view-section active">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h2 style="font-size: 1.2rem;">Laporan Finansial (RAB)</h2>
+                <span style="font-size: 0.8rem; color: var(--green); background: rgba(46, 204, 113, 0.2); padding: 5px 10px; border-radius: 15px;"><i class="fa-solid fa-bolt"></i> Auto-Synced</span>
+            </div>
+
+            <div class="grid-4">
+                <div class="card finance-card"><h3>Total RAB</h3><div class="amount" id="val-total-rab">Rp 0</div><div class="badge bg-blue">Anggaran Utama</div></div>
+                <div class="card finance-card"><h3>Realisasi RAB</h3><div class="amount" id="val-realisasi-rab">Rp 0</div><div class="badge bg-green"><i class="fa-solid fa-arrow-trend-up"></i> Terpakai</div></div>
+                <div class="card finance-card"><h3>Sisa Saldo</h3><div class="amount" id="val-sisa-rab">Rp 0</div><div class="badge bg-red"><i class="fa-solid fa-wallet"></i> Tersedia</div></div>
+                <div class="card finance-card"><h3>Penyerapan</h3><div class="amount" id="val-penyerapan">0%</div><div class="badge bg-green">Sesuai Target</div></div>
+            </div>
+
+            <h2 style="font-size: 1.2rem; margin-bottom: 15px; margin-top: 20px;">Status Program & Kemitraan</h2>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--primary);">Program Berjalan</h3>
+                    <div style="display: flex; gap: 15px; margin-bottom: 30px;">
+                        <div style="flex: 1; text-align: center; padding: 10px; background: var(--bg); border-radius: 10px;"><b id="val-prog-total">0</b><br><small>Total</small></div>
+                        <div style="flex: 1; text-align: center; padding: 10px; background: rgba(46, 204, 113, 0.2); color: var(--green); border-radius: 10px;"><b id="val-prog-selesai">0</b><br><small>Selesai</small></div>
+                        <div style="flex: 1; text-align: center; padding: 10px; background: rgba(246, 178, 59, 0.2); color: #d35400; border-radius: 10px;"><b id="val-prog-progress">0</b><br><small>Progress</small></div>
+                        <div style="flex: 1; text-align: center; padding: 10px; background: #eee; border-radius: 10px;"><b id="val-prog-belum">0</b><br><small>Belum</small></div>
+                    </div>
+
+                    <h3 style="margin-bottom: 20px; color: var(--primary);">Timeline Terdekat</h3>
+                    <div class="timeline-box" id="timeline-list">
+                        <div class="event"><h4 style="font-size: 1rem; color: #aaa;">Belum ada jadwal terdekat...</h4></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--primary);">Distribusi Mitra / Sponsor</h3>
+                    <canvas id="mitraChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-program-event" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h2>Detail Program & Event</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-action" style="background: #e2e8f0; color: var(--primary);" onclick="openModal('deptModal')"><i class="fa-solid fa-sitemap"></i> + Departemen</button>
+                    <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program</button>
+                </div>
+            </div>
+            <p style="color: #666; margin-bottom: 10px;">Pantau seluruh status pelaksanaan program kerja dari tiap departemen.</p>
+            
+            <div class="kanban-board">
+                <div class="kanban-col belum">
+                    <h3 style="margin-bottom: 15px; font-size: 1rem; color: #7f8c8d;"><i class="fa-solid fa-pause"></i> Belum Berjalan</h3>
+                    <div id="kb-belum"><p style="font-size: 0.8rem; color: #aaa;">Kosong...</p></div>
+                </div>
+                <div class="kanban-col progress">
+                    <h3 style="margin-bottom: 15px; font-size: 1rem; color: #d35400;"><i class="fa-solid fa-spinner fa-spin"></i> Sedang Progress</h3>
+                    <div id="kb-progress"><p style="font-size: 0.8rem; color: #aaa;">Kosong...</p></div>
+                </div>
+                <div class="kanban-col selesai">
+                    <h3 style="margin-bottom: 15px; font-size: 1rem; color: #27ae60;"><i class="fa-solid fa-check-double"></i> Sudah Selesai</h3>
+                    <div id="kb-selesai"><p style="font-size: 0.8rem; color: #aaa;">Kosong...</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-input-rab" class="view-section">
+            <h2>Sistem Input RAB Detail</h2>
+            <p style="color: #666; margin-bottom: 20px;">Masukkan detail barang, harga rencana, dan pengeluaran nyata (Realisasi).</p>
+            
+            <div class="card" style="margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <form onsubmit="saveRabDetail(event)" id="form-rab">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);" id="rab-form-title">Input Rincian Baru</h3>
+                        <button type="button" id="btn-cancel-rab" style="display: none; background: #eee; border:none; padding: 5px 15px; border-radius: 5px; cursor: pointer;" onclick="cancelEditRab()">Batal Edit</button>
+                    </div>
+                    
+                    <div class="rab-form-grid">
+                        <div class="input-group">
+                            <label>1. Pilih Departemen</label>
+                            <select id="rab-select-dept" required onchange="filterProgramForRAB()"><option value="">-- Muat Departemen... --</option></select>
+                        </div>
+                        <div class="input-group">
+                            <label>2. Pilih Program / Event</label>
+                            <select id="rab-select-prog" required><option value="">-- Pilih Departemen Dulu --</option></select>
+                        </div>
+                        <div class="input-group">
+                            <label>3. Nama Barang / Kebutuhan</label>
+                            <input type="text" id="rab-nama-barang" placeholder="Contoh: Konsumsi Panitia" required>
+                        </div>
+                    </div>
+                    <div class="rab-form-grid">
+                        <div class="input-group">
+                            <label>Volume / Jumlah</label>
+                            <input type="number" id="rab-volume" placeholder="Contoh: 30" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Satuan</label>
+                            <input type="text" id="rab-satuan" placeholder="Contoh: box, paket, orang" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Harga Satuan Rencana (Rp)</label>
+                            <input type="number" id="rab-harga" placeholder="Contoh: 25000" required>
+                        </div>
+                    </div>
+                    <div class="rab-form-grid" style="grid-template-columns: 1fr;">
+                        <div class="input-group">
+                            <label style="color: var(--green);"><i class="fa-solid fa-money-bill-wave"></i> Realisasi Terpakai (Rp) <small style="color: #777;">*Isi 0 jika belum terlaksana</small></label>
+                            <input type="number" id="rab-realisasi" placeholder="Masukkan total dana yang benar-benar keluar..." value="0" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action" id="btn-save-rab" style="width: 100%;"><i class="fa-solid fa-plus"></i> Simpan Data RAB</button>
+                </form>
+            </div>
+
+            <div class="card" style="overflow-x: auto;">
+                <h3 style="margin-bottom: 15px; color: var(--primary);">Tabel Rincian Anggaran (RAB)</h3>
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Departemen</th>
+                            <th>Program</th>
+                            <th>Nama Barang</th>
+                            <th>Vol</th>
+                            <th>Harga Satuan</th>
+                            <th>Total RAB Rencana</th>
+                            <th style="background: var(--green);">Realisasi Aktual</th>
+                            <th style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rab-body">
+                        <tr><td colspan="9" style="text-align: center;">Memuat data RAB...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-rekap-rab" class="view-section">
+            <h2>Rekapitulasi RAB & Sumber Dana</h2>
+            <p style="color: #666; margin-bottom: 20px;">Pantau keseimbangan anggaran dan atur tipe pemasukan per program kerja.</p>
+
+            <div class="grid-4" style="margin-bottom: 20px;">
+                <div class="card" style="background: #082644; color: white;">
+                    <h3 style="color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Total Pemasukan BPPTN</h3>
+                    <div id="rekap-global-bpptn" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">Rp 0</div>
+                </div>
+                <div class="card" style="background: #082644; color: white;">
+                    <h3 style="color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Total Pemasukan Non-BPPTN</h3>
+                    <div id="rekap-global-non" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">Rp 0</div>
+                </div>
+                <div class="card" style="background: #061c33; color: white;">
+                    <h3 style="color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Total Pemasukan Seluruh</h3>
+                    <div id="rekap-global-masuk" style="font-size: 1.5rem; font-weight: bold; color: var(--blue);">Rp 0</div>
+                </div>
+                <div class="card" style="background: #061c33; color: white;">
+                    <h3 style="color: #aaa; font-size: 0.85rem; margin-bottom: 5px;">Sisa Saldo Anggaran</h3>
+                    <div id="rekap-global-sisa" style="font-size: 1.5rem; font-weight: bold; color: var(--green);">Rp 0</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--secondary);">
+                <form onsubmit="saveSumberDana(event)">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);">Input / Edit Sumber Dana</h3>
+                    </div>
+                    <div class="rab-form-grid">
+                        <div class="input-group">
+                            <label>Pilih Program</label>
+                            <select id="rekap-select-prog" required><option value="">-- Memuat Program... --</option></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Dana BPPTN (Rp)</label>
+                            <input type="number" id="rekap-dana-bpptn" placeholder="Contoh: 10000000" value="0" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Dana Non-BPPTN (Rp)</label>
+                            <input type="number" id="rekap-dana-non" placeholder="Contoh: 5000000" value="0" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action" id="btn-save-dana"><i class="fa-solid fa-save"></i> Simpan Sumber Dana</button>
+                </form>
+            </div>
+
+            <div class="card" style="overflow-x: auto;">
+                <h3 style="margin-bottom: 15px; color: var(--primary);">Tabel Rekapitulasi per Program</h3>
+                <table class="table-custom" style="font-size: 0.85rem;">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="text-align: center; vertical-align: middle;">No</th>
+                            <th rowspan="2" style="vertical-align: middle;">Departemen</th>
+                            <th rowspan="2" style="vertical-align: middle;">Nama Program</th>
+                            <th colspan="2" style="text-align: center; background: #082644;">Sumber Dana Pemasukan</th>
+                            <th colspan="2" style="text-align: center; background: #061c33;">Pengeluaran</th>
+                            <th rowspan="2" style="text-align: center; vertical-align: middle;">Aksi Kontrol</th>
+                        </tr>
+                        <tr>
+                            <th style="background: var(--blue);">BPPTN</th>
+                            <th style="background: var(--secondary); color: var(--primary);">Non-BPPTN</th>
+                            <th style="background: #95a5a6;">Total RAB</th>
+                            <th style="background: var(--green);">Total Realisasi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-rekap-body">
+                        <tr><td colspan="8" style="text-align: center;">Memuat rekapitulasi...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-absensi" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Sistem Absensi Kehadiran</h2>
+                <div id="absen-live-time" style="background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-family: monospace; font-size: 1.1rem;">00:00:00</div>
+            </div>
+            
+            <div class="card" style="text-align: center; padding: 40px 20px;" id="panel-absen-user">
+                <i class="fa-solid fa-fingerprint" style="font-size: 4rem; color: var(--secondary); margin-bottom: 15px;"></i>
+                <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang, Peserta!</h3>
+                <p style="color: #666; margin-bottom: 20px;">Silakan catat kehadiran Anda untuk hari ini.</p>
+                
+                <div class="absen-btn-group">
+                    <button class="btn-absen btn-masuk" id="btn-absen-masuk" onclick="absenAction('masuk')"><i class="fa-solid fa-right-to-bracket"></i> ABSEN MASUK</button>
+                    <button class="btn-absen btn-keluar" id="btn-absen-keluar" onclick="absenAction('keluar')" disabled><i class="fa-solid fa-right-from-bracket"></i> ABSEN KELUAR</button>
+                </div>
+                <p id="absen-status-msg" style="font-weight: bold; color: var(--primary);"></p>
+            </div>
+
+            <div id="panel-absen-admin" style="display: none;">
+                <div class="grid-2">
+                    <div class="card">
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">Ringkasan Kehadiran Hari Ini</h3>
+                        <div style="display: flex; gap: 15px;">
+                            <div style="flex: 1; text-align: center; padding: 15px; background: var(--bg); border-radius: 10px;">
+                                <b style="font-size: 2rem; color: var(--primary);" id="stat-total-user">0</b><br><small>Total User Terdaftar</small>
+                            </div>
+                            <div style="flex: 1; text-align: center; padding: 15px; background: rgba(46, 204, 113, 0.2); border-radius: 10px;">
+                                <b style="font-size: 2rem; color: var(--green);" id="stat-user-hadir">0</b><br><small>Sudah Absen Masuk</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card" style="display: flex; justify-content: center; align-items: center; max-height: 180px;">
+                        <canvas id="absenChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px; overflow-x: auto;">
+                <h3 style="margin-bottom: 15px; color: var(--primary);" id="tabel-absen-title">Riwayat Absensi Anda</h3>
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Peserta</th>
+                            <th>Tanggal</th>
+                            <th style="color: var(--green);">Waktu Masuk</th>
+                            <th style="color: var(--red);">Waktu Keluar</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-absen-body">
+                        <tr><td colspan="6" style="text-align: center;">Memuat data absensi...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-notulensi" class="view-section">
+            <div class="topbar" style="margin-bottom: 20px;"><h2>Folder Notulensi Program</h2><button class="btn-action">+ Buat Folder Baru</button></div>
+            <div class="folder-grid">
+                <div class="folder"><i class="fa-solid fa-folder"></i><p>Rapat Inti BEM</p><small>12 File</small></div>
+            </div>
+        </div>
+
+        <div id="view-kpi" class="view-section"><h2>Indikator KPI (Dalam Pengembangan)</h2></div>
+        <div id="view-timeline" class="view-section"><h2>Integrasi Kalender & Zoom (Dalam Pengembangan)</h2></div>
+        <div id="view-surat" class="view-section"><h2>Pengajuan Surat (Dalam Pengembangan)</h2></div>
+
+    </div>
+
+    <div class="modal-overlay" id="deptModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Tambah Departemen/Divisi</h2><button class="close-btn" onclick="closeModal('deptModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="saveDepartment(event)">
+                <div class="input-group"><label>Nama Departemen</label><input type="text" id="input-nama-dept" required></div>
+                <button type="submit" class="btn-action" style="width: 100%;">Simpan Departemen</button>
+            </form>
+        </div>
+    </div>
+    <div class="modal-overlay" id="programModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="program-modal-title">Tambah Program Kerja</h2><button class="close-btn" onclick="closeModal('programModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="saveProgram(event)" id="form-program">
+                <div class="input-group"><label>Pilih Departemen</label><select id="input-dept-program" required></select></div>
+                <div class="input-group"><label>Nama Program</label><input type="text" id="input-nama-program" required></div>
+                <div class="input-group">
+                    <label>Status Saat Ini</label>
+                    <select id="input-status-program"><option value="Belum">Belum Berjalan</option><option value="Progress">Sedang Progress</option><option value="Selesai">Sudah Selesai</option></select>
+                </div>
+                <button type="submit" class="btn-action" style="width: 100%;" id="btn-save-program">Simpan Program</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let globalWorkspaceId = null;
+        let globalPrograms = []; 
+        let currentUserId = null;
+        let currentUserRole = null; 
+        let currentUserName = null;
+        let editingRabId = null;
+        let editingProgramId = null; 
+
+        // Absensi Chart Instance
+        let absenPieChart = null;
+
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            currentUserId = session.user.id;
+            currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+            
+            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
+            currentUserRole = roleData ? roleData.role : 'user';
+            
+            document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
+            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "ANGGOTA / USER";
+
+            const urlParams = new URLSearchParams(window.location.search);
+            globalWorkspaceId = urlParams.get('workspace');
+
+            if (!globalWorkspaceId) { alert("Akses Ditolak!"); window.location.href = 'index.html'; return; }
+
+            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
+            if (wsData) document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
+
+            // INIT JAM LIVE
+            setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+
+            loadDepartments(); loadFinanceData(); loadProgramData(); loadRabTable(); loadRekapitulasiData();
+            
+            setupAbsensiView();
+            loadAbsensiData();
+        });
+
+        // ====================================================
+        // FITUR ABSENSI & TRACKING
+        // ====================================================
+        function setupAbsensiView() {
+            document.getElementById('absen-greeting').innerText = `Selamat Datang, ${currentUserName}!`;
+            if (currentUserRole === 'admin') {
+                document.getElementById('panel-absen-admin').style.display = 'block';
+                document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Seluruh Peserta";
+            } else {
+                document.getElementById('panel-absen-admin').style.display = 'none';
+                document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Anda";
+            }
+        }
+
+        async function loadAbsensiData() {
+            const today = new Date().toISOString().split('T')[0]; 
+            const { data: todayAbsen } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today).single();
+
+            const btnMasuk = document.getElementById('btn-absen-masuk'); const btnKeluar = document.getElementById('btn-absen-keluar'); const statusMsg = document.getElementById('absen-status-msg');
+
+            if (!todayAbsen) { btnMasuk.disabled = false; btnKeluar.disabled = true; statusMsg.innerText = ""; } 
+            else if (todayAbsen && !todayAbsen.waktu_keluar) { btnMasuk.disabled = true; btnKeluar.disabled = false; statusMsg.innerText = `Anda sudah Absen Masuk pada pukul ${todayAbsen.waktu_masuk}. Jangan lupa Absen Keluar!`; } 
+            else { btnMasuk.disabled = true; btnKeluar.disabled = true; statusMsg.innerText = `Absensi hari ini selesai. Terima kasih atas kerja keras Anda!`; }
+
+            let query = supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).order('tanggal', { ascending: false }).order('waktu_masuk', { ascending: false });
+            if (currentUserRole !== 'admin') { query = query.eq('user_id', currentUserId); }
+            
+            const { data: historyData } = await query;
+            const tbody = document.getElementById('table-absen-body');
+            
+            if (!historyData || historyData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #aaa;">Belum ada riwayat absensi.</td></tr>'; } 
+            else {
+                tbody.innerHTML = '';
+                historyData.forEach((h, index) => {
+                    const tgl = new Date(h.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                    const wKeluar = h.waktu_keluar ? h.waktu_keluar : '-';
+                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tgl}</td><td style="color: var(--green); font-weight: bold;">${h.waktu_masuk}</td><td style="color: var(--red); font-weight: bold;">${wKeluar}</td><td><span style="background: rgba(46, 204, 113, 0.2); color: var(--green); padding: 4px 10px; border-radius: 15px; font-size: 0.8rem;">${h.status}</span></td></tr>`;
+                });
+            }
+
+            if (currentUserRole === 'admin') {
+                const { count: totalUser } = await supabaseClient.from('workspace_members').select('*', { count: 'exact', head: true }).eq('workspace_id', globalWorkspaceId);
+                document.getElementById('stat-total-user').innerText = totalUser || 0;
+
+                const { data: allTodayAbsen } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('tanggal', today);
+                const hadirCount = allTodayAbsen ? allTodayAbsen.length : 0;
+                document.getElementById('stat-user-hadir').innerText = hadirCount;
+
+                const belumHadirCount = (totalUser || 0) - hadirCount;
+                
+                const ctxPie = document.getElementById('absenChart').getContext('2d');
+                if(absenPieChart) absenPieChart.destroy(); 
+                
+                absenPieChart = new Chart(ctxPie, {
+                    type: 'pie', data: { labels: ['Hadir', 'Belum Hadir'], datasets: [{ data: [hadirCount, belumHadirCount], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] },
+                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                });
+            }
+        }
+
+        async function absenAction(jenis) {
+            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const timeNow = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+            
+            if (jenis === 'masuk') {
+                const { error } = await supabaseClient.from('attendances').insert([{ workspace_id: globalWorkspaceId, user_id: currentUserId, nama_user: currentUserName, tanggal: today, waktu_masuk: timeNow }]);
+                if (error) alert("Gagal absen masuk: " + error.message); else alert("Berhasil Absen Masuk!");
+            } 
+            else if (jenis === 'keluar') {
+                const { error } = await supabaseClient.from('attendances').update({ waktu_keluar: timeNow }).eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today);
+                if (error) alert("Gagal absen keluar: " + error.message); else alert("Berhasil Absen Keluar!");
+            }
+            loadAbsensiData(); 
+        }
+
+        // ====================================================
+        // MANAJEMEN DEPARTEMEN & PROGRAM 
+        // ====================================================
+        async function loadDepartments() {
+            const { data } = await supabaseClient.from('departments').select('*').eq('workspace_id', globalWorkspaceId);
+            const selectProgModal = document.getElementById('input-dept-program'); const selectRabDept = document.getElementById('rab-select-dept');
+            let options = '<option value="">-- Pilih Departemen --</option>';
+            if (data && data.length > 0) { data.forEach(d => options += `<option value="${d.id}">${d.nama_departemen}</option>`); } 
+            else { options = '<option value="">-- Buat Departemen Dulu --</option>'; }
+            selectProgModal.innerHTML = options; selectRabDept.innerHTML = options;
+        }
+
+        async function saveDepartment(e) {
+            e.preventDefault(); await supabaseClient.from('departments').insert([{ workspace_id: globalWorkspaceId, nama_departemen: document.getElementById('input-nama-dept').value }]);
+            closeModal('deptModal'); document.getElementById('input-nama-dept').value = ''; loadDepartments(); 
+        }
+
+        async function loadProgramData() {
+            const { data, error } = await supabaseClient.from('programs').select(`id, nama_program, status, department_id, created_by, departments ( nama_departemen )`).eq('workspace_id', globalWorkspaceId);
+            if (error) return; globalPrograms = data; 
+
+            document.getElementById('val-prog-total').innerText = data.length; document.getElementById('val-prog-selesai').innerText = data.filter(p => p.status === 'Selesai').length; document.getElementById('val-prog-progress').innerText = data.filter(p => p.status === 'Progress').length; document.getElementById('val-prog-belum').innerText = data.filter(p => p.status === 'Belum').length;
+
+            const colBelum = document.getElementById('kb-belum'); const colProgress = document.getElementById('kb-progress'); const colSelesai = document.getElementById('kb-selesai');
+            colBelum.innerHTML = ''; colProgress.innerHTML = ''; colSelesai.innerHTML = '';
+
+            data.forEach(p => {
+                const deptName = p.departments?.nama_departemen || 'Umum';
+                const isOwner = p.created_by === currentUserId; const isAdmin = currentUserRole === 'admin';
+                let actionBtns = '';
+
+                if (isAdmin) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}', '${p.department_id}', '${p.nama_program}', '${p.status}')"><i class="fa-solid fa-pen"></i></button><button class="btn-k-action del" onclick="deleteProgramAction('${p.id}', '${p.nama_program}')"><i class="fa-solid fa-trash"></i></button></div>`; } 
+                else if (isOwner) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}', '${p.department_id}', '${p.nama_program}', '${p.status}')"><i class="fa-solid fa-pen"></i></button></div>`; }
+
+                const cardHtml = `<div class="k-card">${actionBtns}<span class="dept-tag"><i class="fa-solid fa-sitemap"></i> ${deptName}</span><h4>${p.nama_program}</h4></div>`;
+                if(p.status === 'Belum') colBelum.innerHTML += cardHtml; if(p.status === 'Progress') colProgress.innerHTML += cardHtml; if(p.status === 'Selesai') colSelesai.innerHTML += cardHtml;
+            });
+        }
+
+        function openProgramModal() { editingProgramId = null; document.getElementById('form-program').reset(); document.getElementById('program-modal-title').innerText = "Tambah Program Kerja"; openModal('programModal'); }
+        function openEditProgram(id, deptId, nama, status) { editingProgramId = id; document.getElementById('program-modal-title').innerText = "Edit Program Kerja"; document.getElementById('input-dept-program').value = deptId; document.getElementById('input-nama-program').value = nama; document.getElementById('input-status-program').value = status; openModal('programModal'); }
+
+        async function saveProgram(e) {
+            e.preventDefault(); const deptId = document.getElementById('input-dept-program').value; const nama = document.getElementById('input-nama-program').value; const status = document.getElementById('input-status-program').value;
+            if (editingProgramId) { await supabaseClient.from('programs').update({ department_id: deptId, nama_program: nama, status: status }).eq('id', editingProgramId); } 
+            else { await supabaseClient.from('programs').insert([{ workspace_id: globalWorkspaceId, department_id: deptId, nama_program: nama, status: status, created_by: currentUserId }]); }
+            closeModal('programModal'); await loadProgramData(); await loadRekapitulasiData();
+        }
+
+        async function deleteProgramAction(progId, progName) { if(confirm(`Yakin hapus Program "${progName}"?`)) { await supabaseClient.from('programs').delete().eq('id', progId); await loadProgramData(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
+
+        // ====================================================
+        // FUNGSI RAB & SINKRONISASI
+        // ====================================================
+        function filterProgramForRAB() { fetchProgByDept(document.getElementById('rab-select-dept').value, document.getElementById('rab-select-prog')); }
+        async function fetchProgByDept(deptId, selectEl) { const { data } = await supabaseClient.from('programs').select('id, nama_program').eq('department_id', deptId); selectEl.innerHTML = data && data.length > 0 ? data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('') : '<option value="">-- Kosong --</option>'; }
+        
+        async function saveRabDetail(e) {
+            e.preventDefault();
+            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('rab-select-dept').value, program_id: document.getElementById('rab-select-prog').value, nama_barang: document.getElementById('rab-nama-barang').value, volume: document.getElementById('rab-volume').value, satuan: document.getElementById('rab-satuan').value, harga_satuan: document.getElementById('rab-harga').value, total_harga: document.getElementById('rab-volume').value * document.getElementById('rab-harga').value, realisasi: document.getElementById('rab-realisasi').value || 0 };
+            if (editingRabId) { await supabaseClient.from('rab_items').update(payload).eq('id', editingRabId); editingRabId = null; document.getElementById('btn-cancel-rab').style.display = 'none'; } 
+            else { payload.created_by = currentUserId; await supabaseClient.from('rab_items').insert([payload]); }
+            document.getElementById('form-rab').reset(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); 
+        }
+
+        async function loadRabTable() {
+            const { data } = await supabaseClient.from('rab_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });
+            const tbody = document.getElementById('table-rab-body'); tbody.innerHTML = '';
+            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Kosong.</td></tr>'; return; }
+            data.forEach((item, index) => {
+                let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>';
+                if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, ${item.realisasi})"><i class="fa-solid fa-pen"></i></button><button class="btn-table-del" onclick="deleteRabAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } 
+                else if (item.created_by === currentUserId) { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, ${item.realisasi})"><i class="fa-solid fa-pen"></i></button>`; }
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.nama_barang}</strong></td><td>${item.volume} ${item.satuan}</td><td>${formatRp(item.harga_satuan)}</td><td>${formatRp(item.total_harga)}</td><td style="color:var(--green);">${formatRp(item.realisasi)}</td><td>${actionButtons}</td></tr>`;
+            });
+        }
+        async function editRabAction(id, deptId, progId, nama, vol, satuan, harga, realisasi) { editingRabId = id; document.getElementById('btn-cancel-rab').style.display = 'block'; document.getElementById('rab-select-dept').value = deptId; await fetchProgByDept(deptId, document.getElementById('rab-select-prog')); document.getElementById('rab-select-prog').value = progId; document.getElementById('rab-nama-barang').value = nama; document.getElementById('rab-volume').value = vol; document.getElementById('rab-satuan').value = satuan; document.getElementById('rab-harga').value = harga; document.getElementById('rab-realisasi').value = realisasi; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function cancelEditRab() { editingRabId = null; document.getElementById('form-rab').reset(); document.getElementById('btn-cancel-rab').style.display = 'none'; }
+        async function deleteRabAction(id) { if(confirm("Hapus?")) { await supabaseClient.from('rab_items').delete().eq('id', id); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
+        
+        async function recalculateGlobalRAB() {
+            const { data } = await supabaseClient.from('rab_items').select('total_harga, realisasi').eq('workspace_id', globalWorkspaceId);
+            let t = 0; let r = 0; if(data) { t = data.reduce((s, i) => s + parseFloat(i.total_harga || 0), 0); r = data.reduce((s, i) => s + parseFloat(i.realisasi || 0), 0); }
+            const { data: exist } = await supabaseClient.from('finance_summaries').select('id').eq('workspace_id', globalWorkspaceId).single();
+            if (exist) { await supabaseClient.from('finance_summaries').update({ total_rab: t, realisasi_rab: r }).eq('id', exist.id); } 
+            else { await supabaseClient.from('finance_summaries').insert([{ workspace_id: globalWorkspaceId, total_rab: t, realisasi_rab: r }]); }
+            loadFinanceData();
+        }
+        async function loadFinanceData() {
+            const { data } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', globalWorkspaceId).single();
+            let t = 0; let r = 0; if (data) { t = parseFloat(data.total_rab); r = parseFloat(data.realisasi_rab); }
+            document.getElementById('val-total-rab').innerText = formatRp(t); document.getElementById('val-realisasi-rab').innerText = formatRp(r); document.getElementById('val-sisa-rab').innerText = formatRp(t-r); document.getElementById('val-penyerapan').innerText = `${t>0?Math.round((r/t)*100):0}%`;
+        }
+
+        // ====================================================
+        // FITUR REKAPITULASI (PERBAIKAN RBAC & GLOBAL SUMMARY)
+        // ====================================================
+        async function saveSumberDana(e) { 
+            e.preventDefault(); 
+            const progId = document.getElementById('rekap-select-prog').value;
+            if(!progId) { alert("Pilih program!"); return; }
+            await supabaseClient.from('programs').update({ dana_bpptn: document.getElementById('rekap-dana-bpptn').value, dana_non_bpptn: document.getElementById('rekap-dana-non').value }).eq('id', progId); 
+            document.getElementById('rekap-dana-bpptn').value = '0'; document.getElementById('rekap-dana-non').value = '0'; await loadRekapitulasiData(); alert("Berhasil!"); 
+        }
+
+        async function loadRekapitulasiData() {
+            const { data: progs } = await supabaseClient.from('programs').select('*, departments(nama_departemen)').eq('workspace_id', globalWorkspaceId);
+            const { data: rabs } = await supabaseClient.from('rab_items').select('program_id, total_harga, realisasi').eq('workspace_id', globalWorkspaceId);
+            
+            const tbody = document.getElementById('table-rekap-body'); 
+            const selectProg = document.getElementById('rekap-select-prog');
+
+            if (!progs || progs.length === 0) { 
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Kosong.</td></tr>'; 
+                selectProg.innerHTML = '<option value="">-- Buat Program Dulu --</option>';
+                return; 
+            }
+
+            let html = '';
+            let optionsHtml = '<option value="">-- Pilih Program --</option>';
+            let hasEditable = false;
+
+            let globalBpptn = 0; let globalNon = 0; let globalRealisasi = 0;
+
+            progs.forEach((p, i) => {
+                const bpptn = parseFloat(p.dana_bpptn || 0);
+                const nonBpptn = parseFloat(p.dana_non_bpptn || 0);
+
+                const myRabs = rabs ? rabs.filter(r => r.program_id === p.id) : []; 
+                const sumR = myRabs.reduce((a, c) => a + parseFloat(c.total_harga || 0), 0); 
+                const sumRe = myRabs.reduce((a, c) => a + parseFloat(c.realisasi || 0), 0);
+
+                globalBpptn += bpptn; globalNon += nonBpptn; globalRealisasi += sumRe;
+
+                const isOwner = p.created_by === currentUserId;
+                const isAdmin = currentUserRole === 'admin';
+                
+                if (isAdmin || isOwner) {
+                    optionsHtml += `<option value="${p.id}">${p.nama_program}</option>`;
+                    hasEditable = true;
+                }
+
+                let btn = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>';
+                if (isAdmin || isOwner) {
+                    btn = `<button class="btn-table-edit" onclick="editRekapAction('${p.id}', ${bpptn}, ${nonBpptn})"><i class="fa-solid fa-pen"></i></button>`;
+                }
+
+                html += `<tr><td style="text-align:center;">${i + 1}</td><td>${p.departments?.nama_departemen||'-'}</td><td><strong>${p.nama_program}</strong></td><td style="color:var(--blue);">${formatRp(bpptn)}</td><td style="color:var(--secondary);">${formatRp(nonBpptn)}</td><td style="color:var(--primary); font-weight:bold;">${formatRp(sumR)}</td><td style="color:var(--green); font-weight:bold;">${formatRp(sumRe)}</td><td style="text-align:center;">${btn}</td></tr>`;
+            });
+            
+            tbody.innerHTML = html;
+            selectProg.innerHTML = hasEditable ? optionsHtml : '<option value="">-- Akses Terkunci --</option>';
+
+            // Update Summary Global
+            document.getElementById('rekap-global-bpptn').innerText = formatRp(globalBpptn);
+            document.getElementById('rekap-global-non').innerText = formatRp(globalNon);
+            const tMasuk = globalBpptn + globalNon;
+            document.getElementById('rekap-global-masuk').innerText = formatRp(tMasuk);
+            
+            const sisaEl = document.getElementById('rekap-global-sisa');
+            const sSaldo = tMasuk - globalRealisasi;
+            sisaEl.innerText = formatRp(sSaldo);
+            sisaEl.style.color = sSaldo < 0 ? '#ff4757' : '#2ecc71';
+        }
+
+        function editRekapAction(pId, b, n) { document.getElementById('rekap-select-prog').value = pId; document.getElementById('rekap-dana-bpptn').value = b; document.getElementById('rekap-dana-non').value = n; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // ====================================================
+        // UI INTERACTION & UTILS
+        // ====================================================
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        function switchTab(tabId) { document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); event.currentTarget.classList.add('active'); document.getElementById('view-' + tabId).classList.add('active'); }
+        const ctx = document.getElementById('mitraChart').getContext('2d'); new Chart(ctx, { type: 'doughnut', data: { labels: ['Sponsor', 'Media', 'Institusi', 'Lainnya'], datasets: [{ data: [3, 8, 2, 5], backgroundColor: ['#0A3055', '#F6B23B', '#2ecc71', '#95a5a6'], borderWidth: 0 }] }, options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } } });
+        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+    </script>
+</body>
+</html>
