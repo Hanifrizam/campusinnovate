@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
     <style>
         :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --white: #fff; --text: #333; --green: #2ecc71; --red: #e74c3c; --blue: #3498db;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -47,10 +51,13 @@
         .event { margin-bottom: 20px; position: relative; }
         .event::before { content: ''; position: absolute; left: -27px; top: 0; width: 12px; height: 12px; background: var(--secondary); border-radius: 50%; }
         
-        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
-        .folder { background: #f8fafc; border: 1px solid #e2e8f0; padding: 20px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.2s; }
-        .folder:hover { border-color: var(--secondary); transform: translateY(-5px); }
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .folder { background: #f8fafc; border: 1px solid #e2e8f0; padding: 25px 15px; text-align: center; border-radius: 10px; cursor: pointer; transition: 0.2s; position: relative;}
+        .folder:hover { border-color: var(--secondary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
         .folder i { font-size: 3rem; color: var(--primary); margin-bottom: 10px; }
+        .folder h4 { font-size: 0.95rem; color: var(--primary); margin-bottom: 5px;}
+        .folder .del-btn { position: absolute; top: 10px; right: 10px; color: #aaa; background: none; border: none; cursor: pointer;}
+        .folder .del-btn:hover { color: var(--red);}
         
         .btn-action { background: var(--secondary); color: var(--primary); border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s;}
         .btn-action:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.3); }
@@ -63,9 +70,10 @@
         .kanban-col.selesai { border-top: 4px solid #2ecc71; background: #e9f7ef;}
         .k-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative;}
         .k-card h4 { color: var(--primary); font-size: 1rem; margin-bottom: 5px; padding-right: 40px;}
-        .k-card span.dept-tag { font-size: 0.75rem; background: #eee; padding: 3px 8px; border-radius: 10px; color: #555; display: inline-block; margin-bottom: 8px;}
+        .k-card span.dept-tag { font-size: 0.7rem; background: #eee; padding: 3px 8px; border-radius: 10px; color: #555; display: inline-block; margin-bottom: 8px;}
+        .k-card-detail { font-size: 0.75rem; color: #777; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;}
+        .k-card-detail i { color: var(--secondary); width: 15px;}
         
-        /* Tombol Aksi Kanban & Tabel */
         .k-card-actions { position: absolute; top: 15px; right: 10px; display: flex; gap: 5px; }
         .btn-k-action { background: none; border: none; cursor: pointer; font-size: 0.85rem; padding: 3px; border-radius: 4px;}
         .btn-k-action.edit { color: var(--blue); }
@@ -74,7 +82,7 @@
         .btn-k-action.del:hover { background: rgba(231, 76, 60, 0.1); }
 
         .rab-form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
-        .table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        .table-custom { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.85rem; }
         .table-custom th, .table-custom td { padding: 12px; border: 1px solid #e2e8f0; text-align: left; }
         .table-custom th { background: var(--primary); color: white; }
         .table-custom tr:nth-child(even) { background-color: #f8fafc; }
@@ -84,7 +92,7 @@
         /* MODAL POPUP */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 1000; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--white); width: 90%; max-width: 450px; border-radius: 20px; padding: 25px; transform: translateY(30px) scale(0.9); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-content { background: var(--white); width: 90%; max-width: 500px; border-radius: 20px; padding: 25px; transform: translateY(30px) scale(0.9); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
         .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         .modal-header h2 { color: var(--primary); font-size: 1.3rem; }
@@ -92,8 +100,8 @@
         .close-btn:hover { color: var(--red); transform: rotate(90deg); }
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; margin-bottom: 5px; color: var(--primary); font-weight: 500; font-size: 0.9rem; }
-        .input-group input, .input-group select { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; outline: none; transition: 0.3s; font-family: 'Poppins', sans-serif;}
-        .input-group input:focus, .input-group select:focus { border-color: var(--secondary); }
+        .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 8px; outline: none; transition: 0.3s; font-family: 'Poppins', sans-serif;}
+        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--secondary); }
 
         /* ABSENSI STYLE */
         .absen-btn-group { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
@@ -103,6 +111,69 @@
         .btn-keluar { background: var(--red); }
         .btn-keluar:hover { background: #c0392b; transform: translateY(-3px); }
         .btn-absen:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .radio-group { display: flex; gap: 15px; margin-bottom: 15px; justify-content: center;}
+        .radio-group label { font-size: 0.9rem; font-weight: 600; cursor: pointer;}
+
+        /* KALENDER STYLE */
+        .calendar-wrapper { border: 1px solid #eee; border-radius: 10px; overflow: hidden; background: white;}
+        .cal-header { background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 15px; }
+        .cal-header button { background: rgba(255,255,255,0.2); color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; transition: 0.3s;}
+        .cal-header button:hover { background: var(--secondary); color: var(--primary); }
+        .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8fafc; border-bottom: 1px solid #eee;}
+        .cal-day-name { text-align: center; padding: 10px 0; font-weight: 600; font-size: 0.85rem; color: var(--primary); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(80px, auto); }
+        .cal-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 5px; position: relative; transition: 0.2s;}
+        .cal-cell.interactive:hover { background: #f0f4f8; cursor: pointer; }
+        .cal-cell:nth-child(7n) { border-right: none; }
+        .cal-date-num { font-size: 0.85rem; color: #777; font-weight: bold; margin-bottom: 5px; display: inline-block;}
+        .cal-event-badge { font-size: 0.65rem; padding: 3px 5px; border-radius: 4px; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid; font-weight: 600;}
+        .cal-event-badge.program { border-left-color: var(--secondary); color: #d35400; background: rgba(246, 178, 59, 0.2); }
+        .cal-event-badge.rapat { border-left-color: var(--blue); color: var(--blue); background: rgba(52, 152, 219, 0.2); }
+        .cal-event-badge.tugas { border-left-color: var(--green); color: var(--green); background: rgba(46, 204, 113, 0.2); }
+        .cal-event-badge.lainnya { border-left-color: #8e44ad; color: #8e44ad; background: rgba(142, 68, 173, 0.2); }
+        .cal-cell.empty { background: #fcfcfc; cursor: default; }
+        .cal-cell.empty:hover { background: #fcfcfc; }
+        .cal-cell.today .cal-date-num { color: white; background: var(--green); width: 22px; height: 22px; text-align: center; line-height: 22px; border-radius: 50%;}
+
+        /* RICH TEXT EDITOR STYLE */
+        .rte-container { border: 2px solid #eee; border-radius: 10px; overflow: hidden; margin-bottom: 20px;}
+        .rte-toolbar { background: #f8fafc; border-bottom: 2px solid #eee; padding: 10px; display: flex; gap: 5px; flex-wrap: wrap; }
+        .rte-toolbar button { background: white; border: 1px solid #ddd; border-radius: 5px; padding: 5px 10px; cursor: pointer; transition: 0.2s; font-family: 'Poppins'; font-weight: 500; color: var(--primary);}
+        .rte-toolbar button:hover { background: var(--secondary); border-color: var(--secondary); color: white;}
+        .rte-editor { padding: 20px; min-height: 300px; max-height: 500px; overflow-y: auto; background: white; outline: none; font-size: 0.95rem; line-height: 1.6;}
+        .rte-editor h1, .rte-editor h2 { color: var(--primary); margin-bottom: 10px;}
+        .rte-editor p { margin-bottom: 10px; }
+        .rte-editor ul, .rte-editor ol { margin-left: 20px; margin-bottom: 10px;}
+        .doc-list-item { background: white; border: 1px solid #eee; padding: 15px; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s;}
+        .doc-list-item:hover { border-color: var(--secondary); transform: translateX(5px);}
+
+        /* KPI STYLE ADDITIONS */
+        .progress-bar-container { width: 100%; background: #e2e8f0; border-radius: 10px; height: 12px; overflow: hidden; margin-top: 15px; margin-bottom: 5px; }
+        .progress-bar-fill { height: 100%; background: var(--blue); transition: width 0.5s ease; }
+        .progress-bar-fill.success { background: var(--green); }
+        .progress-bar-fill.warning { background: var(--secondary); }
+        .kpi-card { position: relative; }
+        .kpi-status-badge { position: absolute; top: 15px; right: 15px; font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: bold; }
+
+        /* DIGITAL OFFICE & E-SIGN STYLE */
+        .status-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: 12px; font-weight: bold; display: inline-block; }
+        .status-menunggu { background: rgba(246, 178, 59, 0.2); color: #d35400; }
+        .status-disetujui { background: rgba(46, 204, 113, 0.2); color: var(--green); }
+        .status-ditolak { background: rgba(231, 76, 60, 0.2); color: var(--red); }
+        
+        #pdf-page-wrapper { position: relative; display: inline-block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 10px auto; background: white;}
+        #pdf-render-canvas { display: block; max-width: 100%; height: auto;}
+        
+        /* Modifikasi Drag Overlay Signature */
+        #sig-draggable-overlay { display: none; position: absolute; top: 50px; left: 50px; border: 2px dashed var(--secondary); background: rgba(246, 178, 59, 0.1); cursor: move; z-index: 10; min-width: 50px; min-height: 25px; touch-action: none;}
+        #sig-draggable-overlay img { width: 100%; height: 100%; pointer-events: none;}
+        #sig-draggable-overlay .resize-handle { position: absolute; bottom: -8px; right: -8px; width: 20px; height: 20px; background: var(--primary); border: 2px solid white; border-radius: 50%; cursor: nwse-resize; touch-action: none; z-index: 20;}
+        
+        #signature-pad-container { border: 2px solid #ccc; border-radius: 10px; background: #fff; touch-action: none;}
+        
+        .pdf-controls { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; background: #f8fafc; padding: 10px; border-radius: 10px; border: 1px solid #eee;}
+        .pdf-controls button { background: var(--white); border: 1px solid #ccc; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; color: var(--primary); transition: 0.2s; display: flex; align-items: center; gap: 5px;}
+        .pdf-controls button:hover { background: var(--primary); color: white;}
     </style>
 </head>
 <body>
@@ -115,14 +186,15 @@
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Manajemen Inti</p>
             <div class="nav-item" onclick="switchTab('program-event')"><i class="fa-solid fa-clipboard-list"></i> Program & Event</div>
             <div class="nav-item" onclick="switchTab('input-rab')"><i class="fa-solid fa-file-invoice-dollar"></i> Input RAB Detail</div>
+            <div class="nav-item" onclick="switchTab('realisasi-anggaran')"><i class="fa-solid fa-hand-holding-dollar"></i> Realisasi Anggaran</div>
             <div class="nav-item" onclick="switchTab('rekap-rab')"><i class="fa-solid fa-scale-balanced"></i> Rekapitulasi RAB</div>
             
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Operasional</p>
             <div class="nav-item" onclick="switchTab('absensi')"><i class="fa-solid fa-calendar-check"></i> Absensi Peserta</div>
-            <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi (Folder)</div>
-            <div class="nav-item" onclick="switchTab('timeline')"><i class="fa-regular fa-calendar-days"></i> Kalender & Zoom</div>
+            <div class="nav-item" onclick="switchTab('timeline')"><i class="fa-regular fa-calendar-days"></i> Kalender & Surat</div>
+            <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi (Docs)</div>
             <div class="nav-item" onclick="switchTab('kpi')"><i class="fa-solid fa-bullseye"></i> Indikator KPI</div>
-            <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-envelope-open-text"></i> Pengajuan Surat</div>
+            <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
         </div>
         <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1);" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
     </div>
@@ -150,7 +222,6 @@
             </div>
 
             <h2 style="font-size: 1.2rem; margin-bottom: 15px; margin-top: 20px;">Status Program & Kemitraan</h2>
-
             <div class="grid-2">
                 <div class="card">
                     <h3 style="margin-bottom: 20px; color: var(--primary);">Program Berjalan</h3>
@@ -163,7 +234,7 @@
 
                     <h3 style="margin-bottom: 20px; color: var(--primary);">Timeline Terdekat</h3>
                     <div class="timeline-box" id="timeline-list">
-                        <div class="event"><h4 style="font-size: 1rem; color: #aaa;">Belum ada jadwal terdekat...</h4></div>
+                        <div class="event"><h4 style="font-size: 1rem; color: #aaa;">Memuat jadwal...</h4></div>
                     </div>
                 </div>
 
@@ -177,9 +248,9 @@
         <div id="view-program-event" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <h2>Detail Program & Event</h2>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; gap: 10px;" id="btn-group-program">
                     <button class="btn-action" style="background: #e2e8f0; color: var(--primary);" onclick="openModal('deptModal')"><i class="fa-solid fa-sitemap"></i> + Departemen</button>
-                    <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program</button>
+                    <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program Baru</button>
                 </div>
             </div>
             <p style="color: #666; margin-bottom: 10px;">Pantau seluruh status pelaksanaan program kerja dari tiap departemen.</p>
@@ -201,20 +272,24 @@
         </div>
 
         <div id="view-input-rab" class="view-section">
-            <h2>Sistem Input RAB Detail</h2>
-            <p style="color: #666; margin-bottom: 20px;">Masukkan detail barang, harga rencana, dan pengeluaran nyata (Realisasi).</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2>Sistem Input RAB Detail (Rencana)</h2>
+                    <p style="color: #666;">Masukkan detail rencana anggaran & Tentukan Sumber Dana-nya. <b>(Untuk input pengeluaran nyata, gunakan menu Realisasi Anggaran)</b></p>
+                </div>
+            </div>
             
             <div class="card" style="margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0;">
                 <form onsubmit="saveRabDetail(event)" id="form-rab">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);" id="rab-form-title">Input Rincian Baru</h3>
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);" id="rab-form-title">Input Rencana RAB</h3>
                         <button type="button" id="btn-cancel-rab" style="display: none; background: #eee; border:none; padding: 5px 15px; border-radius: 5px; cursor: pointer;" onclick="cancelEditRab()">Batal Edit</button>
                     </div>
                     
                     <div class="rab-form-grid">
                         <div class="input-group">
                             <label>1. Pilih Departemen</label>
-                            <select id="rab-select-dept" required onchange="filterProgramForRAB()"><option value="">-- Muat Departemen... --</option></select>
+                            <select id="rab-select-dept" required onchange="filterProgramByDept('rab-select-dept', 'rab-select-prog')"><option value="">-- Muat Departemen... --</option></select>
                         </div>
                         <div class="input-group">
                             <label>2. Pilih Program / Event</label>
@@ -225,24 +300,25 @@
                             <input type="text" id="rab-nama-barang" placeholder="Contoh: Konsumsi Panitia" required>
                         </div>
                     </div>
-                    <div class="rab-form-grid">
+                    <div class="rab-form-grid" style="grid-template-columns: repeat(4, 1fr);">
                         <div class="input-group">
                             <label>Volume / Jumlah</label>
                             <input type="number" id="rab-volume" placeholder="Contoh: 30" required>
                         </div>
                         <div class="input-group">
                             <label>Satuan</label>
-                            <input type="text" id="rab-satuan" placeholder="Contoh: box, paket, orang" required>
+                            <input type="text" id="rab-satuan" placeholder="Contoh: box, paket" required>
                         </div>
                         <div class="input-group">
-                            <label>Harga Satuan Rencana (Rp)</label>
+                            <label>Harga Satuan (Rp)</label>
                             <input type="number" id="rab-harga" placeholder="Contoh: 25000" required>
                         </div>
-                    </div>
-                    <div class="rab-form-grid" style="grid-template-columns: 1fr;">
                         <div class="input-group">
-                            <label style="color: var(--green);"><i class="fa-solid fa-money-bill-wave"></i> Realisasi Terpakai (Rp) <small style="color: #777;">*Isi 0 jika belum terlaksana</small></label>
-                            <input type="number" id="rab-realisasi" placeholder="Masukkan total dana yang benar-benar keluar..." value="0" required>
+                            <label style="color: var(--blue);">Sumber Dana Rencana</label>
+                            <select id="rab-sumber-dana" required style="border-color: var(--blue);">
+                                <option value="BPPTN">BPPTN</option>
+                                <option value="Non-BPPTN">Non-BPPTN</option>
+                            </select>
                         </div>
                     </div>
                     <button type="submit" class="btn-action" id="btn-save-rab" style="width: 100%;"><i class="fa-solid fa-plus"></i> Simpan Data RAB</button>
@@ -250,7 +326,7 @@
             </div>
 
             <div class="card" style="overflow-x: auto;">
-                <h3 style="margin-bottom: 15px; color: var(--primary);">Tabel Rincian Anggaran (RAB)</h3>
+                <h3 style="margin-bottom: 15px; color: var(--primary);">Tabel Rencana Anggaran Biaya (RAB)</h3>
                 <table class="table-custom">
                     <thead>
                         <tr>
@@ -260,13 +336,94 @@
                             <th>Nama Barang</th>
                             <th>Vol</th>
                             <th>Harga Satuan</th>
+                            <th style="color: var(--blue);">Sumber Dana</th>
                             <th>Total RAB Rencana</th>
-                            <th style="background: var(--green);">Realisasi Aktual</th>
                             <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-rab-body">
                         <tr><td colspan="9" style="text-align: center;">Memuat data RAB...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="view-realisasi-anggaran" class="view-section">
+            <h2>Realisasi Anggaran (Pengeluaran Nyata)</h2>
+            <p style="color: #666; margin-bottom: 20px;">Input seluruh pengeluaran uang secara aktual beserta sumber dana yang digunakan di sini.</p>
+
+            <div class="grid-4" style="margin-bottom: 20px;">
+                <div class="card" style="background: var(--blue); color: white;">
+                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Total Rencana (RAB)</h3>
+                    <div id="real-global-rab" style="font-size: 1.5rem; font-weight: bold;">Rp 0</div>
+                </div>
+                <div class="card" style="background: var(--green); color: white;">
+                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Total Realisasi Keluar</h3>
+                    <div id="real-global-realisasi" style="font-size: 1.5rem; font-weight: bold;">Rp 0</div>
+                </div>
+                <div class="card" style="background: var(--white); border: 2px solid var(--red);">
+                    <h3 style="color: #777; font-size: 0.85rem; margin-bottom: 5px;">Sisa Anggaran</h3>
+                    <div id="real-global-sisa" style="font-size: 1.5rem; font-weight: bold; color: var(--red);">Rp 0</div>
+                </div>
+                <div class="card" style="background: var(--white); border: 2px solid var(--primary);">
+                    <h3 style="color: #777; font-size: 0.85rem; margin-bottom: 5px;">Persentase Serapan</h3>
+                    <div id="real-global-persen" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">0%</div>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 20px; background: #e9f7ef; border: 1px solid #2ecc71;">
+                <form onsubmit="saveRealisasiDetail(event)" id="form-realisasi">
+                    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--green);"><i class="fa-solid fa-money-bill-transfer"></i> Input Bukti Pengeluaran (Realisasi)</h3>
+                    
+                    <div class="rab-form-grid">
+                        <div class="input-group">
+                            <label>Pilih Departemen</label>
+                            <select id="real-select-dept" required onchange="filterProgramByDept('real-select-dept', 'real-select-prog')"><option value="">-- Muat Departemen... --</option></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Pilih Program / Event</label>
+                            <select id="real-select-prog" required><option value="">-- Pilih Departemen Dulu --</option></select>
+                        </div>
+                        <div class="input-group">
+                            <label>Keterangan Pengeluaran</label>
+                            <input type="text" id="real-keterangan" placeholder="Contoh: Pembayaran Lunas Cetak Banner" required>
+                        </div>
+                    </div>
+                    <div class="rab-form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="input-group">
+                            <label style="color: var(--green);">Nominal Dana Keluar (Rp)</label>
+                            <input type="number" id="real-nominal" placeholder="Masukkan uang aktual dibayarkan..." required>
+                        </div>
+                        <div class="input-group">
+                            <label style="color: var(--green);">Sumber Dana Aktual (Terpakai)</label>
+                            <select id="real-sumber-dana" required style="border-color: var(--green);">
+                                <option value="BPPTN">BPPTN</option>
+                                <option value="Non-BPPTN">Non-BPPTN</option>
+                                <option value="Gabungan">Gabungan (BPPTN & Non-BPPTN)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action" style="width: 100%; background: var(--green); color: white;" id="btn-save-real"><i class="fa-solid fa-check"></i> Catat Realisasi</button>
+                </form>
+            </div>
+
+            <div class="card" style="overflow-x: auto;">
+                <h3 style="margin-bottom: 15px; color: var(--green);">Tabel Riwayat Realisasi (Aktual)</h3>
+                <table class="table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tanggal Input</th>
+                            <th>Departemen</th>
+                            <th>Program</th>
+                            <th>Keterangan Bukti</th>
+                            <th style="color: var(--green);">Sumber Dana</th>
+                            <th style="background: var(--green);">Nominal Keluar</th>
+                            <th style="text-align: center;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-realisasi-body">
+                        <tr><td colspan="8" style="text-align: center;">Memuat data realisasi...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -298,7 +455,7 @@
             <div class="card" style="margin-bottom: 20px; border-left: 4px solid var(--secondary);">
                 <form onsubmit="saveSumberDana(event)">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);">Input / Edit Sumber Dana</h3>
+                        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);">Input / Edit Pemasukan Dana per Program</h3>
                     </div>
                     <div class="rab-form-grid">
                         <div class="input-group">
@@ -306,15 +463,15 @@
                             <select id="rekap-select-prog" required><option value="">-- Memuat Program... --</option></select>
                         </div>
                         <div class="input-group">
-                            <label>Dana BPPTN (Rp)</label>
+                            <label>Pemasukan Dana BPPTN (Rp)</label>
                             <input type="number" id="rekap-dana-bpptn" placeholder="Contoh: 10000000" value="0" required>
                         </div>
                         <div class="input-group">
-                            <label>Dana Non-BPPTN (Rp)</label>
+                            <label>Pemasukan Dana Non-BPPTN (Rp)</label>
                             <input type="number" id="rekap-dana-non" placeholder="Contoh: 5000000" value="0" required>
                         </div>
                     </div>
-                    <button type="submit" class="btn-action" id="btn-save-dana"><i class="fa-solid fa-save"></i> Simpan Sumber Dana</button>
+                    <button type="submit" class="btn-action" id="btn-save-dana"><i class="fa-solid fa-save"></i> Simpan Pemasukan</button>
                 </form>
             </div>
 
@@ -327,14 +484,14 @@
                             <th rowspan="2" style="vertical-align: middle;">Departemen</th>
                             <th rowspan="2" style="vertical-align: middle;">Nama Program</th>
                             <th colspan="2" style="text-align: center; background: #082644;">Sumber Dana Pemasukan</th>
-                            <th colspan="2" style="text-align: center; background: #061c33;">Pengeluaran</th>
-                            <th rowspan="2" style="text-align: center; vertical-align: middle;">Aksi Kontrol</th>
+                            <th colspan="2" style="text-align: center; background: #061c33;">Pengeluaran (Breakdown)</th>
+                            <th rowspan="2" style="text-align: center; vertical-align: middle;">Aksi</th>
                         </tr>
                         <tr>
                             <th style="background: var(--blue);">BPPTN</th>
                             <th style="background: var(--secondary); color: var(--primary);">Non-BPPTN</th>
-                            <th style="background: #95a5a6;">Total RAB</th>
-                            <th style="background: var(--green);">Total Realisasi</th>
+                            <th style="background: #95a5a6;">Total RAB (Rencana)</th>
+                            <th style="background: var(--green);">Total Realisasi (Aktual)</th>
                         </tr>
                     </thead>
                     <tbody id="table-rekap-body">
@@ -355,6 +512,18 @@
                 <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang, Peserta!</h3>
                 <p style="color: #666; margin-bottom: 20px;">Silakan catat kehadiran Anda untuk hari ini.</p>
                 
+                <div style="max-width: 400px; margin: 0 auto 20px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
+                    <div class="radio-group">
+                        <label><input type="radio" name="tipe_absen" value="Harian" checked onchange="toggleAbsenProgram(false)"> Absen Harian Biasa</label>
+                        <label><input type="radio" name="tipe_absen" value="Program" onchange="toggleAbsenProgram(true)"> Absen Program/Event</label>
+                    </div>
+                    <div id="absen-program-selector" style="display: none; margin-top: 10px;">
+                        <select id="absen-select-prog" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ccc;">
+                            <option value="">-- Pilih Program --</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="absen-btn-group">
                     <button class="btn-absen btn-masuk" id="btn-absen-masuk" onclick="absenAction('masuk')"><i class="fa-solid fa-right-to-bracket"></i> ABSEN MASUK</button>
                     <button class="btn-absen btn-keluar" id="btn-absen-keluar" onclick="absenAction('keluar')" disabled><i class="fa-solid fa-right-from-bracket"></i> ABSEN KELUAR</button>
@@ -388,30 +557,219 @@
                         <tr>
                             <th>No</th>
                             <th>Nama Peserta</th>
+                            <th>Tipe Absen</th>
                             <th>Tanggal</th>
-                            <th style="color: var(--green);">Waktu Masuk</th>
-                            <th style="color: var(--red);">Waktu Keluar</th>
+                            <th style="color: var(--green);">Masuk</th>
+                            <th style="color: var(--red);">Keluar</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody id="table-absen-body">
-                        <tr><td colspan="6" style="text-align: center;">Memuat data absensi...</td></tr>
+                        <tr><td colspan="7" style="text-align: center;">Memuat data absensi...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <div id="view-notulensi" class="view-section">
-            <div class="topbar" style="margin-bottom: 20px;"><h2>Folder Notulensi Program</h2><button class="btn-action">+ Buat Folder Baru</button></div>
-            <div class="folder-grid">
-                <div class="folder"><i class="fa-solid fa-folder"></i><p>Rapat Inti BEM</p><small>12 File</small></div>
+        <div id="view-timeline" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Kalender Program & Jadwal Kegiatan</h2>
+                <div>
+                    <span style="font-size: 0.8rem; background: var(--secondary); color: var(--primary); padding: 5px 15px; border-radius: 15px; font-weight: bold; margin-right: 10px;"><i class="fa-solid fa-bolt"></i> Auto-Sync Program</span>
+                    <button class="btn-action" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Tambah Jadwal Manual</button>
+                </div>
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <div class="calendar-wrapper">
+                        <div class="cal-header">
+                            <button onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h3 id="cal-month-year">...</h3>
+                            <button onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="cal-days">
+                            <div class="cal-day-name">Min</div><div class="cal-day-name">Sen</div><div class="cal-day-name">Sel</div><div class="cal-day-name">Rab</div><div class="cal-day-name">Kam</div><div class="cal-day-name">Jum</div><div class="cal-day-name">Sab</div>
+                        </div>
+                        <div class="cal-grid" id="cal-grid">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 20px; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px;">Daftar Jadwal Keseluruhan</h3>
+                    <div class="timeline-box" id="full-calendar-list" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                        <p style="color: #aaa; font-style: italic;">Memuat jadwal kegiatan...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div id="view-kpi" class="view-section"><h2>Indikator KPI (Dalam Pengembangan)</h2></div>
-        <div id="view-timeline" class="view-section"><h2>Integrasi Kalender & Zoom (Dalam Pengembangan)</h2></div>
-        <div id="view-surat" class="view-section"><h2>Pengajuan Surat (Dalam Pengembangan)</h2></div>
+        <div id="view-notulensi" class="view-section">
+            <div id="notulensi-folder-view">
+                <div class="topbar" style="margin-bottom: 20px;">
+                    <h2>Folder Notulensi (Docs)</h2>
+                    <button class="btn-action" onclick="openModal('folderModal')"><i class="fa-solid fa-folder-plus"></i> Buat Folder Baru</button>
+                </div>
+                <div class="folder-grid" id="folder-grid-container">
+                    <p style="color: #aaa; font-style: italic;">Memuat folder...</p>
+                </div>
+            </div>
 
+            <div id="notulensi-list-view" style="display: none;">
+                <div class="topbar" style="margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 15px;">
+                    <div>
+                        <button style="background: none; border: none; color: #777; cursor: pointer; font-size: 1rem; margin-bottom: 5px;" onclick="backToFolders()"><i class="fa-solid fa-arrow-left"></i> Kembali ke Folder</button>
+                        <h2 id="current-folder-name" style="color: var(--primary);">Nama Folder...</h2>
+                    </div>
+                    <button class="btn-action" onclick="openNotulensiEditor()"><i class="fa-solid fa-file-circle-plus"></i> Tulis Notulensi Baru</button>
+                </div>
+                <div id="notulensi-list-container"></div>
+            </div>
+
+            <div id="notulensi-editor-view" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button style="background: none; border: none; color: #777; cursor: pointer; font-size: 1rem;" onclick="backToList()"><i class="fa-solid fa-arrow-left"></i> Batal & Kembali</button>
+                    <button class="btn-action" onclick="saveNotulensi()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Dokumen</button>
+                </div>
+                
+                <div class="card">
+                    <input type="text" id="notulensi-judul" placeholder="Ketik Judul Rapat / Notulensi di sini..." style="width: 100%; border: none; font-size: 1.5rem; font-weight: bold; color: var(--primary); outline: none; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px;">
+                    
+                    <div class="rte-container">
+                        <div class="rte-toolbar">
+                            <button type="button" onclick="formatDoc('bold')" title="Tebal"><i class="fa-solid fa-bold"></i></button>
+                            <button type="button" onclick="formatDoc('italic')" title="Miring"><i class="fa-solid fa-italic"></i></button>
+                            <button type="button" onclick="formatDoc('underline')" title="Garis Bawah"><i class="fa-solid fa-underline"></i></button>
+                            <div style="width: 1px; background: #ddd; margin: 0 5px;"></div>
+                            <button type="button" onclick="formatDoc('insertOrderedList')" title="List Angka"><i class="fa-solid fa-list-ol"></i></button>
+                            <button type="button" onclick="formatDoc('insertUnorderedList')" title="List Titik"><i class="fa-solid fa-list-ul"></i></button>
+                            <div style="width: 1px; background: #ddd; margin: 0 5px;"></div>
+                            <button type="button" onclick="formatDoc('formatBlock', 'H1')" title="Judul Besar">H1</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'H2')" title="Sub Judul">H2</button>
+                            <button type="button" onclick="formatDoc('formatBlock', 'P')" title="Teks Paragraf Normal">P</button>
+                        </div>
+                        <div id="rte-editor" contenteditable="true" class="rte-editor"><p>Ketik notulensi rapat di sini...</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-kpi" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Indikator Kinerja Utama (KPI)</h2>
+                <button class="btn-action" id="btn-add-kpi" onclick="openKPIModal()"><i class="fa-solid fa-plus"></i> Tambah KPI</button>
+            </div>
+            
+            <div class="grid-4" style="margin-bottom: 20px;">
+                <div class="card" style="background: var(--primary); color: white;">
+                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Total Indikator KPI</h3>
+                    <div id="stat-kpi-total" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">0</div>
+                </div>
+                <div class="card" style="background: var(--green); color: white;">
+                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Tercapai (≥ 100%)</h3>
+                    <div id="stat-kpi-tercapai" style="font-size: 1.5rem; font-weight: bold;">0</div>
+                </div>
+                <div class="card" style="background: var(--white); border: 2px solid var(--secondary);">
+                    <h3 style="color: var(--primary); font-size: 0.85rem; margin-bottom: 5px;">On Progress</h3>
+                    <div id="stat-kpi-progress" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">0</div>
+                </div>
+                <div class="card" style="background: var(--white); border: 2px solid var(--red);">
+                    <h3 style="color: #777; font-size: 0.85rem; margin-bottom: 5px;">Belum Berjalan (0%)</h3>
+                    <div id="stat-kpi-belum" style="font-size: 1.5rem; font-weight: bold; color: var(--red);">0</div>
+                </div>
+            </div>
+
+            <div class="grid-2" id="kpi-container" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+                <p style="color: #aaa; font-style: italic;">Memuat data KPI...</p>
+            </div>
+        </div>
+
+        <div id="view-surat" class="view-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2>Digital Office (E-Sign & Pengajuan)</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Ajukan surat atau dokumen untuk ditandatangani oleh user lain atau Admin secara digital.</p>
+                </div>
+                <button class="btn-action" onclick="openAjukanSuratModal()"><i class="fa-solid fa-paper-plane"></i> Buat Pengajuan Baru</button>
+            </div>
+
+            <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
+                <div class="card">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-inbox"></i> Kotak Masuk (Menunggu Tanda Tangan Anda)</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Judul Dokumen</th>
+                                    <th>Dari</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-do-masuk-body">
+                                <tr><td colspan="3" style="text-align: center;">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat Pengajuan Saya</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Judul Dokumen</th>
+                                    <th>Tujuan</th>
+                                    <th>Status</th>
+                                    <th style="text-align:center;">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-do-keluar-body">
+                                <tr><td colspan="4" style="text-align: center;">Memuat data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="schedule-modal-title">Tambah Jadwal Baru</h2><button class="close-btn" onclick="closeModal('scheduleModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="saveSchedule(event)" id="form-schedule">
+                <div class="input-group"><label>Judul Kegiatan / Agenda</label><input type="text" id="sched-judul" placeholder="Contoh: Rapat Evaluasi Panitia" required></div>
+                <div class="input-group"><label>Keterangan Lengkap</label><input type="text" id="sched-keterangan" placeholder="Contoh: Membahas progress sponsorship"></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Tanggal Mulai</label><input type="date" id="sched-tgl-mulai" required></div>
+                    <div class="input-group"><label>Tanggal Selesai</label><input type="date" id="sched-tgl-selesai" required></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Waktu Mulai</label><input type="time" id="sched-waktu"></div>
+                    <div class="input-group">
+                        <label>Tipe Jadwal</label>
+                        <select id="sched-tipe">
+                            <option value="Rapat">Rapat</option>
+                            <option value="Tugas">Tugas</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="btn-action" style="width: 100%; margin-top: 10px;" id="btn-save-schedule">Simpan Jadwal</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="folderModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Buat Folder Baru</h2><button class="close-btn" onclick="closeModal('folderModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="saveFolder(event)">
+                <div class="input-group"><label>Nama Folder Dokumentasi</label><input type="text" id="input-nama-folder" placeholder="Contoh: Rapat Pleno BEM" required></div>
+                <button type="submit" class="btn-action" style="width: 100%;">Simpan Folder</button>
+            </form>
+        </div>
     </div>
 
     <div class="modal-overlay" id="deptModal">
@@ -423,12 +781,18 @@
             </form>
         </div>
     </div>
+
     <div class="modal-overlay" id="programModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="program-modal-title">Tambah Program Kerja</h2><button class="close-btn" onclick="closeModal('programModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <form onsubmit="saveProgram(event)" id="form-program">
                 <div class="input-group"><label>Pilih Departemen</label><select id="input-dept-program" required></select></div>
-                <div class="input-group"><label>Nama Program</label><input type="text" id="input-nama-program" required></div>
+                <div class="input-group"><label>Nama Program / Event</label><input type="text" id="input-nama-program" required></div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Tanggal Pelaksanaan</label><input type="date" id="input-tgl-program" required></div>
+                    <div class="input-group"><label>Waktu Pelaksanaan</label><input type="time" id="input-waktu-program" required></div>
+                </div>
+                <div class="input-group"><label>Tempat / Lokasi</label><input type="text" id="input-tempat-program" placeholder="Contoh: Gedung Auditorium / Zoom" required></div>
                 <div class="input-group">
                     <label>Status Saat Ini</label>
                     <select id="input-status-program"><option value="Belum">Belum Berjalan</option><option value="Progress">Sedang Progress</option><option value="Selesai">Sudah Selesai</option></select>
@@ -438,21 +802,134 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="kpiModal">
+        <div class="modal-content">
+            <div class="modal-header"><h2 id="kpi-modal-title">Tambah KPI Baru</h2><button class="close-btn" onclick="closeModal('kpiModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="saveKPI(event)" id="form-kpi">
+                <div class="input-group">
+                    <label>Pilih Departemen/Divisi</label>
+                    <select id="kpi-dept" required><option value="">-- Muat Departemen... --</option></select>
+                </div>
+                <div class="input-group">
+                    <label>Nama Indikator (KPI)</label>
+                    <input type="text" id="kpi-nama" placeholder="Contoh: Target Jumlah Peserta Hadir" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="input-group"><label>Target (Angka)</label><input type="number" id="kpi-target" placeholder="Contoh: 100" required></div>
+                    <div class="input-group"><label>Satuan Pengukuran</label><input type="text" id="kpi-satuan" placeholder="Contoh: Orang, %, Laporan" required></div>
+                </div>
+                <div class="input-group">
+                    <label>Capaian Realisasi Saat Ini</label>
+                    <input type="number" id="kpi-capaian" value="0" placeholder="Contoh: 45" required>
+                </div>
+                <button type="submit" class="btn-action" style="width: 100%;" id="btn-save-kpi">Simpan KPI</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalAjukanSurat">
+        <div class="modal-content">
+            <div class="modal-header"><h2>Buat Pengajuan Dokumen</h2><button class="close-btn" onclick="closeModal('modalAjukanSurat')"><i class="fa-solid fa-xmark"></i></button></div>
+            <form onsubmit="savePengajuanSurat(event)" id="form-ajukan-surat">
+                <div class="input-group">
+                    <label>Judul Dokumen</label>
+                    <input type="text" id="do-judul" placeholder="Contoh: Proposal Pencairan Dana Kegiatan" required>
+                </div>
+                <div class="input-group">
+                    <label>Pilih Penerima (Tujuan Tanda Tangan)</label>
+                    <select id="do-penerima" required><option value="">-- Memuat User... --</option></select>
+                </div>
+                <div class="input-group">
+                    <label>Upload Dokumen PDF</label>
+                    <input type="file" id="do-file-upload" accept="application/pdf" required style="padding: 10px; background: #fff;">
+                </div>
+                <button type="submit" class="btn-action" style="width: 100%;" id="btn-save-do">Ajukan & Minta Tanda Tangan</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalAksiSurat">
+        <div class="modal-content" style="max-width: 800px; width: 95%;"> 
+            <div class="modal-header"><h2 id="do-review-judul">Preview & Tanda Tangan Dokumen</h2><button class="close-btn" onclick="closeModal('modalAksiSurat')"><i class="fa-solid fa-xmark"></i></button></div>
+            
+            <div class="pdf-controls">
+                <button type="button" onclick="onPrevPage()"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                <span>Halaman: <span id="page_num">1</span> / <span id="page_count">?</span></span>
+                <button type="button" onclick="onNextPage()">Next <i class="fa-solid fa-chevron-right"></i></button>
+                <div style="width: 1px; height: 20px; background: #ccc; margin: 0 5px;"></div>
+                <button type="button" onclick="zoomOutPdf()" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+                <button type="button" onclick="zoomInPdf()" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+                <button type="button" onclick="fitPdfToPage()" title="Fit to Page"><i class="fa-solid fa-expand"></i></button>
+                <div style="width: 1px; height: 20px; background: #ccc; margin: 0 5px;"></div>
+                <button type="button" onclick="bukaModalSignature()"><i class="fa-solid fa-pen-nib"></i> Buat TTD</button>
+                <button type="button" onclick="terapkanSignature()"><i class="fa-solid fa-stamp"></i> Terapkan TTD</button>
+            </div>
+
+            <div style="width: 100%; height: 400px; overflow: auto; border: 2px solid #ccc; margin-bottom: 15px; background: #999; text-align: center; position: relative;" id="pdf-container-scroll">
+                <div id="pdf-page-wrapper">
+                    <canvas id="pdf-render-canvas"></canvas>
+                    <div id="sig-draggable-overlay">
+                        <img id="sig-img-element" src="" alt="TTD">
+                        <div class="resize-handle" id="sig-resize-handle"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label>Catatan Revisi / Keterangan Penolakan (Wajib jika menolak)</label>
+                <textarea id="do-review-catatan" rows="2" placeholder="Tulis catatan di sini..."></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" class="btn-action" style="flex: 1; background: var(--green); color: white;" id="btn-approve-pdf" onclick="prosesAksiSurat('Disetujui')"><i class="fa-solid fa-signature"></i> Tanda Tangani (Approve)</button>
+                <button type="button" class="btn-action" style="flex: 1; background: var(--red); color: white;" onclick="prosesAksiSurat('Ditolak')"><i class="fa-solid fa-xmark"></i> Tolak Dokumen (Revisi)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="modalSignaturePad" style="z-index: 1100;">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header"><h2>Gambar Tanda Tangan Anda</h2><button class="close-btn" onclick="closeModal('modalSignaturePad')"><i class="fa-solid fa-xmark"></i></button></div>
+            <p style="font-size: 0.8rem; color: #777; margin-bottom: 10px;">Tanda tangan ini akan disimpan di memori perangkat Anda untuk penggunaan selanjutnya.</p>
+            
+            <canvas id="signature-pad-container" width="350" height="200"></canvas>
+            
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button type="button" class="btn-action" style="flex: 1; background: #eee; color: var(--primary);" onclick="clearSignaturePad()"><i class="fa-solid fa-eraser"></i> Bersihkan</button>
+                <button type="button" class="btn-action" style="flex: 2;" onclick="saveSignatureData()"><i class="fa-solid fa-save"></i> Simpan Tanda Tangan</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let globalWorkspaceId = null;
+        let globalWorkspaceId = null; 
         let globalPrograms = []; 
-        let currentUserId = null;
-        let currentUserRole = null; 
-        let currentUserName = null;
-        let editingRabId = null;
-        let editingProgramId = null; 
+        let globalSchedules = []; 
+        let globalKPIs = []; 
+        let globalWorkspaceUsers = []; 
+        let currentUserId = null; let currentUserRole = null; let currentUserName = null;
+        let editingRabId = null; let editingProgramId = null; 
+        let editingScheduleId = null; 
+        let editingKPIId = null; 
+        
+        // State Digital Office & PDF
+        let activeActionSuratId = null; 
+        let activeActionFileUrl = null;
+        let pdfDocInstance = null;
+        let pageNum = 1;
+        let pageRendering = false;
+        let pageNumPending = null;
+        let pdfScale = 1.0; // Zoom rendering PDF diubah jadi let agar bisa di zoom in/out
+        let loadedPdfBytes = null; // Buffer PDF Asli
+        let userSignatureBase64 = null; // Data TTD
+        let signatureIsApplied = false; // Tanda apakah TTD sudah diletakkan
 
-        // Absensi Chart Instance
-        let absenPieChart = null;
+        // Setup PDF.js Worker
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
 
@@ -460,118 +937,106 @@
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
 
-            currentUserId = session.user.id;
-            currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-            
+            currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
             const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
             currentUserRole = roleData ? roleData.role : 'user';
             
             document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
             document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "ANGGOTA / USER";
+            
+            // Cek Storage Lokal untuk Tanda Tangan sebelumnya
+            const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
+            if (savedSig) { userSignatureBase64 = savedSig; }
 
-            const urlParams = new URLSearchParams(window.location.search);
-            globalWorkspaceId = urlParams.get('workspace');
+            if (currentUserRole !== 'admin') { 
+                document.getElementById('btn-group-program').style.display = 'none'; 
+                document.getElementById('btn-add-kpi').style.display = 'none'; 
+            }
 
+            const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
             if (!globalWorkspaceId) { alert("Akses Ditolak!"); window.location.href = 'index.html'; return; }
 
             const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
             if (wsData) document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
 
-            // INIT JAM LIVE
+            // --- PASTIKAN KODE INI BERADA DI DALAM DOMContentLoaded ---
+
+// 1. KODE UNTUK REALTIME ONLINE STATUS (PRESENCE)
+const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
+
+userPresenceChannel.subscribe(async (status) => {
+    if (status === 'SUBSCRIBED') {
+        // Mengirim sinyal ke Admin bahwa user ini sedang online
+        await userPresenceChannel.track({
+            user_id: currentUserId,
+            nama_user: currentUserName,
+            online_at: new Date().toISOString()
+        });
+        console.log("Sinyal Realtime terkirim ke Admin!");
+    }
+});
+
+// 2. KODE UNTUK UPDATE LAST SEEN & NAMA USER KE DATABASE
+async function updatePresenceToDB() {
+    if (currentUserId && globalWorkspaceId) {
+        // Melakukan update jam terakhir dilihat DAN memastikan namanya tidak "User Tanpa Nama"
+        const { error } = await supabaseClient
+            .from('workspace_members')
+            .update({ 
+                last_seen: new Date().toISOString(),
+                nama_user: currentUserName // Memperbaiki isu "User Tanpa Nama"
+            })
+            .eq('user_id', currentUserId)
+            .eq('workspace_id', globalWorkspaceId);
+            
+        if(error) console.error("Gagal update last seen:", error.message);
+    }
+}
+
+// Update Last Seen pertama kali saat halaman dimuat
+updatePresenceToDB();
+
+// Update Last Seen setiap 1 menit (60000 ms) agar data selalu fresh
+setInterval(updatePresenceToDB, 60000); 
+    
+// Update Last Seen sesaat sebelum tab browser ditutup
+window.addEventListener('beforeunload', () => {
+    updatePresenceToDB(); 
+});
+
             setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
 
-            loadDepartments(); loadFinanceData(); loadProgramData(); loadRabTable(); loadRekapitulasiData();
+            try { await loadWorkspaceUsers(); } catch(e){ console.error("Gagal load User Workspace", e); } 
+            try { await loadDepartments(); } catch(e){}
+            try { await loadFinanceData(); } catch(e){}
+            try { await loadSchedules(); } catch(e){} 
+            try { await loadProgramData(); } catch(e){} 
+            try { await loadRabTable(); } catch(e){}
+            try { await loadRealisasiTable(); } catch(e){}
+            try { await loadRekapitulasiData(); } catch(e){}
+            try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
+            try { loadFolders(); } catch(e){}
+            try { await loadKPIData(); } catch(e){}
+            try { await loadDigitalOffice(); } catch(e){ console.error("Gagal load Digital Office", e); }
             
-            setupAbsensiView();
-            loadAbsensiData();
+            // Inisialisasi Canvas Drawing untuk Tanda Tangan
+            initSignaturePad();
+            // Inisialisasi Fitur Drag & Drop & Resize untuk Overlay TTD
+            initDraggableSignature();
         });
-
-        // ====================================================
-        // FITUR ABSENSI & TRACKING
-        // ====================================================
-        function setupAbsensiView() {
-            document.getElementById('absen-greeting').innerText = `Selamat Datang, ${currentUserName}!`;
-            if (currentUserRole === 'admin') {
-                document.getElementById('panel-absen-admin').style.display = 'block';
-                document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Seluruh Peserta";
-            } else {
-                document.getElementById('panel-absen-admin').style.display = 'none';
-                document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Anda";
-            }
-        }
-
-        async function loadAbsensiData() {
-            const today = new Date().toISOString().split('T')[0]; 
-            const { data: todayAbsen } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today).single();
-
-            const btnMasuk = document.getElementById('btn-absen-masuk'); const btnKeluar = document.getElementById('btn-absen-keluar'); const statusMsg = document.getElementById('absen-status-msg');
-
-            if (!todayAbsen) { btnMasuk.disabled = false; btnKeluar.disabled = true; statusMsg.innerText = ""; } 
-            else if (todayAbsen && !todayAbsen.waktu_keluar) { btnMasuk.disabled = true; btnKeluar.disabled = false; statusMsg.innerText = `Anda sudah Absen Masuk pada pukul ${todayAbsen.waktu_masuk}. Jangan lupa Absen Keluar!`; } 
-            else { btnMasuk.disabled = true; btnKeluar.disabled = true; statusMsg.innerText = `Absensi hari ini selesai. Terima kasih atas kerja keras Anda!`; }
-
-            let query = supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).order('tanggal', { ascending: false }).order('waktu_masuk', { ascending: false });
-            if (currentUserRole !== 'admin') { query = query.eq('user_id', currentUserId); }
-            
-            const { data: historyData } = await query;
-            const tbody = document.getElementById('table-absen-body');
-            
-            if (!historyData || historyData.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #aaa;">Belum ada riwayat absensi.</td></tr>'; } 
-            else {
-                tbody.innerHTML = '';
-                historyData.forEach((h, index) => {
-                    const tgl = new Date(h.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                    const wKeluar = h.waktu_keluar ? h.waktu_keluar : '-';
-                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tgl}</td><td style="color: var(--green); font-weight: bold;">${h.waktu_masuk}</td><td style="color: var(--red); font-weight: bold;">${wKeluar}</td><td><span style="background: rgba(46, 204, 113, 0.2); color: var(--green); padding: 4px 10px; border-radius: 15px; font-size: 0.8rem;">${h.status}</span></td></tr>`;
-                });
-            }
-
-            if (currentUserRole === 'admin') {
-                const { count: totalUser } = await supabaseClient.from('workspace_members').select('*', { count: 'exact', head: true }).eq('workspace_id', globalWorkspaceId);
-                document.getElementById('stat-total-user').innerText = totalUser || 0;
-
-                const { data: allTodayAbsen } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('tanggal', today);
-                const hadirCount = allTodayAbsen ? allTodayAbsen.length : 0;
-                document.getElementById('stat-user-hadir').innerText = hadirCount;
-
-                const belumHadirCount = (totalUser || 0) - hadirCount;
-                
-                const ctxPie = document.getElementById('absenChart').getContext('2d');
-                if(absenPieChart) absenPieChart.destroy(); 
-                
-                absenPieChart = new Chart(ctxPie, {
-                    type: 'pie', data: { labels: ['Hadir', 'Belum Hadir'], datasets: [{ data: [hadirCount, belumHadirCount], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] },
-                    options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-                });
-            }
-        }
-
-        async function absenAction(jenis) {
-            const today = new Date().toISOString().split('T')[0];
-            const now = new Date();
-            const timeNow = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-            
-            if (jenis === 'masuk') {
-                const { error } = await supabaseClient.from('attendances').insert([{ workspace_id: globalWorkspaceId, user_id: currentUserId, nama_user: currentUserName, tanggal: today, waktu_masuk: timeNow }]);
-                if (error) alert("Gagal absen masuk: " + error.message); else alert("Berhasil Absen Masuk!");
-            } 
-            else if (jenis === 'keluar') {
-                const { error } = await supabaseClient.from('attendances').update({ waktu_keluar: timeNow }).eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today);
-                if (error) alert("Gagal absen keluar: " + error.message); else alert("Berhasil Absen Keluar!");
-            }
-            loadAbsensiData(); 
-        }
 
         // ====================================================
         // MANAJEMEN DEPARTEMEN & PROGRAM 
         // ====================================================
         async function loadDepartments() {
             const { data } = await supabaseClient.from('departments').select('*').eq('workspace_id', globalWorkspaceId);
-            const selectProgModal = document.getElementById('input-dept-program'); const selectRabDept = document.getElementById('rab-select-dept');
+            const selectProgModal = document.getElementById('input-dept-program'); const selectRabDept = document.getElementById('rab-select-dept'); const selectRealDept = document.getElementById('real-select-dept');
+            const selectKpiDept = document.getElementById('kpi-dept'); 
+            
             let options = '<option value="">-- Pilih Departemen --</option>';
             if (data && data.length > 0) { data.forEach(d => options += `<option value="${d.id}">${d.nama_departemen}</option>`); } 
             else { options = '<option value="">-- Buat Departemen Dulu --</option>'; }
-            selectProgModal.innerHTML = options; selectRabDept.innerHTML = options;
+            selectProgModal.innerHTML = options; selectRabDept.innerHTML = options; selectRealDept.innerHTML = options; selectKpiDept.innerHTML = options;
         }
 
         async function saveDepartment(e) {
@@ -580,154 +1045,797 @@
         }
 
         async function loadProgramData() {
-            const { data, error } = await supabaseClient.from('programs').select(`id, nama_program, status, department_id, created_by, departments ( nama_departemen )`).eq('workspace_id', globalWorkspaceId);
+            const { data, error } = await supabaseClient.from('programs').select(`*, departments ( nama_departemen )`).eq('workspace_id', globalWorkspaceId).order('tanggal_pelaksanaan', { ascending: true });
             if (error) return; globalPrograms = data; 
 
             document.getElementById('val-prog-total').innerText = data.length; document.getElementById('val-prog-selesai').innerText = data.filter(p => p.status === 'Selesai').length; document.getElementById('val-prog-progress').innerText = data.filter(p => p.status === 'Progress').length; document.getElementById('val-prog-belum').innerText = data.filter(p => p.status === 'Belum').length;
 
             const colBelum = document.getElementById('kb-belum'); const colProgress = document.getElementById('kb-progress'); const colSelesai = document.getElementById('kb-selesai');
             colBelum.innerHTML = ''; colProgress.innerHTML = ''; colSelesai.innerHTML = '';
+            
+            const selectAbsenProg = document.getElementById('absen-select-prog');
+            selectAbsenProg.innerHTML = '<option value="">-- Pilih Program --</option>' + data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('');
 
-            data.forEach(p => {
+            data.forEach((p) => {
                 const deptName = p.departments?.nama_departemen || 'Umum';
                 const isOwner = p.created_by === currentUserId; const isAdmin = currentUserRole === 'admin';
                 let actionBtns = '';
 
-                if (isAdmin) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}', '${p.department_id}', '${p.nama_program}', '${p.status}')"><i class="fa-solid fa-pen"></i></button><button class="btn-k-action del" onclick="deleteProgramAction('${p.id}', '${p.nama_program}')"><i class="fa-solid fa-trash"></i></button></div>`; } 
-                else if (isOwner) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}', '${p.department_id}', '${p.nama_program}', '${p.status}')"><i class="fa-solid fa-pen"></i></button></div>`; }
+                const tgl = p.tanggal_pelaksanaan ? new Date(p.tanggal_pelaksanaan).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric'}) : 'Tgl blm diatur';
+                let waktu = ''; if (p.waktu_pelaksanaan && typeof p.waktu_pelaksanaan === 'string') { waktu = p.waktu_pelaksanaan.substring(0,5); }
+                const tempat = p.tempat || 'Lokasi blm diatur';
 
-                const cardHtml = `<div class="k-card">${actionBtns}<span class="dept-tag"><i class="fa-solid fa-sitemap"></i> ${deptName}</span><h4>${p.nama_program}</h4></div>`;
+                if (isAdmin) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}')"><i class="fa-solid fa-pen"></i></button><button class="btn-k-action del" onclick="deleteProgramAction('${p.id}', '${p.nama_program}')"><i class="fa-solid fa-trash"></i></button></div>`; } 
+                else if (isOwner) { actionBtns = `<div class="k-card-actions"><button class="btn-k-action edit" onclick="openEditProgram('${p.id}')"><i class="fa-solid fa-pen"></i></button></div>`; }
+
+                const cardHtml = `<div class="k-card">${actionBtns}<span class="dept-tag"><i class="fa-solid fa-sitemap"></i> ${deptName}</span><h4>${p.nama_program}</h4><div class="k-card-detail"><div><i class="fa-regular fa-calendar"></i> ${tgl} ${waktu}</div><div><i class="fa-solid fa-location-dot"></i> ${tempat}</div></div></div>`;
                 if(p.status === 'Belum') colBelum.innerHTML += cardHtml; if(p.status === 'Progress') colProgress.innerHTML += cardHtml; if(p.status === 'Selesai') colSelesai.innerHTML += cardHtml;
             });
+            
+            if(!colBelum.innerHTML) colBelum.innerHTML = '<p style="font-size: 0.8rem; color: #aaa;">Kosong...</p>'; if(!colProgress.innerHTML) colProgress.innerHTML = '<p style="font-size: 0.8rem; color: #aaa;">Kosong...</p>'; if(!colSelesai.innerHTML) colSelesai.innerHTML = '<p style="font-size: 0.8rem; color: #aaa;">Kosong...</p>';
+            
+            renderCalendar(); 
+            renderMergedTimeline(); 
         }
 
         function openProgramModal() { editingProgramId = null; document.getElementById('form-program').reset(); document.getElementById('program-modal-title').innerText = "Tambah Program Kerja"; openModal('programModal'); }
-        function openEditProgram(id, deptId, nama, status) { editingProgramId = id; document.getElementById('program-modal-title').innerText = "Edit Program Kerja"; document.getElementById('input-dept-program').value = deptId; document.getElementById('input-nama-program').value = nama; document.getElementById('input-status-program').value = status; openModal('programModal'); }
+        function openEditProgram(id) { 
+            const p = globalPrograms.find(prog => prog.id === id); if(!p) return;
+            editingProgramId = id; document.getElementById('program-modal-title').innerText = "Edit Program Kerja"; 
+            document.getElementById('input-dept-program').value = p.department_id; document.getElementById('input-nama-program').value = p.nama_program; 
+            document.getElementById('input-tgl-program').value = p.tanggal_pelaksanaan || ''; document.getElementById('input-waktu-program').value = p.waktu_pelaksanaan || '';
+            document.getElementById('input-tempat-program').value = p.tempat || ''; document.getElementById('input-status-program').value = p.status; 
+            openModal('programModal'); 
+        }
 
         async function saveProgram(e) {
-            e.preventDefault(); const deptId = document.getElementById('input-dept-program').value; const nama = document.getElementById('input-nama-program').value; const status = document.getElementById('input-status-program').value;
-            if (editingProgramId) { await supabaseClient.from('programs').update({ department_id: deptId, nama_program: nama, status: status }).eq('id', editingProgramId); } 
-            else { await supabaseClient.from('programs').insert([{ workspace_id: globalWorkspaceId, department_id: deptId, nama_program: nama, status: status, created_by: currentUserId }]); }
-            closeModal('programModal'); await loadProgramData(); await loadRekapitulasiData();
-        }
-
-        async function deleteProgramAction(progId, progName) { if(confirm(`Yakin hapus Program "${progName}"?`)) { await supabaseClient.from('programs').delete().eq('id', progId); await loadProgramData(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
-
-        // ====================================================
-        // FUNGSI RAB & SINKRONISASI
-        // ====================================================
-        function filterProgramForRAB() { fetchProgByDept(document.getElementById('rab-select-dept').value, document.getElementById('rab-select-prog')); }
-        async function fetchProgByDept(deptId, selectEl) { const { data } = await supabaseClient.from('programs').select('id, nama_program').eq('department_id', deptId); selectEl.innerHTML = data && data.length > 0 ? data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('') : '<option value="">-- Kosong --</option>'; }
-        
-        async function saveRabDetail(e) {
-            e.preventDefault();
-            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('rab-select-dept').value, program_id: document.getElementById('rab-select-prog').value, nama_barang: document.getElementById('rab-nama-barang').value, volume: document.getElementById('rab-volume').value, satuan: document.getElementById('rab-satuan').value, harga_satuan: document.getElementById('rab-harga').value, total_harga: document.getElementById('rab-volume').value * document.getElementById('rab-harga').value, realisasi: document.getElementById('rab-realisasi').value || 0 };
-            if (editingRabId) { await supabaseClient.from('rab_items').update(payload).eq('id', editingRabId); editingRabId = null; document.getElementById('btn-cancel-rab').style.display = 'none'; } 
-            else { payload.created_by = currentUserId; await supabaseClient.from('rab_items').insert([payload]); }
-            document.getElementById('form-rab').reset(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); 
-        }
-
-        async function loadRabTable() {
-            const { data } = await supabaseClient.from('rab_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });
-            const tbody = document.getElementById('table-rab-body'); tbody.innerHTML = '';
-            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Kosong.</td></tr>'; return; }
-            data.forEach((item, index) => {
-                let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>';
-                if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, ${item.realisasi})"><i class="fa-solid fa-pen"></i></button><button class="btn-table-del" onclick="deleteRabAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } 
-                else if (item.created_by === currentUserId) { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, ${item.realisasi})"><i class="fa-solid fa-pen"></i></button>`; }
-                tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.nama_barang}</strong></td><td>${item.volume} ${item.satuan}</td><td>${formatRp(item.harga_satuan)}</td><td>${formatRp(item.total_harga)}</td><td style="color:var(--green);">${formatRp(item.realisasi)}</td><td>${actionButtons}</td></tr>`;
-            });
-        }
-        async function editRabAction(id, deptId, progId, nama, vol, satuan, harga, realisasi) { editingRabId = id; document.getElementById('btn-cancel-rab').style.display = 'block'; document.getElementById('rab-select-dept').value = deptId; await fetchProgByDept(deptId, document.getElementById('rab-select-prog')); document.getElementById('rab-select-prog').value = progId; document.getElementById('rab-nama-barang').value = nama; document.getElementById('rab-volume').value = vol; document.getElementById('rab-satuan').value = satuan; document.getElementById('rab-harga').value = harga; document.getElementById('rab-realisasi').value = realisasi; window.scrollTo({ top: 0, behavior: 'smooth' }); }
-        function cancelEditRab() { editingRabId = null; document.getElementById('form-rab').reset(); document.getElementById('btn-cancel-rab').style.display = 'none'; }
-        async function deleteRabAction(id) { if(confirm("Hapus?")) { await supabaseClient.from('rab_items').delete().eq('id', id); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
-        
-        async function recalculateGlobalRAB() {
-            const { data } = await supabaseClient.from('rab_items').select('total_harga, realisasi').eq('workspace_id', globalWorkspaceId);
-            let t = 0; let r = 0; if(data) { t = data.reduce((s, i) => s + parseFloat(i.total_harga || 0), 0); r = data.reduce((s, i) => s + parseFloat(i.realisasi || 0), 0); }
-            const { data: exist } = await supabaseClient.from('finance_summaries').select('id').eq('workspace_id', globalWorkspaceId).single();
-            if (exist) { await supabaseClient.from('finance_summaries').update({ total_rab: t, realisasi_rab: r }).eq('id', exist.id); } 
-            else { await supabaseClient.from('finance_summaries').insert([{ workspace_id: globalWorkspaceId, total_rab: t, realisasi_rab: r }]); }
-            loadFinanceData();
-        }
-        async function loadFinanceData() {
-            const { data } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', globalWorkspaceId).single();
-            let t = 0; let r = 0; if (data) { t = parseFloat(data.total_rab); r = parseFloat(data.realisasi_rab); }
-            document.getElementById('val-total-rab').innerText = formatRp(t); document.getElementById('val-realisasi-rab').innerText = formatRp(r); document.getElementById('val-sisa-rab').innerText = formatRp(t-r); document.getElementById('val-penyerapan').innerText = `${t>0?Math.round((r/t)*100):0}%`;
-        }
-
-        // ====================================================
-        // FITUR REKAPITULASI (PERBAIKAN RBAC & GLOBAL SUMMARY)
-        // ====================================================
-        async function saveSumberDana(e) { 
             e.preventDefault(); 
-            const progId = document.getElementById('rekap-select-prog').value;
-            if(!progId) { alert("Pilih program!"); return; }
-            await supabaseClient.from('programs').update({ dana_bpptn: document.getElementById('rekap-dana-bpptn').value, dana_non_bpptn: document.getElementById('rekap-dana-non').value }).eq('id', progId); 
-            document.getElementById('rekap-dana-bpptn').value = '0'; document.getElementById('rekap-dana-non').value = '0'; await loadRekapitulasiData(); alert("Berhasil!"); 
+            const payload = { department_id: document.getElementById('input-dept-program').value, nama_program: document.getElementById('input-nama-program').value, status: document.getElementById('input-status-program').value, tanggal_pelaksanaan: document.getElementById('input-tgl-program').value || null, waktu_pelaksanaan: document.getElementById('input-waktu-program').value || null, tempat: document.getElementById('input-tempat-program').value };
+            if (!payload.department_id) { alert("Pilih departemen dulu!"); return; }
+            document.getElementById('btn-save-program').innerText = "Menyimpan..."; document.getElementById('btn-save-program').disabled = true;
+
+            if (editingProgramId) { await supabaseClient.from('programs').update(payload).eq('id', editingProgramId); } 
+            else { payload.workspace_id = globalWorkspaceId; payload.created_by = currentUserId; await supabaseClient.from('programs').insert([payload]); }
+            
+            closeModal('programModal'); await loadProgramData(); await loadRekapitulasiData();
+            document.getElementById('btn-save-program').innerText = "Simpan Program"; document.getElementById('btn-save-program').disabled = false;
+        }
+        async function deleteProgramAction(progId, progName) { if(confirm(`Yakin hapus Program "${progName}"?`)) { await supabaseClient.from('programs').delete().eq('id', progId); await loadProgramData(); await loadRabTable(); await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
+
+        // ====================================================
+        // FITUR JADWAL MANUAL & KALENDER
+        // ====================================================
+        async function loadSchedules() {
+            const { data } = await supabaseClient.from('custom_schedules').select('*').eq('workspace_id', globalWorkspaceId);
+            if (data) globalSchedules = data;
         }
 
-        async function loadRekapitulasiData() {
-            const { data: progs } = await supabaseClient.from('programs').select('*, departments(nama_departemen)').eq('workspace_id', globalWorkspaceId);
-            const { data: rabs } = await supabaseClient.from('rab_items').select('program_id, total_harga, realisasi').eq('workspace_id', globalWorkspaceId);
+        function openScheduleModal(dateStr = '') { 
+            editingScheduleId = null; document.getElementById('form-schedule').reset(); 
+            document.getElementById('schedule-modal-title').innerText = "Tambah Jadwal Baru"; 
+            if(dateStr) { document.getElementById('sched-tgl-mulai').value = dateStr; document.getElementById('sched-tgl-selesai').value = dateStr; }
+            openModal('scheduleModal'); 
+        }
+        
+        function openEditSchedule(id) { 
+            const s = globalSchedules.find(sc => sc.id === id); if(!s) return;
+            editingScheduleId = id; document.getElementById('schedule-modal-title').innerText = "Edit Jadwal"; 
+            document.getElementById('sched-judul').value = s.judul_kegiatan; document.getElementById('sched-keterangan').value = s.keterangan || ''; 
+            document.getElementById('sched-tgl-mulai').value = s.tanggal_mulai; document.getElementById('sched-tgl-selesai').value = s.tanggal_selesai;
+            document.getElementById('sched-waktu').value = s.waktu || ''; document.getElementById('sched-tipe').value = s.tipe_jadwal; 
+            openModal('scheduleModal'); 
+        }
+
+        async function saveSchedule(e) {
+            e.preventDefault(); 
+            const payload = { workspace_id: globalWorkspaceId, judul_kegiatan: document.getElementById('sched-judul').value, keterangan: document.getElementById('sched-keterangan').value, tanggal_mulai: document.getElementById('sched-tgl-mulai').value, tanggal_selesai: document.getElementById('sched-tgl-selesai').value, waktu: document.getElementById('sched-waktu').value || null, tipe_jadwal: document.getElementById('sched-tipe').value };
+            document.getElementById('btn-save-schedule').innerText = "Menyimpan..."; document.getElementById('btn-save-schedule').disabled = true;
+
+            if (editingScheduleId) { await supabaseClient.from('custom_schedules').update(payload).eq('id', editingScheduleId); } 
+            else { payload.created_by = currentUserId; await supabaseClient.from('custom_schedules').insert([payload]); }
             
-            const tbody = document.getElementById('table-rekap-body'); 
-            const selectProg = document.getElementById('rekap-select-prog');
+            closeModal('scheduleModal'); await loadSchedules(); renderCalendar(); renderMergedTimeline();
+            document.getElementById('btn-save-schedule').innerText = "Simpan Jadwal"; document.getElementById('btn-save-schedule').disabled = false;
+        }
 
-            if (!progs || progs.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Kosong.</td></tr>'; 
-                selectProg.innerHTML = '<option value="">-- Buat Program Dulu --</option>';
-                return; 
+        async function deleteScheduleAction(id) { 
+            if(confirm(`Hapus jadwal manual ini?`)) { await supabaseClient.from('custom_schedules').delete().eq('id', id); await loadSchedules(); renderCalendar(); renderMergedTimeline(); } 
+        }
+
+        let calCurrentDate = new Date();
+        function changeMonth(dir) { calCurrentDate.setMonth(calCurrentDate.getMonth() + dir); renderCalendar(); }
+
+        function renderCalendar() {
+            const year = calCurrentDate.getFullYear(); const month = calCurrentDate.getMonth();
+            const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            document.getElementById('cal-month-year').innerText = `${monthNames[month]} ${year}`;
+            
+            const firstDay = new Date(year, month, 1).getDay(); const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const grid = document.getElementById('cal-grid'); grid.innerHTML = '';
+            for(let i=0; i<firstDay; i++) { grid.innerHTML += `<div class="cal-cell empty"></div>`; }
+
+            const today = new Date();
+            for(let i=1; i<=daysInMonth; i++) {
+                let isToday = (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) ? 'today' : '';
+                let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                let badges = '';
+                
+                const progsToday = globalPrograms.filter(p => p.tanggal_pelaksanaan === dateStr);
+                progsToday.forEach(p => {
+                    let wkt = p.waktu_pelaksanaan ? p.waktu_pelaksanaan.substring(0,5) : '';
+                    badges += `<span class="cal-event-badge program" title="${p.nama_program}">${wkt} ${p.nama_program}</span>`;
+                });
+
+                globalSchedules.forEach(s => {
+                    if (s.tanggal_mulai <= dateStr && s.tanggal_selesai >= dateStr) {
+                        let wkt = s.waktu ? s.waktu.substring(0,5) : '';
+                        let typeClass = s.tipe_jadwal === 'Rapat' ? 'rapat' : (s.tipe_jadwal === 'Tugas' ? 'tugas' : 'lainnya');
+                        badges += `<span class="cal-event-badge ${typeClass}" title="${s.judul_kegiatan}">${wkt} ${s.judul_kegiatan}</span>`;
+                    }
+                });
+
+                grid.innerHTML += `<div class="cal-cell interactive ${isToday}" onclick="openScheduleModal('${dateStr}')"><div class="cal-date-num">${i}</div>${badges}</div>`;
             }
+        }
 
-            let html = '';
-            let optionsHtml = '<option value="">-- Pilih Program --</option>';
-            let hasEditable = false;
+        function renderMergedTimeline() {
+            let combined = [];
+            globalPrograms.forEach(p => {
+                combined.push({ id: p.id, type: 'program', title: p.nama_program, date: p.tanggal_pelaksanaan || '9999-12-31', waktu: p.waktu_pelaksanaan, desc: p.tempat || 'Lokasi blm diatur', badge: p.status, obj: p });
+            });
+            globalSchedules.forEach(s => {
+                combined.push({ id: s.id, type: 'schedule', title: s.judul_kegiatan, date: s.tanggal_mulai, waktu: s.waktu, desc: s.keterangan || '-', badge: s.tipe_jadwal, created_by: s.created_by, obj: s });
+            });
 
-            let globalBpptn = 0; let globalNon = 0; let globalRealisasi = 0;
+            combined.sort((a, b) => a.date.localeCompare(b.date));
 
-            progs.forEach((p, i) => {
-                const bpptn = parseFloat(p.dana_bpptn || 0);
-                const nonBpptn = parseFloat(p.dana_non_bpptn || 0);
+            const fullTimelineList = document.getElementById('full-calendar-list'); const dashTimelineList = document.getElementById('timeline-list');
+            fullTimelineList.innerHTML = ''; dashTimelineList.innerHTML = '';
 
-                const myRabs = rabs ? rabs.filter(r => r.program_id === p.id) : []; 
-                const sumR = myRabs.reduce((a, c) => a + parseFloat(c.total_harga || 0), 0); 
-                const sumRe = myRabs.reduce((a, c) => a + parseFloat(c.realisasi || 0), 0);
-
-                globalBpptn += bpptn; globalNon += nonBpptn; globalRealisasi += sumRe;
-
-                const isOwner = p.created_by === currentUserId;
+            let countDash = 0;
+            combined.forEach(c => {
+                const tgl = c.date !== '9999-12-31' ? new Date(c.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric'}) : 'Tgl blm diatur';
+                const wkt = c.waktu ? c.waktu.substring(0,5) : '';
                 const isAdmin = currentUserRole === 'admin';
                 
-                if (isAdmin || isOwner) {
-                    optionsHtml += `<option value="${p.id}">${p.nama_program}</option>`;
-                    hasEditable = true;
+                let iconClass = 'fa-regular fa-calendar'; let badgeColor = '#eee'; let badgeText = '#555'; let actionHtml = '';
+                
+                if (c.type === 'program') {
+                    iconClass = 'fa-solid fa-star'; badgeColor = 'rgba(246, 178, 59, 0.2)'; badgeText = '#d35400';
+                } else {
+                    const isOwner = c.created_by === currentUserId;
+                    if (isAdmin) { actionHtml = `<div style="float: right;"><button class="btn-k-action edit" onclick="openEditSchedule('${c.id}')"><i class="fa-solid fa-pen"></i></button> <button class="btn-k-action del" onclick="deleteScheduleAction('${c.id}')"><i class="fa-solid fa-trash"></i></button></div>`; } 
+                    else if (isOwner) { actionHtml = `<div style="float: right;"><button class="btn-k-action edit" onclick="openEditSchedule('${c.id}')"><i class="fa-solid fa-pen"></i></button></div>`; }
+                    if(c.badge === 'Rapat') { iconClass = 'fa-solid fa-users'; badgeColor = 'rgba(52, 152, 219, 0.2)'; badgeText = 'var(--blue)';}
+                    if(c.badge === 'Tugas') { iconClass = 'fa-solid fa-list-check'; badgeColor = 'rgba(46, 204, 113, 0.2)'; badgeText = 'var(--green)';}
                 }
 
-                let btn = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>';
-                if (isAdmin || isOwner) {
-                    btn = `<button class="btn-table-edit" onclick="editRekapAction('${p.id}', ${bpptn}, ${nonBpptn})"><i class="fa-solid fa-pen"></i></button>`;
-                }
-
-                html += `<tr><td style="text-align:center;">${i + 1}</td><td>${p.departments?.nama_departemen||'-'}</td><td><strong>${p.nama_program}</strong></td><td style="color:var(--blue);">${formatRp(bpptn)}</td><td style="color:var(--secondary);">${formatRp(nonBpptn)}</td><td style="color:var(--primary); font-weight:bold;">${formatRp(sumR)}</td><td style="color:var(--green); font-weight:bold;">${formatRp(sumRe)}</td><td style="text-align:center;">${btn}</td></tr>`;
+                const html = `
+                    <div class="event">
+                        ${actionHtml}
+                        <h4 style="font-size: 1.1rem; color: var(--primary);">${c.title} <span style="font-size:0.7rem; background:${badgeColor}; color:${badgeText}; padding:3px 8px; border-radius:10px;">${c.badge}</span></h4>
+                        <p style="font-size: 0.85rem; color: #777; margin-top:5px;"><i class="fa-regular fa-calendar"></i> ${tgl} | <i class="fa-regular fa-clock"></i> ${wkt} | <i class="${iconClass}"></i> ${c.desc}</p>
+                    </div>
+                `;
+                fullTimelineList.innerHTML += html;
+                if(countDash < 3) { dashTimelineList.innerHTML += html; countDash++; }
             });
-            
-            tbody.innerHTML = html;
-            selectProg.innerHTML = hasEditable ? optionsHtml : '<option value="">-- Akses Terkunci --</option>';
 
-            // Update Summary Global
-            document.getElementById('rekap-global-bpptn').innerText = formatRp(globalBpptn);
-            document.getElementById('rekap-global-non').innerText = formatRp(globalNon);
-            const tMasuk = globalBpptn + globalNon;
-            document.getElementById('rekap-global-masuk').innerText = formatRp(tMasuk);
-            
-            const sisaEl = document.getElementById('rekap-global-sisa');
-            const sSaldo = tMasuk - globalRealisasi;
-            sisaEl.innerText = formatRp(sSaldo);
-            sisaEl.style.color = sSaldo < 0 ? '#ff4757' : '#2ecc71';
+            if(combined.length === 0) { fullTimelineList.innerHTML = '<p style="color: #aaa; font-style: italic;">Belum ada jadwal kegiatan.</p>'; dashTimelineList.innerHTML = '<p style="color: #aaa; font-style: italic;">Belum ada jadwal kegiatan.</p>'; }
         }
 
+        // ====================================================
+        // FITUR NOTULENSI
+        // ====================================================
+        function formatDoc(cmd, value=null) { document.execCommand(cmd, false, value); document.getElementById('rte-editor').focus(); }
+        let activeFolderId = null; let activeNotulensiId = null;
+
+        async function loadFolders() {
+            const { data } = await supabaseClient.from('folders').select('*').eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });
+            const container = document.getElementById('folder-grid-container'); container.innerHTML = '';
+            if(!data || data.length === 0) { container.innerHTML = '<p style="color: #aaa; width:100%; text-align:center;">Belum ada folder yang dibuat.</p>'; return; }
+            data.forEach(f => {
+                let delBtn = currentUserRole === 'admin' ? `<button class="del-btn" onclick="deleteFolder(event, '${f.id}', '${f.nama_folder}')"><i class="fa-solid fa-trash"></i></button>` : '';
+                container.innerHTML += `<div class="folder" onclick="openFolderView('${f.id}', '${f.nama_folder}')">${delBtn}<i class="fa-solid fa-folder"></i><h4>${f.nama_folder}</h4></div>`;
+            });
+        }
+        async function saveFolder(e) { e.preventDefault(); await supabaseClient.from('folders').insert([{ workspace_id: globalWorkspaceId, nama_folder: document.getElementById('input-nama-folder').value, created_by: currentUserId }]); closeModal('folderModal'); document.getElementById('input-nama-folder').value = ''; loadFolders(); }
+        async function deleteFolder(e, id, name) { e.stopPropagation(); if(confirm(`Hapus folder "${name}"?`)) { await supabaseClient.from('folders').delete().eq('id', id); loadFolders(); } }
+
+        async function openFolderView(folderId, folderName) { activeFolderId = folderId; document.getElementById('notulensi-folder-view').style.display = 'none'; document.getElementById('notulensi-list-view').style.display = 'block'; document.getElementById('current-folder-name').innerHTML = `<i class="fa-solid fa-folder-open"></i> ${folderName}`; await loadNotulensiList(); }
+        function backToFolders() { activeFolderId = null; document.getElementById('notulensi-list-view').style.display = 'none'; document.getElementById('notulensi-folder-view').style.display = 'block'; }
+
+        async function loadNotulensiList() {
+            const { data } = await supabaseClient.from('notulensi').select('*').eq('folder_id', activeFolderId).order('updated_at', { ascending: false });
+            const listContainer = document.getElementById('notulensi-list-container'); listContainer.innerHTML = '';
+            if(!data || data.length === 0) { listContainer.innerHTML = '<p style="color: #aaa; text-align:center;">Belum ada dokumen.</p>'; return; }
+            data.forEach(doc => {
+                const tgl = new Date(doc.updated_at).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit'});
+                let delBtn = (currentUserRole === 'admin' || doc.created_by === currentUserId) ? `<button style="background:var(--red); color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer;" onclick="deleteNotulensi(event, '${doc.id}')"><i class="fa-solid fa-trash"></i></button>` : '';
+                listContainer.innerHTML += `<div class="doc-list-item" onclick="editNotulensi('${doc.id}', '${doc.judul_notulensi.replace(/'/g, "\\'")}')"><div><h4 style="color: var(--primary); margin-bottom: 5px;"><i class="fa-solid fa-file-lines" style="color: var(--secondary);"></i> ${doc.judul_notulensi}</h4><p style="font-size: 0.8rem; color: #777;">Terakhir diubah: ${tgl}</p></div><div>${delBtn}</div></div>`;
+            });
+        }
+
+        function openNotulensiEditor() { activeNotulensiId = null; document.getElementById('notulensi-judul').value = ''; document.getElementById('rte-editor').innerHTML = '<p>Mulai mengetik...</p>'; document.getElementById('notulensi-list-view').style.display = 'none'; document.getElementById('notulensi-editor-view').style.display = 'block'; }
+        function backToList() { activeNotulensiId = null; document.getElementById('notulensi-editor-view').style.display = 'none'; document.getElementById('notulensi-list-view').style.display = 'block'; }
+        async function editNotulensi(id, judul) { activeNotulensiId = id; document.getElementById('notulensi-judul').value = judul; const { data } = await supabaseClient.from('notulensi').select('isi_dokumen').eq('id', id).single(); document.getElementById('rte-editor').innerHTML = data.isi_dokumen || '<p></p>'; document.getElementById('notulensi-list-view').style.display = 'none'; document.getElementById('notulensi-editor-view').style.display = 'block'; }
+        async function saveNotulensi() { const judul = document.getElementById('notulensi-judul').value; if(!judul) { alert("Judul kosong!"); return; } const payload = { workspace_id: globalWorkspaceId, folder_id: activeFolderId, judul_notulensi: judul, isi_dokumen: document.getElementById('rte-editor').innerHTML, updated_at: new Date() }; if(activeNotulensiId) { await supabaseClient.from('notulensi').update(payload).eq('id', activeNotulensiId); } else { payload.created_by = currentUserId; await supabaseClient.from('notulensi').insert([payload]); } alert("Disimpan!"); backToList(); loadNotulensiList(); }
+        async function deleteNotulensi(e, id) { e.stopPropagation(); if(confirm("Hapus dokumen?")) { await supabaseClient.from('notulensi').delete().eq('id', id); loadNotulensiList(); } }
+
+        // ====================================================
+        // FUNGSI RAB RENCANA & AKTUAL
+        // ====================================================
+        function filterProgramByDept(deptElemId, progElemId) { fetchProgByDept(document.getElementById(deptElemId).value, document.getElementById(progElemId)); }
+        async function fetchProgByDept(deptId, selectEl) { const { data } = await supabaseClient.from('programs').select('id, nama_program').eq('department_id', deptId); selectEl.innerHTML = data && data.length > 0 ? data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('') : '<option value="">-- Kosong --</option>'; }
+        
+        async function saveRabDetail(e) { e.preventDefault(); const vol = document.getElementById('rab-volume').value; const hrg = document.getElementById('rab-harga').value; const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('rab-select-dept').value, program_id: document.getElementById('rab-select-prog').value, nama_barang: document.getElementById('rab-nama-barang').value, volume: vol, satuan: document.getElementById('rab-satuan').value, harga_satuan: hrg, total_harga: vol * hrg, sumber_dana: document.getElementById('rab-sumber-dana').value }; if (editingRabId) { await supabaseClient.from('rab_items').update(payload).eq('id', editingRabId); editingRabId = null; document.getElementById('btn-cancel-rab').style.display = 'none'; } else { payload.created_by = currentUserId; await supabaseClient.from('rab_items').insert([payload]); } document.getElementById('form-rab').reset(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); }
+        async function loadRabTable() { const { data } = await supabaseClient.from('rab_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); const tbody = document.getElementById('table-rab-body'); tbody.innerHTML = ''; if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Kosong.</td></tr>'; return; } data.forEach((item, index) => { let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, '${item.sumber_dana||'BPPTN'}')"><i class="fa-solid fa-pen"></i></button><button class="btn-table-del" onclick="deleteRabAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } else if (item.created_by === currentUserId) { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, '${item.sumber_dana||'BPPTN'}')"><i class="fa-solid fa-pen"></i></button>`; } const badgeDana = item.sumber_dana === 'Non-BPPTN' ? `<span style="background:var(--secondary); color:var(--primary); padding:2px 8px; border-radius:8px; font-size:0.75rem;">Non-BPPTN</span>` : `<span style="background:var(--blue); color:white; padding:2px 8px; border-radius:8px; font-size:0.75rem;">BPPTN</span>`; tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.nama_barang}</strong></td><td>${item.volume} ${item.satuan}</td><td>${formatRp(item.harga_satuan)}</td><td>${badgeDana}</td><td style="font-weight: bold; color: var(--primary);">${formatRp(item.total_harga)}</td><td style="text-align: center;">${actionButtons}</td></tr>`; }); }
+        async function editRabAction(id, deptId, progId, nama, vol, satuan, harga, sumberDana) { editingRabId = id; document.getElementById('btn-cancel-rab').style.display = 'block'; document.getElementById('rab-select-dept').value = deptId; await fetchProgByDept(deptId, document.getElementById('rab-select-prog')); document.getElementById('rab-select-prog').value = progId; document.getElementById('rab-nama-barang').value = nama; document.getElementById('rab-volume').value = vol; document.getElementById('rab-satuan').value = satuan; document.getElementById('rab-harga').value = harga; document.getElementById('rab-sumber-dana').value = sumberDana; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        function cancelEditRab() { editingRabId = null; document.getElementById('form-rab').reset(); document.getElementById('btn-cancel-rab').style.display = 'none'; }
+        async function deleteRabAction(id) { if(confirm("Hapus Rencana RAB?")) { await supabaseClient.from('rab_items').delete().eq('id', id); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
+
+        async function saveRealisasiDetail(e) { e.preventDefault(); const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('real-select-dept').value, program_id: document.getElementById('real-select-prog').value, keterangan: document.getElementById('real-keterangan').value, nominal: document.getElementById('real-nominal').value, sumber_dana: document.getElementById('real-sumber-dana').value, created_by: currentUserId }; await supabaseClient.from('realisasi_items').insert([payload]); document.getElementById('form-realisasi').reset(); await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); }
+        async function loadRealisasiTable() { const { data } = await supabaseClient.from('realisasi_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); const tbody = document.getElementById('table-realisasi-body'); tbody.innerHTML = ''; if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Kosong.</td></tr>'; return; } data.forEach((item, index) => { const tgl = new Date(item.created_at).toLocaleDateString('id-ID'); let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-del" onclick="deleteRealisasiAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } let badgeDana = `<span style="background:#eee; padding:2px 8px; border-radius:8px; font-size:0.7rem;">Gabungan</span>`; if(item.sumber_dana === 'BPPTN') badgeDana = `<span style="background:var(--blue); color:white; padding:2px 8px; border-radius:8px; font-size:0.7rem;">BPPTN</span>`; if(item.sumber_dana === 'Non-BPPTN') badgeDana = `<span style="background:var(--secondary); color:var(--primary); padding:2px 8px; border-radius:8px; font-size:0.7rem;">Non-BPPTN</span>`; tbody.innerHTML += `<tr><td>${index + 1}</td><td>${tgl}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.keterangan}</strong></td><td>${badgeDana}</td><td style="color:var(--green); font-weight:bold;">${formatRp(item.nominal)}</td><td style="text-align: center;">${actionButtons}</td></tr>`; }); }
+        async function deleteRealisasiAction(id) { if(confirm("Hapus catatan realisasi ini?")) { await supabaseClient.from('realisasi_items').delete().eq('id', id); await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); } }
+
+        async function recalculateGlobalRAB() { const { data: dataRab } = await supabaseClient.from('rab_items').select('total_harga').eq('workspace_id', globalWorkspaceId); let totalRabSum = 0; if(dataRab) totalRabSum = dataRab.reduce((s, i) => s + parseFloat(i.total_harga || 0), 0); const { data: dataReal } = await supabaseClient.from('realisasi_items').select('nominal').eq('workspace_id', globalWorkspaceId); let totalRealisasiSum = 0; if(dataReal) totalRealisasiSum = dataReal.reduce((s, i) => s + parseFloat(i.nominal || 0), 0); const { data: exist } = await supabaseClient.from('finance_summaries').select('id').eq('workspace_id', globalWorkspaceId).single(); if (exist) { await supabaseClient.from('finance_summaries').update({ total_rab: totalRabSum, realisasi_rab: totalRealisasiSum }).eq('id', exist.id); } else { await supabaseClient.from('finance_summaries').insert([{ workspace_id: globalWorkspaceId, total_rab: totalRabSum, realisasi_rab: totalRealisasiSum }]); } loadFinanceData(); }
+        async function loadFinanceData() { const { data } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', globalWorkspaceId).single(); let t = 0; let r = 0; if (data) { t = parseFloat(data.total_rab); r = parseFloat(data.realisasi_rab); } const sisa = t - r; const persentase = t > 0 ? Math.round((r/t)*100) : 0; document.getElementById('val-total-rab').innerText = formatRp(t); document.getElementById('val-realisasi-rab').innerText = formatRp(r); document.getElementById('val-sisa-rab').innerText = formatRp(sisa); document.getElementById('val-penyerapan').innerText = `${persentase}%`; document.getElementById('real-global-rab').innerText = formatRp(t); document.getElementById('real-global-realisasi').innerText = formatRp(r); document.getElementById('real-global-sisa').innerText = formatRp(sisa); document.getElementById('real-global-persen').innerText = `${persentase}%`; }
+
+        async function saveSumberDana(e) { e.preventDefault(); const progId = document.getElementById('rekap-select-prog').value; if(!progId) { alert("Pilih program!"); return; } await supabaseClient.from('programs').update({ dana_bpptn: document.getElementById('rekap-dana-bpptn').value, dana_non_bpptn: document.getElementById('rekap-dana-non').value }).eq('id', progId); document.getElementById('rekap-dana-bpptn').value = '0'; document.getElementById('rekap-dana-non').value = '0'; await loadRekapitulasiData(); alert("Berhasil!"); }
+        async function loadRekapitulasiData() { const { data: progs } = await supabaseClient.from('programs').select('*, departments(nama_departemen)').eq('workspace_id', globalWorkspaceId); const { data: rabs } = await supabaseClient.from('rab_items').select('program_id, total_harga, sumber_dana').eq('workspace_id', globalWorkspaceId); const { data: reals } = await supabaseClient.from('realisasi_items').select('program_id, nominal, sumber_dana').eq('workspace_id', globalWorkspaceId); const tbody = document.getElementById('table-rekap-body'); const selectProg = document.getElementById('rekap-select-prog'); if (!progs || progs.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Kosong.</td></tr>'; selectProg.innerHTML = '<option value="">-- Buat Program Dulu --</option>'; return; } let html = ''; let optionsHtml = '<option value="">-- Pilih Program --</option>'; let hasEditable = false; let globalBpptn = 0; let globalNon = 0; let globalRealisasi = 0; progs.forEach((p, i) => { const bpptn = parseFloat(p.dana_bpptn || 0); const nonBpptn = parseFloat(p.dana_non_bpptn || 0); const myRabs = rabs ? rabs.filter(r => r.program_id === p.id) : []; const sumR = myRabs.reduce((a, c) => a + parseFloat(c.total_harga || 0), 0); const sumRBpptn = myRabs.filter(r => r.sumber_dana === 'BPPTN').reduce((a, c) => a + parseFloat(c.total_harga || 0), 0); const sumRNon = myRabs.filter(r => r.sumber_dana === 'Non-BPPTN').reduce((a, c) => a + parseFloat(c.total_harga || 0), 0); const myReals = reals ? reals.filter(r => r.program_id === p.id) : []; const sumRe = myReals.reduce((a, c) => a + parseFloat(c.nominal || 0), 0); const sumReBpptn = myReals.filter(r => r.sumber_dana === 'BPPTN').reduce((a, c) => a + parseFloat(c.nominal || 0), 0); const sumReNon = myReals.filter(r => r.sumber_dana === 'Non-BPPTN').reduce((a, c) => a + parseFloat(c.nominal || 0), 0); const sumReGab = myReals.filter(r => r.sumber_dana === 'Gabungan').reduce((a, c) => a + parseFloat(c.nominal || 0), 0); globalBpptn += bpptn; globalNon += nonBpptn; globalRealisasi += sumRe; const isOwner = p.created_by === currentUserId; const isAdmin = currentUserRole === 'admin'; if (isAdmin || isOwner) { optionsHtml += `<option value="${p.id}">${p.nama_program}</option>`; hasEditable = true; } let btn = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; if (isAdmin || isOwner) { btn = `<button class="btn-table-edit" onclick="editRekapAction('${p.id}', ${bpptn}, ${nonBpptn})"><i class="fa-solid fa-pen"></i></button>`; } html += `<tr><td style="text-align:center;">${i + 1}</td><td>${p.departments?.nama_departemen||'-'}</td><td><strong>${p.nama_program}</strong></td><td style="color:var(--blue); font-weight:500;">${formatRp(bpptn)}</td><td style="color:var(--secondary); font-weight:500;">${formatRp(nonBpptn)}</td><td style="color:var(--primary); font-weight:bold;">${formatRp(sumR)}<div style="font-size:0.7rem; color:#777; font-weight:normal; margin-top:4px;">B: ${formatRp(sumRBpptn)} <br> N: ${formatRp(sumRNon)}</div></td><td style="color:var(--green); font-weight:bold;">${formatRp(sumRe)}<div style="font-size:0.7rem; color:#777; font-weight:normal; margin-top:4px;">B: ${formatRp(sumReBpptn)} <br> N: ${formatRp(sumReNon)} <br> G: ${formatRp(sumReGab)}</div></td><td style="text-align:center;">${btn}</td></tr>`; }); tbody.innerHTML = html; selectProg.innerHTML = hasEditable ? optionsHtml : '<option value="">-- Akses Terkunci --</option>'; document.getElementById('rekap-global-bpptn').innerText = formatRp(globalBpptn); document.getElementById('rekap-global-non').innerText = formatRp(globalNon); const tMasuk = globalBpptn + globalNon; document.getElementById('rekap-global-masuk').innerText = formatRp(tMasuk); const sisaEl = document.getElementById('rekap-global-sisa'); const sSaldo = tMasuk - globalRealisasi; sisaEl.innerText = formatRp(sSaldo); sisaEl.style.color = sSaldo < 0 ? '#ff4757' : '#2ecc71'; }
         function editRekapAction(pId, b, n) { document.getElementById('rekap-select-prog').value = pId; document.getElementById('rekap-dana-bpptn').value = b; document.getElementById('rekap-dana-non').value = n; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+        // ====================================================
+        // FITUR ABSENSI
+        // ====================================================
+        function toggleAbsenProgram(isProgram) { document.getElementById('absen-program-selector').style.display = isProgram ? 'block' : 'none'; }
+        function setupAbsensiView() { document.getElementById('absen-greeting').innerText = `Selamat Datang, ${currentUserName}!`; if (currentUserRole === 'admin') { document.getElementById('panel-absen-admin').style.display = 'block'; document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Seluruh Peserta"; } else { document.getElementById('panel-absen-admin').style.display = 'none'; document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Anda"; } }
+        let absenPieChart = null;
+        async function loadAbsensiData() { let query = supabaseClient.from('attendances').select('*, programs(nama_program)').eq('workspace_id', globalWorkspaceId).order('tanggal', { ascending: false }).order('waktu_masuk', { ascending: false }); if (currentUserRole !== 'admin') { query = query.eq('user_id', currentUserId); } const { data: historyData } = await query; const tbody = document.getElementById('table-absen-body'); if (!historyData || historyData.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #aaa;">Belum ada riwayat absensi.</td></tr>'; } else { tbody.innerHTML = ''; historyData.forEach((h, index) => { const tgl = new Date(h.tanggal).toLocaleDateString('id-ID', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' }); const wKeluar = h.waktu_keluar ? h.waktu_keluar : '-'; const tipeLabel = h.tipe_absen === 'Program' ? `<span style="background:var(--secondary); color:var(--primary); padding:3px 8px; border-radius:10px; font-size:0.75rem;"><i class="fa-solid fa-star"></i> ${h.programs?.nama_program || 'Event'}</span>` : `<span style="background:#eee; color:#555; padding:3px 8px; border-radius:10px; font-size:0.75rem;">Harian Biasa</span>`; tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td style="color: var(--green); font-weight: bold;">${h.waktu_masuk}</td><td style="color: var(--red); font-weight: bold;">${wKeluar}</td><td><span style="background: rgba(46, 204, 113, 0.2); color: var(--green); padding: 4px 10px; border-radius: 15px; font-size: 0.8rem;">${h.status}</span></td></tr>`; }); } if (currentUserRole === 'admin') { const today = new Date().toISOString().split('T')[0]; const { count: totalUser } = await supabaseClient.from('workspace_members').select('*', { count: 'exact', head: true }).eq('workspace_id', globalWorkspaceId); document.getElementById('stat-total-user').innerText = totalUser || 0; const { data: allTodayAbsen } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('tanggal', today).is('program_id', null); const hadirCount = allTodayAbsen ? allTodayAbsen.length : 0; document.getElementById('stat-user-hadir').innerText = hadirCount; const belumHadirCount = (totalUser || 0) - hadirCount; const ctxPie = document.getElementById('absenChart').getContext('2d'); if(absenPieChart) absenPieChart.destroy(); absenPieChart = new Chart(ctxPie, { type: 'pie', data: { labels: ['Hadir', 'Belum Hadir'], datasets: [{ data: [hadirCount, belumHadirCount], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] }, options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } } }); } }
+        async function absenAction(jenis) { const isProgram = document.querySelector('input[name="tipe_absen"]:checked').value === 'Program'; const progId = document.getElementById('absen-select-prog').value; if (isProgram && !progId) { alert("Pilih Program/Event terlebih dahulu!"); return; } const today = new Date().toISOString().split('T')[0]; const now = new Date(); const timeNow = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`; let queryCek = supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today); if(isProgram) queryCek = queryCek.eq('program_id', progId); else queryCek = queryCek.is('program_id', null); const { data: existingAbsen } = await queryCek.single(); if (jenis === 'masuk') { if (existingAbsen) { alert("Anda sudah absen masuk untuk kategori ini hari ini!"); return; } const payload = { workspace_id: globalWorkspaceId, user_id: currentUserId, nama_user: currentUserName, tanggal: today, waktu_masuk: timeNow, tipe_absen: isProgram ? 'Program' : 'Harian' }; if (isProgram) payload.program_id = progId; await supabaseClient.from('attendances').insert([payload]); alert("Berhasil Absen Masuk!"); } else if (jenis === 'keluar') { if (!existingAbsen) { alert("Anda belum absen masuk!"); return; } if (existingAbsen.waktu_keluar) { alert("Anda sudah absen keluar!"); return; } await supabaseClient.from('attendances').update({ waktu_keluar: timeNow }).eq('id', existingAbsen.id); alert("Berhasil Absen Keluar!"); } loadAbsensiData(); }
+
+        // ====================================================
+        // FITUR INDIKATOR KPI 
+        // ====================================================
+        async function loadKPIData() {
+            const { data, error } = await supabaseClient.from('kpi_items').select(`*, departments(nama_departemen)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: true });
+            if (error) { document.getElementById('kpi-container').innerHTML = '<p style="color: #aaa; font-style: italic;">Data tidak ditemukan/tabel belum dibuat.</p>'; return; }
+            
+            globalKPIs = data || [];
+            
+            let html = '';
+            let total = globalKPIs.length;
+            let tercapai = 0, progress = 0, belum = 0;
+
+            globalKPIs.forEach(kpi => {
+                let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
+                let isTercapai = false;
+
+                if (persen >= 100) { persen = 100; tercapai++; isTercapai = true; }
+                else if (persen > 0) { progress++; }
+                else { belum++; }
+
+                let bgStatus = isTercapai ? 'rgba(46, 204, 113, 0.2)' : (persen > 0 ? 'rgba(246, 178, 59, 0.2)' : 'rgba(231, 76, 60, 0.2)');
+                let colStatus = isTercapai ? 'var(--green)' : (persen > 0 ? '#d35400' : 'var(--red)');
+                let textStatus = isTercapai ? 'Tercapai' : (persen > 0 ? 'On Progress' : 'Belum');
+                
+                let pBarClass = isTercapai ? 'success' : (persen > 0 ? 'warning' : '');
+                
+                let actionBtns = '';
+                if (currentUserRole === 'admin') {
+                    actionBtns = `<div style="margin-top: 15px; border-top: 1px dashed #eee; padding-top: 10px; display: flex; justify-content: flex-end; gap: 5px;">
+                        <button class="btn-k-action edit" onclick="openEditKPI('${kpi.id}')"><i class="fa-solid fa-pen"></i> Update Capaian</button>
+                        <button class="btn-k-action del" onclick="deleteKPIAction('${kpi.id}', '${kpi.nama_kpi}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+                }
+
+                html += `
+                <div class="card kpi-card">
+                    <span class="kpi-status-badge" style="background: ${bgStatus}; color: ${colStatus};">${textStatus}</span>
+                    <span class="dept-tag" style="font-size: 0.75rem; background: #eee; padding: 3px 8px; border-radius: 10px; color: #555; display: inline-block; margin-bottom: 10px;">
+                        <i class="fa-solid fa-sitemap"></i> ${kpi.departments?.nama_departemen || 'Umum'}
+                    </span>
+                    <h3 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 5px; padding-right: 70px;">${kpi.nama_kpi}</h3>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.85rem;">
+                        <div style="color: #777;">Target: <b>${kpi.target} ${kpi.satuan}</b></div>
+                        <div style="color: var(--primary);">Realisasi: <b>${kpi.capaian} ${kpi.satuan}</b></div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill ${pBarClass}" style="width: ${persen}%;"></div>
+                    </div>
+                    <div style="text-align: right; font-size: 0.8rem; font-weight: bold; color: ${colStatus};">${persen.toFixed(1)}%</div>
+                    ${actionBtns}
+                </div>`;
+            });
+
+            if (total === 0) { html = '<p style="color: #aaa; font-style: italic;">Belum ada Indikator KPI yang dibuat.</p>'; }
+            
+            document.getElementById('kpi-container').innerHTML = html;
+            document.getElementById('stat-kpi-total').innerText = total;
+            document.getElementById('stat-kpi-tercapai').innerText = tercapai;
+            document.getElementById('stat-kpi-progress').innerText = progress;
+            document.getElementById('stat-kpi-belum').innerText = belum;
+        }
+
+        function openKPIModal() { 
+            editingKPIId = null; 
+            document.getElementById('form-kpi').reset(); 
+            document.getElementById('kpi-modal-title').innerText = "Tambah KPI Baru"; 
+            openModal('kpiModal'); 
+        }
+
+        function openEditKPI(id) { 
+            const k = globalKPIs.find(kpi => kpi.id === id); if(!k) return;
+            editingKPIId = id; 
+            document.getElementById('kpi-modal-title').innerText = "Update / Edit KPI"; 
+            document.getElementById('kpi-dept').value = k.department_id; 
+            document.getElementById('kpi-nama').value = k.nama_kpi; 
+            document.getElementById('kpi-target').value = k.target; 
+            document.getElementById('kpi-satuan').value = k.satuan; 
+            document.getElementById('kpi-capaian').value = k.capaian; 
+            openModal('kpiModal'); 
+        }
+
+        async function saveKPI(e) {
+            e.preventDefault(); 
+            const payload = { 
+                department_id: document.getElementById('kpi-dept').value, 
+                nama_kpi: document.getElementById('kpi-nama').value, 
+                target: parseFloat(document.getElementById('kpi-target').value), 
+                satuan: document.getElementById('kpi-satuan').value, 
+                capaian: parseFloat(document.getElementById('kpi-capaian').value || 0)
+            };
+            if (!payload.department_id) { alert("Pilih departemen dulu!"); return; }
+            
+            document.getElementById('btn-save-kpi').innerText = "Menyimpan..."; 
+            document.getElementById('btn-save-kpi').disabled = true;
+
+            if (editingKPIId) { 
+                await supabaseClient.from('kpi_items').update(payload).eq('id', editingKPIId); 
+            } else { 
+                payload.workspace_id = globalWorkspaceId; 
+                payload.created_by = currentUserId; 
+                await supabaseClient.from('kpi_items').insert([payload]); 
+            }
+            
+            closeModal('kpiModal'); 
+            await loadKPIData();
+            document.getElementById('btn-save-kpi').innerText = "Simpan KPI"; 
+            document.getElementById('btn-save-kpi').disabled = false;
+        }
+
+        async function deleteKPIAction(id, name) { 
+            if(confirm(`Yakin ingin menghapus Indikator KPI "${name}"?`)) { 
+                await supabaseClient.from('kpi_items').delete().eq('id', id); 
+                await loadKPIData(); 
+            } 
+        }
+
+        // ====================================================
+        // FITUR DIGITAL OFFICE (E-SIGN PDF)
+        // ====================================================
+        async function loadWorkspaceUsers() {
+            const { data } = await supabaseClient.from('attendances').select('user_id, nama_user').eq('workspace_id', globalWorkspaceId);
+            if(data) {
+                const uniqueUsers = []; const map = new Map();
+                for (const item of data) {
+                    if(!map.has(item.user_id)) {
+                        map.set(item.user_id, true);
+                        uniqueUsers.push({ id: item.user_id, name: item.nama_user });
+                    }
+                }
+                globalWorkspaceUsers = uniqueUsers;
+                const selectPenerima = document.getElementById('do-penerima');
+                if(selectPenerima) {
+                    selectPenerima.innerHTML = '<option value="">-- Pilih Penerima --</option>' + 
+                        uniqueUsers.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
+                }
+            }
+        }
+
+        async function loadDigitalOffice() {
+            const { data, error } = await supabaseClient.from('digital_office').select('*').eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });
+            const tbodyMasuk = document.getElementById('table-do-masuk-body'); const tbodyKeluar = document.getElementById('table-do-keluar-body');
+            if (error || !data) { tbodyMasuk.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #aaa;">Data tidak ditemukan/Error.</td></tr>'; tbodyKeluar.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa;">Data tidak ditemukan/Error.</td></tr>'; return; }
+
+            tbodyMasuk.innerHTML = ''; tbodyKeluar.innerHTML = '';
+            let countMasuk = 0; let countKeluar = 0;
+
+            data.forEach((item) => {
+                const isPenerima = item.penerima_id === currentUserId;
+                const isPengirim = item.pengirim_id === currentUserId;
+                
+                const pengirimData = globalWorkspaceUsers.find(u => u.id === item.pengirim_id);
+                const namaPengirim = pengirimData ? pengirimData.name : 'User Lain / Admin';
+                const penerimaData = globalWorkspaceUsers.find(u => u.id === item.penerima_id);
+                const namaPenerima = penerimaData ? penerimaData.name : 'User Lain / Admin';
+
+                let statusBadge = '';
+                if(item.status === 'Menunggu') statusBadge = `<span class="status-badge status-menunggu"><i class="fa-solid fa-clock"></i> Menunggu TTD</span>`;
+                else if(item.status === 'Disetujui') statusBadge = `<span class="status-badge status-disetujui"><i class="fa-solid fa-check-double"></i> Disetujui</span>`;
+                else if(item.status === 'Ditolak') statusBadge = `<span class="status-badge status-ditolak"><i class="fa-solid fa-xmark"></i> Revisi/Ditolak</span>`;
+
+                if (isPenerima && item.status === 'Menunggu') {
+                    countMasuk++;
+                    tbodyMasuk.innerHTML += `<tr><td><strong>${item.judul_surat}</strong></td><td>${namaPengirim}</td><td><button class="btn-action" style="padding: 5px 10px; font-size: 0.8rem; background: var(--blue); color: white;" onclick="openAksiSuratModal('${item.id}', '${item.judul_surat}', '${item.file_url}')"><i class="fa-solid fa-eye"></i> Review & TTD</button></td></tr>`;
+                }
+
+                if (isPengirim) {
+                    countKeluar++;
+                    let noteHtml = item.catatan ? `<div style="font-size:0.7rem; margin-top:5px; color:#e74c3c;">Catatan: ${item.catatan}</div>` : '';
+                    let deleteBtn = `<button class="btn-table-del" onclick="deletePengajuanSurat('${item.id}')" title="Hapus Pengajuan"><i class="fa-solid fa-trash"></i></button>`;
+                    tbodyKeluar.innerHTML += `<tr><td><strong>${item.judul_surat}</strong><br><a href="${item.file_url}" target="_blank" style="font-size:0.75rem; color:var(--blue);"><i class="fa-solid fa-file-pdf"></i> Buka Dokumen</a></td><td>${namaPenerima}</td><td>${statusBadge} ${noteHtml}</td><td style="text-align: center;">${deleteBtn}</td></tr>`;
+                }
+            });
+
+            if(countMasuk === 0) tbodyMasuk.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #aaa;">Kotak masuk Anda kosong.</td></tr>';
+            if(countKeluar === 0) tbodyKeluar.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #aaa;">Belum ada riwayat pengajuan.</td></tr>';
+        }
+
+        function openAjukanSuratModal() { document.getElementById('form-ajukan-surat').reset(); openModal('modalAjukanSurat'); }
+
+        async function savePengajuanSurat(e) {
+            e.preventDefault();
+            const penerimaId = document.getElementById('do-penerima').value;
+            if (penerimaId === currentUserId) { alert("Tidak dapat mengirim pengajuan ke diri sendiri!"); return; }
+
+            const fileInput = document.getElementById('do-file-upload');
+            if (fileInput.files.length === 0) { alert("Pilih file PDF terlebih dahulu!"); return; }
+            
+            const file = fileInput.files[0];
+            if (file.type !== "application/pdf") { alert("Hanya file PDF yang diizinkan!"); return; }
+
+            document.getElementById('btn-save-do').innerText = "Mengupload & Mengirim...";
+            document.getElementById('btn-save-do').disabled = true;
+
+            try {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+                const filePath = `dokumen_surat/${globalWorkspaceId}/${fileName}`;
+
+                const { error: uploadError } = await supabaseClient.storage.from('digital_office').upload(filePath, file);
+                if (uploadError) throw uploadError;
+
+                const { data: publicUrlData } = supabaseClient.storage.from('digital_office').getPublicUrl(filePath);
+                const fileUrl = publicUrlData.publicUrl;
+
+                const payload = { workspace_id: globalWorkspaceId, judul_surat: document.getElementById('do-judul').value, file_url: fileUrl, pengirim_id: currentUserId, penerima_id: penerimaId, status: 'Menunggu' };
+                await supabaseClient.from('digital_office').insert([payload]);
+
+                closeModal('modalAjukanSurat'); await loadDigitalOffice();
+            } catch (error) {
+                console.error("Upload error:", error);
+                alert("Gagal mengupload dokumen: Pastikan tabel dan Storage 'digital_office' sudah dibuat. " + error.message);
+            } finally {
+                document.getElementById('btn-save-do').innerText = "Ajukan & Minta Tanda Tangan";
+                document.getElementById('btn-save-do').disabled = false;
+            }
+        }
+
+        async function deletePengajuanSurat(id) {
+            if (confirm("Yakin ingin menghapus pengajuan surat/dokumen ini?")) {
+                await supabaseClient.from('digital_office').delete().eq('id', id); await loadDigitalOffice();
+            }
+        }
+
+        // --- SISTEM PDF VIEWER & TTD ---
+        async function openAksiSuratModal(id, judul, url) {
+            activeActionSuratId = id; activeActionFileUrl = url;
+            document.getElementById('do-review-judul').innerText = judul;
+            document.getElementById('do-review-catatan').value = '';
+            document.getElementById('btn-approve-pdf').innerText = "Tanda Tangani (Approve)";
+            document.getElementById('btn-approve-pdf').disabled = false;
+            document.getElementById('sig-draggable-overlay').style.display = 'none';
+            signatureIsApplied = false;
+            
+            openModal('modalAksiSurat');
+            
+            try {
+                const pdfData = await fetch(url).then(res => res.arrayBuffer());
+                loadedPdfBytes = pdfData; 
+                pdfDocInstance = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                document.getElementById('page_count').textContent = pdfDocInstance.numPages;
+                pageNum = 1;
+                
+                // Set default scale to Fit to Page saat pertama dibuka
+                fitPdfToPage();
+            } catch (error) {
+                console.error("Error loading PDF", error);
+                alert("Gagal memuat PDF. Pastikan URL valid dan CORS diijinkan.");
+            }
+        }
+
+        function renderPage(num) {
+            pageRendering = true;
+            pdfDocInstance.getPage(num).then((page) => {
+                const canvas = document.getElementById('pdf-render-canvas');
+                const ctx = canvas.getContext('2d');
+                const viewport = page.getViewport({ scale: pdfScale });
+                
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+                
+                document.getElementById('pdf-page-wrapper').style.width = viewport.width + 'px';
+                document.getElementById('pdf-page-wrapper').style.height = viewport.height + 'px';
+
+                const renderContext = { canvasContext: ctx, viewport: viewport };
+                page.render(renderContext).promise.then(() => {
+                    pageRendering = false;
+                    if (pageNumPending !== null) {
+                        renderPage(pageNumPending);
+                        pageNumPending = null;
+                    }
+                });
+            });
+            document.getElementById('page_num').textContent = num;
+        }
+
+        function queueRenderPage(num) {
+            if (pageRendering) { pageNumPending = num; } else { renderPage(num); }
+        }
+
+        function onPrevPage() { if (pageNum <= 1) return; pageNum--; queueRenderPage(pageNum); }
+        function onNextPage() { if (pageNum >= pdfDocInstance.numPages) return; pageNum++; queueRenderPage(pageNum); }
+
+        function zoomInPdf() {
+            pdfScale += 0.2;
+            queueRenderPage(pageNum);
+        }
+
+        function zoomOutPdf() {
+            if (pdfScale <= 0.4) return;
+            pdfScale -= 0.2;
+            queueRenderPage(pageNum);
+        }
+
+        function fitPdfToPage() {
+            if (!pdfDocInstance) return;
+            pdfDocInstance.getPage(pageNum).then((page) => {
+                const container = document.getElementById('pdf-container-scroll');
+                const unscaledViewport = page.getViewport({ scale: 1.0 });
+                // Menyesuaikan lebar container (dikurangi sedikit ruang scroll/padding)
+                const fitScale = (container.clientWidth - 25) / unscaledViewport.width;
+                pdfScale = fitScale > 0 ? fitScale : 1.0;
+                renderPage(pageNum);
+            });
+        }
+
+        function terapkanSignature() {
+            if (!userSignatureBase64) {
+                alert("Anda belum membuat tanda tangan! Silakan klik 'Buat Tanda Tangan' terlebih dahulu.");
+                return;
+            }
+            const overlay = document.getElementById('sig-draggable-overlay');
+            const img = document.getElementById('sig-img-element');
+            img.src = userSignatureBase64;
+            overlay.style.display = 'block';
+            
+            // Set default ukuran awal kotak tanda tangan menyesuaikan skala zoom PDF saat ini
+            overlay.style.width = (120 * pdfScale) + 'px';
+            overlay.style.height = (60 * pdfScale) + 'px';
+            
+            signatureIsApplied = true;
+            alert("Tanda Tangan berhasil dimunculkan. Geser kotak tanda tangan untuk meletakkannya, dan tarik sudut kanan bawah untuk mengatur ukurannya!");
+        }
+
+        async function prosesAksiSurat(statusPilihan) {
+            if (!activeActionSuratId) return;
+            const catatan = document.getElementById('do-review-catatan').value;
+
+            if (statusPilihan === 'Ditolak' && catatan.trim() === '') {
+                alert("Wajib memberikan catatan revisi jika Anda menolak dokumen ini!"); return;
+            }
+
+            try {
+                let finalUrl = activeActionFileUrl;
+
+                if (statusPilihan === 'Disetujui') {
+                    if (!signatureIsApplied) { alert("Anda harus menempatkan/menerapkan Tanda Tangan terlebih dahulu!"); return; }
+                    
+                    document.getElementById('btn-approve-pdf').innerText = "Memproses TTD...";
+                    document.getElementById('btn-approve-pdf').disabled = true;
+
+                    // 1. Modifikasi PDF dengan pdf-lib
+                    const pdfDoc = await PDFLib.PDFDocument.load(loadedPdfBytes);
+                    const pages = pdfDoc.getPages();
+                    const targetPage = pages[pageNum - 1]; // TTD diletakkan di halaman yang sedang dilihat
+
+                    const sigImgBytes = await fetch(userSignatureBase64).then(res => res.arrayBuffer());
+                    const pngImage = await pdfDoc.embedPng(sigImgBytes);
+
+                    // 2. Kalkulasi Koordinat dari HTML ke PDF
+                    const canvasHtml = document.getElementById('pdf-render-canvas');
+                    const overlay = document.getElementById('sig-draggable-overlay');
+                    
+                    const htmlW = canvasHtml.width;
+                    const htmlH = canvasHtml.height;
+                    const pdfW = targetPage.getWidth();
+                    const pdfH = targetPage.getHeight();
+
+                    // Faktor skala konversi HTML Canvas -> PDF Coordinates
+                    const scaleX = pdfW / htmlW;
+                    const scaleY = pdfH / htmlH;
+
+                    const ovLeft = parseInt(overlay.style.left || 50, 10);
+                    const ovTop = parseInt(overlay.style.top || 50, 10);
+                    const ovWidth = overlay.offsetWidth;
+                    const ovHeight = overlay.offsetHeight;
+
+                    const finalX = ovLeft * scaleX;
+                    // PDF Y terbalik (0 di bawah), HTML Y (0 di atas)
+                    const finalY = pdfH - ((ovTop + ovHeight) * scaleY);
+
+                    // 3. Gambar TTD ke PDF
+                    targetPage.drawImage(pngImage, {
+                        x: finalX,
+                        y: finalY,
+                        width: ovWidth * scaleX,
+                        height: ovHeight * scaleY,
+                    });
+
+                    // 4. Simpan & Upload PDF Baru
+                    const modifiedPdfBytes = await pdfDoc.save();
+                    const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+                    const file = new File([blob], `Signed_${Date.now()}.pdf`, { type: 'application/pdf' });
+
+                    const filePath = `dokumen_surat/${globalWorkspaceId}/${file.name}`;
+                    const { error: uploadError } = await supabaseClient.storage.from('digital_office').upload(filePath, file);
+                    if (uploadError) throw uploadError;
+                    
+                    const { data: publicUrlData } = supabaseClient.storage.from('digital_office').getPublicUrl(filePath);
+                    finalUrl = publicUrlData.publicUrl;
+                }
+
+                // Update Database
+                await supabaseClient.from('digital_office').update({ status: statusPilihan, catatan: catatan || null, file_url: finalUrl }).eq('id', activeActionSuratId);
+
+                alert(`Dokumen berhasil ${statusPilihan}`);
+                closeModal('modalAksiSurat');
+                await loadDigitalOffice();
+                
+            } catch(e) {
+                console.error(e);
+                alert("Terjadi kesalahan saat memproses tanda tangan: " + e.message);
+                document.getElementById('btn-approve-pdf').innerText = "Tanda Tangani (Approve)";
+                document.getElementById('btn-approve-pdf').disabled = false;
+            }
+        }
+
+        // --- LOGIK CANVAS DRAWING TTD ---
+        let isDrawingPad = false;
+        let padCtx = null;
+        let padCanvas = null;
+
+        function bukaModalSignature() {
+            openModal('modalSignaturePad');
+            setTimeout(() => { // Fix offset bug when modal pops
+                padCanvas = document.getElementById('signature-pad-container');
+                padCtx = padCanvas.getContext('2d');
+                padCtx.lineWidth = 3;
+                padCtx.lineCap = 'round';
+                padCtx.strokeStyle = '#000000';
+            }, 300);
+        }
+
+        function initSignaturePad() {
+            padCanvas = document.getElementById('signature-pad-container');
+            
+            const startDraw = (e) => {
+                isDrawingPad = true;
+                const rect = padCanvas.getBoundingClientRect();
+                padCtx.beginPath();
+                let x = e.clientX ? e.clientX : e.touches[0].clientX;
+                let y = e.clientY ? e.clientY : e.touches[0].clientY;
+                padCtx.moveTo(x - rect.left, y - rect.top);
+            };
+
+            const draw = (e) => {
+                if (!isDrawingPad) return;
+                e.preventDefault();
+                const rect = padCanvas.getBoundingClientRect();
+                let x = e.clientX ? e.clientX : e.touches[0].clientX;
+                let y = e.clientY ? e.clientY : e.touches[0].clientY;
+                padCtx.lineTo(x - rect.left, y - rect.top);
+                padCtx.stroke();
+            };
+
+            const endDraw = () => { isDrawingPad = false; padCtx.closePath(); };
+
+            padCanvas.addEventListener('mousedown', startDraw);
+            padCanvas.addEventListener('mousemove', draw);
+            padCanvas.addEventListener('mouseup', endDraw);
+            padCanvas.addEventListener('touchstart', startDraw, {passive:false});
+            padCanvas.addEventListener('touchmove', draw, {passive:false});
+            padCanvas.addEventListener('touchend', endDraw);
+        }
+
+        function clearSignaturePad() {
+            if(padCtx) padCtx.clearRect(0, 0, padCanvas.width, padCanvas.height);
+        }
+
+        function saveSignatureData() {
+            userSignatureBase64 = padCanvas.toDataURL("image/png");
+            localStorage.setItem(`savedSignature_${currentUserId}`, userSignatureBase64);
+            alert("Tanda tangan berhasil disimpan secara lokal!");
+            closeModal('modalSignaturePad');
+        }
+
+        // --- LOGIK DRAGGABLE & RESIZABLE OVERLAY ---
+        function initDraggableSignature() {
+            const overlay = document.getElementById('sig-draggable-overlay');
+            const wrapper = document.getElementById('pdf-page-wrapper');
+            const resizeHandle = document.getElementById('sig-resize-handle');
+            
+            let isDragging = false;
+            let isResizing = false;
+            let startX, startY, startW, startH, startLeft, startTop;
+
+            const startAction = (e) => {
+                if (e.target === resizeHandle) {
+                    isResizing = true;
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    startY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    startW = overlay.offsetWidth;
+                    startH = overlay.offsetHeight;
+                    e.preventDefault();
+                    e.stopPropagation();
+                } else if (e.target === overlay || overlay.contains(e.target)) {
+                    isDragging = true;
+                    const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                    startLeft = overlay.offsetLeft;
+                    startTop = overlay.offsetTop;
+                    startX = clientX;
+                    startY = clientY;
+                    e.preventDefault();
+                }
+            };
+
+            const doAction = (e) => {
+                if (!isDragging && !isResizing) return;
+                
+                const clientX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                const clientY = e.type.includes('mouse') ? e.clientY : e.touches[0].clientY;
+                
+                if (isResizing) {
+                    let newWidth = startW + (clientX - startX);
+                    let newHeight = startH + (clientY - startY);
+                    
+                    if (newWidth < 50) newWidth = 50;
+                    if (newHeight < 25) newHeight = 25;
+                    
+                    if (overlay.offsetLeft + newWidth > wrapper.offsetWidth) newWidth = wrapper.offsetWidth - overlay.offsetLeft;
+                    if (overlay.offsetTop + newHeight > wrapper.offsetHeight) newHeight = wrapper.offsetHeight - overlay.offsetTop;
+
+                    overlay.style.width = newWidth + 'px';
+                    overlay.style.height = newHeight + 'px';
+                } else if (isDragging) {
+                    let dx = clientX - startX;
+                    let dy = clientY - startY;
+                    
+                    let newLeft = startLeft + dx;
+                    let newTop = startTop + dy;
+
+                    if(newLeft < 0) newLeft = 0;
+                    if(newTop < 0) newTop = 0;
+                    if(newLeft + overlay.offsetWidth > wrapper.offsetWidth) newLeft = wrapper.offsetWidth - overlay.offsetWidth;
+                    if(newTop + overlay.offsetHeight > wrapper.offsetHeight) newTop = wrapper.offsetHeight - overlay.offsetHeight;
+
+                    overlay.style.left = newLeft + 'px';
+                    overlay.style.top = newTop + 'px';
+                }
+            };
+
+            const stopAction = () => { isDragging = false; isResizing = false; };
+
+            overlay.addEventListener('mousedown', startAction);
+            document.addEventListener('mousemove', doAction);
+            document.addEventListener('mouseup', stopAction);
+            
+            overlay.addEventListener('touchstart', startAction, { passive: false });
+            document.addEventListener('touchmove', doAction, { passive: false });
+            document.addEventListener('touchend', stopAction);
+        }
 
         // ====================================================
         // UI INTERACTION & UTILS
