@@ -8,241 +8,535 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; }
+        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; --green: #2ecc71; --red: #e74c3c; --blue: #3498db;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); display: flex; color: var(--text); }
+        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; height: 100vh;}
         
-        .sidebar { width: 250px; background: var(--primary); height: 100vh; padding: 20px; color: var(--white); position: fixed; }
-        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; }
-        .sidebar-subtitle { font-size: 0.8rem; color: #aaa; margin-bottom: 30px; line-height: 1.4; }
-        .nav-item { padding: 12px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--secondary); }
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 100; overflow-y: auto;}
+        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .sidebar-subtitle { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 30px; line-height: 1.5; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; color: #cbd5e1;}
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); transform: translateX(5px); }
+        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); }
         
-        .main-content { margin-left: 250px; padding: 40px; width: 100%; min-height: 100vh; }
-        .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); height: 100vh; overflow-y: auto; animation: fadeIn 0.5s ease; }
         
-        /* Form Buat Workspace */
-        #setup-workspace-section { display: none; text-align: center; max-width: 600px; margin: 50px auto; }
-        .input-group { margin: 20px 0; text-align: left; }
-        .input-group label { font-weight: 600; color: var(--primary); display: block; margin-bottom: 8px; }
-        .input-group input { width: 100%; padding: 15px; border: 2px solid #eee; border-radius: 10px; font-size: 1rem; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: var(--secondary); }
-        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1rem; width: 100%; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.3); }
+        .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
+        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px;}
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); }
+        .btn-danger { background: var(--red); color: white; padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;}
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
+        .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;}
 
-        /* Dashboard Workspace Aktif */
-        #active-workspace-section { display: none; }
-        .quota-box { display: flex; gap: 20px; margin-top: 20px; }
-        .quota-item { flex: 1; padding: 30px; background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 10px; text-align: center; transition: 0.3s; }
-        .quota-item.filled { border-style: solid; border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); }
-        .quota-item i { font-size: 2.5rem; margin-bottom: 15px; }
-        .quota-item.filled i { color: var(--primary); }
+        .menu-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
+        .menu-content.active { display: block; }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 15px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: var(--bg); color: var(--primary); }
-        .btn-sm { padding: 8px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-        .btn-danger { background: #ff4757; color: white; }
+        /* BUILDER LAYOUT */
+        .builder-container { display: flex; gap: 20px; height: calc(100vh - 150px); }
+        
+        /* BUILDER LEFT: EDITOR & CANVAS */
+        .builder-editor { flex: 1; display: flex; flex-direction: column; gap: 20px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto;}
+        
+        .toolbox { display: flex; gap: 10px; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 2px dashed #eee; }
+        .tool-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 8px; cursor: grab; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; transition: 0.2s;}
+        .tool-btn:hover { border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); transform: translateY(-2px);}
+        
+        .canvas-area { flex: 1; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 15px; background: #f8fafc; min-height: 300px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;}
+        .canvas-area.drag-over { background: rgba(46, 204, 113, 0.1); border-color: var(--green); }
+        
+        /* BUILDER WIDGET BLOCKS */
+        .build-block { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; position: relative; cursor: grab; animation: slideUp 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
+        .build-block:active { cursor: grabbing; opacity: 0.8; }
+        .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+        .block-title { font-weight: bold; color: var(--primary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+        .block-actions button { background: none; border: none; cursor: pointer; color: #aaa; margin-left: 5px; transition: 0.2s;}
+        .block-actions button:hover { color: var(--primary); }
+        .block-actions .del-btn:hover { color: var(--red); }
+        
+        /* FORM IN BLOCKS */
+        .block-content input, .block-content textarea, .block-content select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; font-size: 0.85rem; margin-bottom: 8px; outline: none;}
+        .block-content input:focus, .block-content textarea:focus { border-color: var(--blue); }
+
+        /* BUILDER RIGHT: LIVE PREVIEW */
+        .builder-preview { flex: 1; background: #333; border-radius: 15px; padding: 10px; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
+        .preview-header { color: white; padding: 5px 10px 15px; font-size: 0.85rem; display: flex; justify-content: space-between;}
+        .preview-frame { flex: 1; background: white; border-radius: 10px; overflow: hidden; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        /* TOAST */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--white); border-left: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; min-width: 300px; animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+
+        /* Form Inputs General */
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-weight: 600; color: var(--primary); margin-bottom: 8px; font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; transition: 0.3s; font-family: 'Poppins'; }
+        .input-group input:focus { border-color: var(--secondary); }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px;}
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem;}
+        th { background: #f8fafc; color: var(--primary); font-weight: 600;}
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-online { background: rgba(46, 204, 113, 0.15); color: var(--green); }
+        .badge-offline { background: #f1f5f9; color: #64748b; }
+        .badge-role { background: rgba(10, 48, 85, 0.1); color: var(--primary); }
+        
+        .live-counter { background: var(--white); padding: 15px 20px; border-radius: 10px; display: inline-flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 4px solid var(--green); font-weight: 600; color: var(--primary); }
+        .live-counter .count { background: var(--green); color: white; padding: 2px 10px; border-radius: 15px; font-size: 1.1rem; }
     </style>
 </head>
 <body>
+    
+    <div id="toast-container"></div>
+
     <div class="sidebar">
-        <h2>CI Admin</h2>
-        <div class="sidebar-subtitle">
-            Ruang Kerja:<br>
-            <strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong>
-        </div>
+        <h2><i class="fa-solid fa-layer-group"></i> CI Admin</h2>
+        <div class="sidebar-subtitle">Ruang Kerja:<br><strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong></div>
         
-        <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-layer-group"></i> Setup Project</div>
-        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Kelola User</div>
-        <div class="nav-item" style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.1); border-radius: 0; padding-top: 20px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
+        <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-sliders"></i> Konfigurasi Utama</div>
+        <div class="nav-item" onclick="switchMenu('builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Website Builder</div>
+        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Tracking User</div>
+        <div class="nav-item" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
     </div>
 
     <div class="main-content">
         
-        <div id="setup-workspace-section" class="card">
-            <i class="fa-solid fa-building-flag" style="font-size: 4rem; color: var(--secondary); margin-bottom: 20px;"></i>
-            <h1 style="color: var(--primary);">Selamat Datang, Admin!</h1>
-            <p style="color: #777; margin-bottom: 30px;">Anda belum memiliki Ruang Kerja. Silakan buat identitas organisasi Anda terlebih dahulu.</p>
-            
-            <form onsubmit="createWorkspace(event)">
-                <div class="input-group">
-                    <label>Nama Organisasi / Ruang Kerja</label>
-                    <input type="text" id="orgName" placeholder="Contoh: BEM Fakultas Kedokteran, HIMA Manajemen..." required>
-                </div>
-                <button type="submit" class="btn-primary" id="btn-create-ws">Membangun Ruang Kerja...</button>
-            </form>
+        <div id="setup-workspace-section" class="card" style="display:none;">
+            <div style="text-align: center; max-width: 600px; margin: 50px auto;">
+                <i class="fa-solid fa-building-flag" style="font-size: 4rem; color: var(--secondary); margin-bottom: 20px;"></i>
+                <h1 style="color: var(--primary);">Selamat Datang, Admin!</h1>
+                <p style="color: #777; margin-bottom: 30px;">Silakan buat identitas organisasi Anda terlebih dahulu.</p>
+                <form onsubmit="createWorkspace(event)">
+                    <div class="input-group" style="text-align: left;">
+                        <label>Nama Organisasi</label>
+                        <input type="text" id="orgName" placeholder="Contoh: BEM Fakultas Kedokteran..." required>
+                    </div>
+                    <button type="submit" class="btn-primary" id="btn-create-ws" style="width:100%; justify-content:center;"><i class="fa-solid fa-hammer"></i> Bangun Ruang Kerja</button>
+                </form>
+            </div>
         </div>
 
-        <div id="active-workspace-section">
-            <h1 style="color: var(--primary); margin-bottom: 10px;">Manajemen: <span id="header-workspace-name" style="color: var(--secondary);">...</span></h1>
-            <p style="color: #666; margin-bottom: 30px;">Kelola konfigurasi dan anggota ruang kerja Anda di sini.</p>
+        <div id="active-workspace-section" style="display:none; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h1 style="color: var(--primary); font-size: 1.8rem;">Manajemen: <span id="header-workspace-name" style="color: var(--secondary);">...</span></h1>
+                <button class="btn-sm" style="background: var(--blue); color: white; padding: 10px 20px;" onclick="goToUserDashboard()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Buka Dashboard Internal</button>
+            </div>
 
-            <div id="menu-setup" class="card menu-content">
-                <h2>Konfigurasi Ruang Kerja (Kuota)</h2>
-                <div class="quota-box">
-                    <div class="quota-item filled">
-                        <i class="fa-solid fa-globe"></i>
-                        <h3>Landing Page (1/1)</h3>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">Otomatis dibuat.</p>
-                        <button class="btn-sm" style="background: var(--primary); color: white; margin-top: 15px;" onclick="alert('Fitur Editor Landing Page sedang dalam pengembangan.')"><i class="fa-solid fa-pen"></i> Edit Landing Page</button>
-                    </div>
-                    <div class="quota-item filled">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <h3>Sistem Dashboard (1/1)</h3>
-                        <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">Otomatis dibuat.</p>
-                        <button class="btn-sm" style="background: var(--secondary); color: var(--primary); margin-top: 15px;" onclick="goToUserDashboard()"><i class="fa-solid fa-external-link-alt"></i> Buka Dashboard Utama</button>
+            <div id="menu-setup" class="menu-content active">
+                <div class="card">
+                    <h2>Konfigurasi Sistem</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Pilih menu Website Builder di sebelah kiri untuk mendesain landing page, atau pantau user di menu Tracking.</p>
+                    <div style="display: flex; gap:20px;">
+                        <div style="flex:1; background: #f8fafc; padding:20px; border-radius: 10px; border-left: 4px solid var(--secondary);">
+                            <h3><i class="fa-solid fa-globe"></i> Status Website Publik</h3>
+                            <p style="margin-top:10px; font-size: 0.9rem;" id="ws-status-text">Memeriksa status...</p>
+                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                                <a href="#" id="link-public" target="_blank" style="display:none; text-decoration: none; background: var(--primary); color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.85rem;"><i class="fa-solid fa-eye"></i> Kunjungi Web</a>
+                                <button id="btn-hapus-web" onclick="deleteLandingPage()" style="display:none; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.85rem; cursor: pointer;"><i class="fa-solid fa-trash"></i> Hapus Web</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div id="menu-users" class="card menu-content" style="display: none;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h2>Daftar Anggota / Peserta</h2>
-                    <button class="btn-sm" style="background: var(--secondary); color: var(--primary);" onclick="showInviteCode()"><i class="fa-solid fa-user-plus"></i> Kode Undangan Workspace</button>
+            <div id="menu-builder" class="menu-content">
+                <div class="builder-container">
+                    
+                    <div class="builder-editor">
+                        <div>
+                            <h2 style="color: var(--primary); margin-bottom: 5px;"><i class="fa-solid fa-pen-ruler"></i> Visual Editor</h2>
+                            <p style="font-size: 0.8rem; color: #777;">Tarik kotak di bawah ini ke area kanvas untuk mendesain.</p>
+                        </div>
+                        
+                        <div class="toolbox">
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-heading"></i> Hero Title</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'text')"><i class="fa-solid fa-align-left"></i> Paragraf</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'image')"><i class="fa-solid fa-image"></i> Gambar</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'finance')"><i class="fa-solid fa-chart-pie" style="color:var(--blue);"></i> Widget Keuangan</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'kpi')"><i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Widget KPI</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Widget Program</div>
+                        </div>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                            <h3 style="font-size: 1rem; color: var(--primary);">Susunan Kanvas</h3>
+                            <button class="btn-sm" style="background: var(--primary); color: white;" onclick="saveLandingPage()"><i class="fa-solid fa-save"></i> Simpan Draft & Update</button>
+                        </div>
+                        <div class="input-group" style="margin: 0;">
+                            <label style="margin-bottom: 5px;">Warna Tema Website</label>
+                            <input type="color" id="theme-color-picker" value="#0A3055" onchange="updateLivePreview()" style="height: 40px; padding: 2px; cursor: pointer; width: 100px;">
+                        </div>
+
+                        <div class="canvas-area" id="canvas-dropzone" ondragover="allowDrop(event)" ondrop="dropToCanvas(event)">
+                            <div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 50px;">
+                                <i class="fa-solid fa-download" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
+                                Drop (Letakkan) Widget di sini
+                            </div>
+                            </div>
+                    </div>
+
+                    <div class="builder-preview">
+                        <div class="preview-header">
+                            <span><i class="fa-solid fa-desktop"></i> Live Preview</span>
+                            <span style="color: #aaa; font-size: 0.75rem;"><i class="fa-solid fa-rotate"></i> Auto Update</span>
+                        </div>
+                        <div class="preview-frame">
+                            <iframe id="preview-iframe"></iframe>
+                        </div>
+                    </div>
+
                 </div>
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 20px;">
-                    <strong>Cara menambahkan User:</strong> Berikan <b>ID Workspace</b> Anda kepada User biasa. Mereka dapat memasukkan ID tersebut setelah mendaftar di halaman Login untuk bergabung ke organisasi ini.
-                </p>
-                
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nama Anggota</th>
-                            <th>Tanggal Bergabung</th>
-                            <th>Status Akses</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="member-list">
-                        <tr><td colspan="4" style="text-align: center; color: #777;">Belum ada anggota yang bergabung.</td></tr>
-                        </tbody>
-                </table>
+            </div>
+
+            <div id="menu-users" class="menu-content">
+                <div class="live-counter">
+                    <i class="fa-solid fa-tower-broadcast" style="color: var(--green);"></i> Pengguna Sedang Online: <span class="count" id="online-count-badge">0</span>
+                </div>
+
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 style="color: var(--primary);">Daftar & Aktivitas Anggota</h2>
+                            <p style="font-size: 0.85rem; color: #666;">Pantau keberadaan *real-time*.</p>
+                        </div>
+                        <button class="btn-sm" style="background: var(--secondary); color: var(--primary);" onclick="showInviteCode()"><i class="fa-solid fa-user-plus"></i> Kode Undangan</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr><th>Identitas Anggota</th><th>Peran</th><th>Status Aktif Saat Ini</th><th>Terakhir Terlihat (Last Seen)</th></tr>
+                            </thead>
+                            <tbody id="member-list"><tr><td colspan="4" style="text-align: center; color: #777;">Memuat data...</td></tr></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
         </div>
-
     </div>
 
     <script>
-        // 1. KONEKSI SUPABASE
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        let currentAdminSession = null;
-        let currentWorkspaceId = null;
+        let currentAdminSession = null; let currentWorkspaceId = null;
+        let onlineUsers = {}; let allMembersData = []; 
 
-        // 2. CEK SESI & ROLE SAAT HALAMAN DIMUAT
+        // --- STATE UNTUK WEBSITE BUILDER ---
+        let layoutBlocks = []; // Menyimpan data JSON blok
+        let isPublished = false;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div'); toast.className = `toast ${type}`;
+            let icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-circle-info' : 'fa-check-circle');
+            toast.innerHTML = `<i class="fa-solid ${icon} fa-lg"></i> <span class="toast-message">${message}</span>`;
+            container.appendChild(toast); setTimeout(() => { toast.remove(); }, 3000);
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
-
             currentAdminSession = session.user;
-
             const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', session.user.id).single();
-            if (!roleData || roleData.role !== 'admin') {
-                alert("Peringatan Keamanan: Anda bukan Admin Workspace!");
-                window.location.href = 'index.html';
-                return;
-            }
-
+            if (!roleData || roleData.role !== 'admin') { alert("Akses Ditolak!"); window.location.href = 'index.html'; return; }
             checkWorkspace();
         });
 
-        // 3. CEK APAKAH ADMIN INI SUDAH PUNYA WORKSPACE
         async function checkWorkspace() {
-            const { data: wsData, error } = await supabaseClient
-                .from('workspaces')
-                .select('*')
-                .eq('admin_id', currentAdminSession.id)
-                .single(); // Kita asumsikan 1 Admin = 1 Workspace sesuai standar umum
-
+            const { data: wsData } = await supabaseClient.from('workspaces').select('*').eq('admin_id', currentAdminSession.id).single(); 
             if (wsData) {
-                // Admin SUDAH punya workspace
                 currentWorkspaceId = wsData.id;
                 document.getElementById('setup-workspace-section').style.display = 'none';
                 document.getElementById('active-workspace-section').style.display = 'block';
-                
-                // Update UI dengan nama workspace
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
                 document.getElementById('header-workspace-name').innerText = wsData.nama_organisasi;
                 
-                loadMembers(); // Muat daftar anggota
+                await loadMembers(); setupRealtimePresence(); await loadLandingPageData();
             } else {
-                // Admin BELUM punya workspace
                 document.getElementById('setup-workspace-section').style.display = 'block';
-                document.getElementById('active-workspace-section').style.display = 'none';
-                document.getElementById('sidebar-workspace-name').innerText = "Belum Dibuat";
             }
         }
 
-        // 4. FUNGSI MEMBUAT WORKSPACE BARU
         async function createWorkspace(e) {
             e.preventDefault();
-            const orgName = document.getElementById('orgName').value;
-            const btn = document.getElementById('btn-create-ws');
+            const { error } = await supabaseClient.from('workspaces').insert([{ admin_id: currentAdminSession.id, nama_organisasi: document.getElementById('orgName').value }]);
+            if (!error) { showToast(`Ruang Kerja berhasil dibuat!`); checkWorkspace(); } else showToast("Gagal: "+error.message, 'error');
+        }
+
+        // ==========================================
+        // 1. WEBSITE BUILDER LOGIC (DRAG & DROP)
+        // ==========================================
+        
+        async function loadLandingPageData() {
+            const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
+            const linkBtn = document.getElementById('link-public');
+            const delBtn = document.getElementById('btn-hapus-web');
+            const statusTxt = document.getElementById('ws-status-text');
+
+            if (data && data.is_published) {
+                isPublished = true;
+                layoutBlocks = data.layout_data || [];
+                document.getElementById('theme-color-picker').value = data.theme_color || '#0A3055';
+                
+                statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check"></i> Website Telah Terpublikasi</span>`;
+                linkBtn.href = `public.html?workspace=${currentWorkspaceId}`;
+                linkBtn.style.display = 'inline-flex';
+                delBtn.style.display = 'inline-flex';
+            } else {
+                isPublished = false;
+                layoutBlocks = [];
+                statusTxt.innerHTML = `<span style="color:#aaa;"><i class="fa-solid fa-circle-exclamation"></i> Belum ada website yang dibuat.</span>`;
+                linkBtn.style.display = 'none';
+                delBtn.style.display = 'none';
+            }
+            renderCanvas();
+        }
+
+        // Drag Tools
+        function dragStartTool(e, type) { e.dataTransfer.setData('blockType', type); }
+        function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
+        
+        function dropToCanvas(e) {
+            e.preventDefault();
+            document.getElementById('canvas-dropzone').classList.remove('drag-over');
+            const type = e.dataTransfer.getData('blockType');
+            if(!type) return;
+
+            let newBlock = { id: 'block_' + Date.now(), type: type };
             
-            btn.disabled = true;
-            btn.innerText = "Membangun Sistem...";
-
-            const { data, error } = await supabaseClient
-                .from('workspaces')
-                .insert([{ 
-                    admin_id: currentAdminSession.id, 
-                    nama_organisasi: orgName,
-                    has_landing_page: true, // Otomatis aktif
-                    has_dashboard: true     // Otomatis aktif
-                }])
-                .select();
-
-            if (error) {
-                alert("Gagal membuat Ruang Kerja: " + error.message);
-                btn.disabled = false;
-                btn.innerText = "Membangun Ruang Kerja...";
-                return;
+            if(type === 'hero') { newBlock.title = "Sistem Transparansi"; newBlock.subtitle = "Mewujudkan kinerja nyata"; }
+            if(type === 'text') { newBlock.content = "Tulis deskripsi organisasi Anda di sini..."; }
+            if(type === 'image') { newBlock.url = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"; }
+            
+            const draggedId = e.dataTransfer.getData('existingId');
+            if(draggedId) {
+                const index = layoutBlocks.findIndex(b => b.id === draggedId);
+                if(index > -1) {
+                    const item = layoutBlocks.splice(index, 1)[0];
+                    layoutBlocks.push(item);
+                }
+            } else {
+                layoutBlocks.push(newBlock);
             }
-
-            alert(`Ruang Kerja "${orgName}" berhasil dibuat!`);
-            checkWorkspace(); // Refresh tampilan
+            renderCanvas();
         }
 
-        // 5. FUNGSI BUKA DASHBOARD USER (Preview)
-        function goToUserDashboard() {
-            if (currentWorkspaceId) {
-                // Melempar Admin ke halaman User (sebagai preview) dengan membawa ID workspace
-                window.location.href = `user.html?workspace=${currentWorkspaceId}`;
+        // Render Blocks di Panel Tengah Admin
+        function renderCanvas() {
+            const dropzone = document.getElementById('canvas-dropzone');
+            dropzone.innerHTML = '';
+            
+            if(layoutBlocks.length === 0) {
+                dropzone.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 50px;"><i class="fa-solid fa-download" style="font-size: 2rem; margin-bottom: 10px;"></i><br>Tarik Widget dari atas ke kotak ini</div>`;
+            } else {
+                layoutBlocks.forEach((block, index) => {
+                    const blockDiv = document.createElement('div');
+                    blockDiv.className = 'build-block';
+                    blockDiv.draggable = true;
+                    blockDiv.ondragstart = (e) => e.dataTransfer.setData('existingId', block.id);
+                    
+                    let titleIcon = ''; let formHtml = '';
+                    
+                    if(block.type === 'hero') {
+                        titleIcon = '<i class="fa-solid fa-heading"></i> Blok Hero Banner';
+                        formHtml = `<div class="block-content">
+                            <label style="font-size:0.75rem; color:#777;">Judul Utama</label>
+                            <input type="text" value="${block.title}" onkeyup="updateBlockData('${block.id}', 'title', this.value)">
+                            <label style="font-size:0.75rem; color:#777;">Sub Judul</label>
+                            <input type="text" value="${block.subtitle}" onkeyup="updateBlockData('${block.id}', 'subtitle', this.value)">
+                        </div>`;
+                    } else if(block.type === 'text') {
+                        titleIcon = '<i class="fa-solid fa-align-left"></i> Blok Paragraf';
+                        formHtml = `<div class="block-content">
+                            <textarea rows="3" onkeyup="updateBlockData('${block.id}', 'content', this.value)">${block.content}</textarea>
+                        </div>`;
+                    } else if(block.type === 'image') {
+                        titleIcon = '<i class="fa-solid fa-image"></i> Blok Gambar';
+                        formHtml = `<div class="block-content">
+                            <label style="font-size:0.75rem; color:#777;">URL Gambar (Link)</label>
+                            <input type="text" value="${block.url}" onchange="updateBlockData('${block.id}', 'url', this.value)">
+                        </div>`;
+                    } else if(block.type === 'finance') {
+                        titleIcon = '<i class="fa-solid fa-wallet" style="color:var(--blue);"></i> Widget Data: Serapan Keuangan';
+                        formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
+                    } else if(block.type === 'kpi') {
+                        titleIcon = '<i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Widget Data: Capaian KPI';
+                        formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
+                    } else if(block.type === 'program') {
+                        titleIcon = '<i class="fa-solid fa-list-check" style="color:#d35400;"></i> Widget Data: Status Program Kerja';
+                        formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
+                    }
+
+                    blockDiv.innerHTML = `
+                        <div class="block-header">
+                            <div class="block-title">${titleIcon}</div>
+                            <div class="block-actions">
+                                ${index > 0 ? `<button onclick="moveBlock(${index}, -1)" title="Naik"><i class="fa-solid fa-arrow-up"></i></button>` : ''}
+                                ${index < layoutBlocks.length - 1 ? `<button onclick="moveBlock(${index}, 1)" title="Turun"><i class="fa-solid fa-arrow-down"></i></button>` : ''}
+                                <button class="del-btn" onclick="removeBlock('${block.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                        ${formHtml}
+                    `;
+                    dropzone.appendChild(blockDiv);
+                });
+            }
+            updateLivePreview();
+        }
+
+        function updateBlockData(id, key, value) {
+            const block = layoutBlocks.find(b => b.id === id);
+            if(block) { block[key] = value; updateLivePreview(); }
+        }
+
+        function moveBlock(index, dir) {
+            const temp = layoutBlocks[index];
+            layoutBlocks[index] = layoutBlocks[index + dir];
+            layoutBlocks[index + dir] = temp;
+            renderCanvas();
+        }
+
+        function removeBlock(id) {
+            layoutBlocks = layoutBlocks.filter(b => b.id !== id);
+            renderCanvas();
+        }
+
+        // ==========================================
+        // 2. LIVE PREVIEW ENGINE (Bebas Error Parsing)
+        // ==========================================
+        function updateLivePreview() {
+            const iframe = document.getElementById('preview-iframe');
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            const themeColor = document.getElementById('theme-color-picker').value;
+
+            let bodyHtml = '';
+            layoutBlocks.forEach(b => {
+                if (b.type === 'hero') {
+                    bodyHtml += '<div class="hero"><h1>' + b.title + '</h1><p>' + b.subtitle + '</p></div>';
+                } else if (b.type === 'text') {
+                    bodyHtml += '<div class="container"><div class="about-box"><p>' + b.content + '</p></div></div>';
+                } else if (b.type === 'image') {
+                    bodyHtml += '<div class="container"><img src="' + b.url + '" style="width:100%; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px;"></div>';
+                } else if (b.type === 'finance') {
+                    bodyHtml += '<div class="container"><h2 class="section-title">Transparansi Keuangan</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Data Keuangan Realtime akan muncul di sini]</div></div>';
+                } else if (b.type === 'kpi') {
+                    bodyHtml += '<div class="container"><h2 class="section-title">Capaian KPI</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Grafik Bar KPI akan muncul di sini]</div></div>';
+                } else if (b.type === 'program') {
+                    bodyHtml += '<div class="container"><h2 class="section-title">Status Program Kerja</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Daftar Program Kerja akan muncul di sini]</div></div>';
+                }
+            });
+
+            const css = `
+                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+                :root { --theme-color: ${themeColor}; --bg: #f9fbfd; --text: #333; }
+                body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px;}
+                .hero { background: linear-gradient(135deg, var(--theme-color), #2c3e50); color: white; padding: 60px 20px; text-align: center; border-radius: 0 0 30px 30px;}
+                .hero h1 { font-size: 2.5rem; margin: 0 0 10px 0; font-weight: 800;}
+                .container { padding: 20px; max-width: 800px; margin: 0 auto; }
+                .about-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--theme-color); }
+                .section-title { font-size: 1.2rem; color: var(--theme-color); margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+                .mock-widget { background: white; padding: 20px; border-radius: 10px; border-left: 4px solid; color: #777; font-size: 0.9rem; text-align: center; border-color: var(--theme-color); box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+            `;
+
+            if (doc) {
+                // Modifikasi DOM iframe secara aman tanpa doc.write
+                doc.head.innerHTML = "<style>" + css + "</style>";
+                doc.body.innerHTML = bodyHtml || "<div style='text-align:center; padding:50px; color:#aaa; font-family:sans-serif;'>Kanvas kosong. Mulai tambahkan widget!</div>";
             }
         }
 
-        // 6. FUNGSI UNTUK MENGUNDANG USER
-        function showInviteCode() {
-            if(currentWorkspaceId) {
-                // Menggunakan prompt agar admin bisa langsung Copy kodenya
-                prompt("Berikan KODE WORKSPACE ini kepada anggota Anda agar mereka bisa bergabung:", currentWorkspaceId);
+        // ==========================================
+        // 3. DATABASE ACTION (SAVE & DELETE)
+        // ==========================================
+        async function saveLandingPage() {
+            if(layoutBlocks.length === 0) { alert("Kanvas tidak boleh kosong!"); return; }
+            
+            const payload = {
+                workspace_id: currentWorkspaceId,
+                theme_color: document.getElementById('theme-color-picker').value,
+                layout_data: layoutBlocks,
+                is_published: true,
+                updated_at: new Date().toISOString()
+            };
+
+            const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
+            if (error) showToast("Gagal menyimpan: " + error.message, 'error');
+            else { showToast("Desain Website berhasil dipublikasikan!", 'success'); loadLandingPageData(); }
+        }
+
+        async function deleteLandingPage() {
+            if(confirm("Yakin ingin menghapus dan mereset ulang seluruh website publik ini? Semua desain akan hilang.")) {
+                await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
+                showToast("Website berhasil dihapus.", 'info');
+                loadLandingPageData();
             }
         }
 
-        // 7. FUNGSI MUAT DAFTAR ANGGOTA (DUMMY SEMENTARA KARENA BELUM ADA MENU GABUNG DI USER)
+        // ==========================================
+        // TRACKING USER & UTILS LAINNYA
+        // ==========================================
+        function goToUserDashboard() { if (currentWorkspaceId) window.open(`user.html?workspace=${currentWorkspaceId}`, '_blank'); }
+        function showInviteCode() { if(currentWorkspaceId) navigator.clipboard.writeText(currentWorkspaceId).then(() => showToast("ID Workspace disalin!", 'info')).catch(()=>prompt("Copy Kode ini:", currentWorkspaceId)); }
+        
         async function loadMembers() {
-            // Logika aslinya akan di-query ke tabel workspace_members
-            // Namun karena belum ada user yang bergabung, kita biarkan kosong dulu
+            const { data, error } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', currentWorkspaceId);
+            const tbody = document.getElementById('member-list'); tbody.innerHTML = '';
+            if (error || !data || data.length === 0) { tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">Belum ada anggota.</td></tr>`; return; }
+            allMembersData = data; renderMembersTable();
         }
 
-        // 8. LOGIKA MENU SIDEBAR (Single Page App)
+        function renderMembersTable() {
+            const tbody = document.getElementById('member-list');
+            if (allMembersData.length === 0) return; tbody.innerHTML = '';
+            allMembersData.forEach(member => {
+                const isOnline = onlineUsers[member.user_id] ? true : false;
+                const statusBadge = isOnline ? '<span class="badge badge-online"><i class="fa-solid fa-circle"></i> Online Sekarang</span>' : '<span class="badge badge-offline"><i class="fa-regular fa-circle"></i> Offline</span>';
+                let lastSeenText = isOnline ? '<span style="color: var(--green); font-weight: 500;">Aktif saat ini</span>' : (member.last_seen ? new Date(member.last_seen).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Belum pernah aktif");
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary); display: block;">${member.nama_user || 'User Tanpa Nama'}</strong>
+                            <span style="font-size: 0.75rem; color: #aaa;">ID: ${member.user_id.substring(0,8)}...</span>
+                        </td>
+                        <td><span class="badge badge-role">${member.role || 'Member'}</span></td>
+                        <td>${statusBadge}</td>
+                        <td style="font-size: 0.85rem;">${lastSeenText}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function setupRealtimePresence() {
+            const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
+            presenceChannel
+                .on('presence', { event: 'sync' }, () => {
+                    const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
+                    for (const key in state) { state[key].forEach(p => { if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; }}); }
+                    document.getElementById('online-count-badge').innerText = count; renderMembersTable();
+                })
+                .on('presence', { event: 'join' }, ({ newPresences }) => { newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'info'); }); })
+                .on('presence', { event: 'leave' }, () => { setTimeout(loadMembers, 2000); })
+                .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
+        }
+
         function switchMenu(menu) {
-            document.querySelectorAll('.menu-content').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`menu-${menu}`).style.display = 'block';
+            document.getElementById(`menu-${menu}`).classList.add('active');
             event.currentTarget.classList.add('active');
         }
 
-        // 9. LOGOUT
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            window.location.href = 'index.html';
-        }
+        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
