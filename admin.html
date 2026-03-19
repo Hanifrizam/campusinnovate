@@ -7,13 +7,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; --green: #2ecc71; --red: #e74c3c; --blue: #3498db;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; height: 100vh;}
+        body { background: var(--bg); display: flex; flex-direction: column; color: var(--text); overflow-x: hidden; height: 100vh;}
         
+        /* MOBILE HEADER */
+        .mobile-header { display: none; background: var(--primary); padding: 15px 20px; color: white; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 998; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .mobile-header h2 { font-size: 1.2rem; color: var(--secondary); margin: 0;}
+        .menu-toggle { background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+
+        /* OVERLAY UNTUK SIDEBAR MOBILE */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s; }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
         /* SIDEBAR */
-        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 100; overflow-y: auto;}
+        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; top: 0; left: 0; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 1000; overflow-y: auto; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);}
         .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
         .sidebar-subtitle { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 30px; line-height: 1.5; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; color: #cbd5e1;}
@@ -21,32 +31,29 @@
         .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); }
         
         /* MAIN CONTENT */
-        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); height: 100vh; overflow-y: auto; animation: fadeIn 0.5s ease; }
+        .main-content { margin-left: 260px; padding: 40px; width: calc(100% - 260px); height: 100vh; overflow-y: auto; animation: fadeIn 0.5s ease; flex-grow: 1; }
         
         .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px;}
+        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; justify-content: center;}
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); }
         .btn-danger { background: var(--red); color: white; padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;}
         .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
-        .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 8px;}
+        .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
 
         .menu-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
         .menu-content.active { display: block; }
         
         /* BUILDER LAYOUT */
         .builder-container { display: flex; gap: 20px; height: calc(100vh - 150px); }
-        
-        /* BUILDER LEFT: EDITOR & CANVAS */
         .builder-editor { flex: 1; display: flex; flex-direction: column; gap: 20px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto;}
         
         .toolbox { display: flex; gap: 10px; flex-wrap: wrap; padding-bottom: 15px; border-bottom: 2px dashed #eee; }
-        .tool-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 15px; border-radius: 8px; cursor: grab; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; transition: 0.2s;}
+        .tool-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; cursor: grab; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 8px; transition: 0.2s;}
         .tool-btn:hover { border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); transform: translateY(-2px);}
         
         .canvas-area { flex: 1; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 15px; background: #f8fafc; min-height: 300px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;}
         .canvas-area.drag-over { background: rgba(46, 204, 113, 0.1); border-color: var(--green); }
         
-        /* BUILDER WIDGET BLOCKS */
         .build-block { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 15px; position: relative; cursor: grab; animation: slideUp 0.3s ease; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
         .build-block:active { cursor: grabbing; opacity: 0.8; }
         .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
@@ -55,54 +62,101 @@
         .block-actions button:hover { color: var(--primary); }
         .block-actions .del-btn:hover { color: var(--red); }
         
-        /* FORM IN BLOCKS */
         .block-content input, .block-content textarea, .block-content select { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; font-family: 'Poppins'; font-size: 0.85rem; margin-bottom: 8px; outline: none;}
         .block-content input:focus, .block-content textarea:focus { border-color: var(--blue); }
+        .file-upload-wrapper { border: 2px dashed #cbd5e1; padding: 10px; text-align: center; border-radius: 8px; background: #f8fafc; cursor: pointer; margin-bottom: 8px; }
 
-        /* BUILDER RIGHT: LIVE PREVIEW */
         .builder-preview { flex: 1; background: #333; border-radius: 15px; padding: 10px; display: flex; flex-direction: column; position: relative; box-shadow: 0 10px 30px rgba(0,0,0,0.2);}
         .preview-header { color: white; padding: 5px 10px 15px; font-size: 0.85rem; display: flex; justify-content: space-between;}
         .preview-frame { flex: 1; background: white; border-radius: 10px; overflow: hidden; position: relative; }
         iframe { width: 100%; height: 100%; border: none; }
 
-        /* TOAST */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--white); border-left: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; min-width: 300px; animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
+        .toast { background: var(--white); border-left: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 15px 20px; border-radius: 8px; display: flex; align-items: center; gap: 15px; min-width: 300px; max-width: 90vw; animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards; }
 
-        /* Form Inputs General */
         .input-group { margin-bottom: 15px; }
         .input-group label { display: block; font-weight: 600; color: var(--primary); margin-bottom: 8px; font-size: 0.9rem; }
         .input-group input { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; outline: none; transition: 0.3s; font-family: 'Poppins'; }
-        .input-group input:focus { border-color: var(--secondary); }
+        
+        /* Analytics Grid Fix */
+        .analytics-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .sync-badge { font-size: 0.85rem; color: #777; border: 1px solid #eee; padding: 5px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; }
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+        .chart-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid #eee; width: 100%; }
+        /* Wrapper penting agar height Chart.js tidak collapse/overflow */
+        .chart-container-wrapper { position: relative; height: 250px; width: 100%; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
         @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 15px;}
+        .table-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px;}
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem;}
-        th { background: #f8fafc; color: var(--primary); font-weight: 600;}
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+        th { background: #f8fafc; color: var(--primary); font-weight: 600; white-space: nowrap;}
+        
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
         .badge-online { background: rgba(46, 204, 113, 0.15); color: var(--green); }
         .badge-offline { background: #f1f5f9; color: #64748b; }
         .badge-role { background: rgba(10, 48, 85, 0.1); color: var(--primary); }
         
         .live-counter { background: var(--white); padding: 15px 20px; border-radius: 10px; display: inline-flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 4px solid var(--green); font-weight: 600; color: var(--primary); }
         .live-counter .count { background: var(--green); color: white; padding: 2px 10px; border-radius: 15px; font-size: 1.1rem; }
+
+        /* ========================================= */
+        /* MEDIA QUERIES UNTUK MOBILE VIEWS          */
+        /* ========================================= */
+        @media (max-width: 768px) {
+            body { display: block; overflow-y: auto;}
+            .mobile-header { display: flex; }
+            .sidebar { transform: translateX(-100%); padding-top: 20px; }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; width: 100%; padding: 80px 15px 20px; height: auto; overflow: visible;}
+            
+            #active-workspace-section > div:first-child { flex-direction: column; align-items: flex-start; gap: 15px; }
+            #active-workspace-section > div:first-child button { width: 100%; }
+            #menu-setup .card > div { flex-direction: column; }
+            
+            .builder-container { flex-direction: column; height: auto; }
+            .builder-editor, .builder-preview { min-height: 500px; flex: none; height: 500px;}
+            .flex-mobile-col { flex-direction: column; gap: 15px; }
+
+            /* Analytics Mobile Fixes */
+            .analytics-header { flex-direction: column; align-items: flex-start; }
+            .analytics-grid { grid-template-columns: 1fr; }
+            .chart-container-wrapper { height: 220px; } /* Sesuaikan tinggi agar proporsional di HP */
+
+            #menu-users .card > div:first-child { flex-direction: column; align-items: flex-start; gap: 15px; }
+            #menu-users .card > div:first-child button { width: 100%; }
+            #toast-container { top: 70px; right: 5%; width: 90%; align-items: center;}
+            .toast { min-width: 100%; }
+        }
     </style>
 </head>
 <body>
     
+    <div class="mobile-header">
+        <h2><i class="fa-solid fa-layer-group"></i> CI Admin</h2>
+        <button class="menu-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <div id="toast-container"></div>
 
-    <div class="sidebar">
-        <h2><i class="fa-solid fa-layer-group"></i> CI Admin</h2>
+    <div class="sidebar" id="appSidebar">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <h2><i class="fa-solid fa-layer-group"></i> CI Admin</h2>
+            <button onclick="toggleSidebar()" class="menu-toggle" style="display: none; color: white;" id="closeSidebarBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
         <div class="sidebar-subtitle">Ruang Kerja:<br><strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong></div>
         
         <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-sliders"></i> Konfigurasi Utama</div>
         <div class="nav-item" onclick="switchMenu('builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Website Builder</div>
         <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Tracking User</div>
+        <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-chart-line"></i> Dashboard Analitik</div>
         <div class="nav-item" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
     </div>
 
@@ -118,7 +172,7 @@
                         <label>Nama Organisasi</label>
                         <input type="text" id="orgName" placeholder="Contoh: BEM Fakultas Kedokteran..." required>
                     </div>
-                    <button type="submit" class="btn-primary" id="btn-create-ws" style="width:100%; justify-content:center;"><i class="fa-solid fa-hammer"></i> Bangun Ruang Kerja</button>
+                    <button type="submit" class="btn-primary" id="btn-create-ws" style="width:100%;"><i class="fa-solid fa-hammer"></i> Bangun Ruang Kerja</button>
                 </form>
             </div>
         </div>
@@ -137,7 +191,7 @@
                         <div style="flex:1; background: #f8fafc; padding:20px; border-radius: 10px; border-left: 4px solid var(--secondary);">
                             <h3><i class="fa-solid fa-globe"></i> Status Website Publik</h3>
                             <p style="margin-top:10px; font-size: 0.9rem;" id="ws-status-text">Memeriksa status...</p>
-                            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                            <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
                                 <a href="#" id="link-public" target="_blank" style="display:none; text-decoration: none; background: var(--primary); color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.85rem;"><i class="fa-solid fa-eye"></i> Kunjungi Web</a>
                                 <button id="btn-hapus-web" onclick="deleteLandingPage()" style="display:none; background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 5px; font-size: 0.85rem; cursor: pointer;"><i class="fa-solid fa-trash"></i> Hapus Web</button>
                             </div>
@@ -148,7 +202,6 @@
 
             <div id="menu-builder" class="menu-content">
                 <div class="builder-container">
-                    
                     <div class="builder-editor">
                         <div>
                             <h2 style="color: var(--primary); margin-bottom: 5px;"><i class="fa-solid fa-pen-ruler"></i> Visual Editor</h2>
@@ -159,18 +212,33 @@
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-heading"></i> Hero Title</div>
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'text')"><i class="fa-solid fa-align-left"></i> Paragraf</div>
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'image')"><i class="fa-solid fa-image"></i> Gambar</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'video')"><i class="fa-brands fa-youtube"></i> Video Embed</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'newsletter')"><i class="fa-regular fa-newspaper" style="color:#e67e22;"></i> Berita/Newsletter</div>
+                            <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'divider')"><i class="fa-solid fa-minus"></i> Divider</div>
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'finance')"><i class="fa-solid fa-chart-pie" style="color:var(--blue);"></i> Widget Keuangan</div>
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'kpi')"><i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Widget KPI</div>
                             <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Widget Program</div>
                         </div>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 10px; gap: 10px;">
                             <h3 style="font-size: 1rem; color: var(--primary);">Susunan Kanvas</h3>
-                            <button class="btn-sm" style="background: var(--primary); color: white;" onclick="saveLandingPage()"><i class="fa-solid fa-save"></i> Simpan Draft & Update</button>
+                            <button class="btn-sm" style="background: var(--primary); color: white;" onclick="saveLandingPage()"><i class="fa-solid fa-save"></i> Simpan Update</button>
                         </div>
-                        <div class="input-group" style="margin: 0;">
-                            <label style="margin-bottom: 5px;">Warna Tema Website</label>
-                            <input type="color" id="theme-color-picker" value="#0A3055" onchange="updateLivePreview()" style="height: 40px; padding: 2px; cursor: pointer; width: 100px;">
+                        
+                        <div class="flex-mobile-col" style="display: flex; gap: 15px;">
+                            <div class="input-group" style="margin: 0; flex: 1;">
+                                <label style="margin-bottom: 5px; font-size: 0.8rem;">Warna Tema</label>
+                                <input type="color" id="theme-color-picker" value="#0A3055" onchange="updateLivePreview()" style="height: 40px; padding: 2px; cursor: pointer; width: 100%;">
+                            </div>
+                            <div class="input-group" style="margin: 0; flex: 2;">
+                                <label style="margin-bottom: 5px; font-size: 0.8rem;">Lebar Kontainer Website</label>
+                                <select id="container-width-select" onchange="updateLivePreview()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; outline: none;">
+                                    <option value="800px">Standard (800px)</option>
+                                    <option value="1000px">Medium (1000px)</option>
+                                    <option value="1200px">Lebar (1200px)</option>
+                                    <option value="100%">Penuh Layar (100%)</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="canvas-area" id="canvas-dropzone" ondragover="allowDrop(event)" ondrop="dropToCanvas(event)">
@@ -178,7 +246,7 @@
                                 <i class="fa-solid fa-download" style="font-size: 2rem; margin-bottom: 10px;"></i><br>
                                 Drop (Letakkan) Widget di sini
                             </div>
-                            </div>
+                        </div>
                     </div>
 
                     <div class="builder-preview">
@@ -219,6 +287,28 @@
                 </div>
             </div>
 
+            <div id="menu-analytics" class="menu-content">
+                <div class="analytics-header">
+                    <h2 style="color: var(--primary); font-size: 1.5rem; margin: 0;"><i class="fa-solid fa-chart-line"></i> Dashboard Analitik Interaksi</h2>
+                    <span class="sync-badge"><i class="fa-solid fa-circle-dot" style="color:var(--green);"></i> Real-time Sync Active</span>
+                </div>
+                
+                <div class="analytics-grid">
+                    <div class="chart-box">
+                        <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 15px;">Traffic Pengunjung Website (Publik)</h3>
+                        <div class="chart-container-wrapper">
+                            <canvas id="publicTrafficChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-box">
+                        <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 15px;">Aktivitas Modul Internal (User Panel)</h3>
+                        <div class="chart-container-wrapper">
+                            <canvas id="userActivityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -230,9 +320,19 @@
         let currentAdminSession = null; let currentWorkspaceId = null;
         let onlineUsers = {}; let allMembersData = []; 
 
-        // --- STATE UNTUK WEBSITE BUILDER ---
-        let layoutBlocks = []; // Menyimpan data JSON blok
+        let layoutBlocks = [];
         let isPublished = false;
+
+        // FUNGSI TOGGLE SIDEBAR MOBILE
+        function toggleSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            const closeBtn = document.getElementById('closeSidebarBtn');
+            if(window.innerWidth <= 768) { closeBtn.style.display = 'block'; }
+        }
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -260,7 +360,7 @@
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
                 document.getElementById('header-workspace-name').innerText = wsData.nama_organisasi;
                 
-                await loadMembers(); setupRealtimePresence(); await loadLandingPageData();
+                await loadMembers(); setupRealtimePresence(); await loadLandingPageData(); initAnalyticsCharts();
             } else {
                 document.getElementById('setup-workspace-section').style.display = 'block';
             }
@@ -273,9 +373,8 @@
         }
 
         // ==========================================
-        // 1. WEBSITE BUILDER LOGIC (DRAG & DROP)
+        // 1. WEBSITE BUILDER LOGIC
         // ==========================================
-        
         async function loadLandingPageData() {
             const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
             const linkBtn = document.getElementById('link-public');
@@ -286,6 +385,7 @@
                 isPublished = true;
                 layoutBlocks = data.layout_data || [];
                 document.getElementById('theme-color-picker').value = data.theme_color || '#0A3055';
+                document.getElementById('container-width-select').value = data.container_width || '800px';
                 
                 statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check"></i> Website Telah Terpublikasi</span>`;
                 linkBtn.href = `public.html?workspace=${currentWorkspaceId}`;
@@ -301,7 +401,6 @@
             renderCanvas();
         }
 
-        // Drag Tools
         function dragStartTool(e, type) { e.dataTransfer.setData('blockType', type); }
         function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
         
@@ -312,10 +411,12 @@
             if(!type) return;
 
             let newBlock = { id: 'block_' + Date.now(), type: type };
-            
             if(type === 'hero') { newBlock.title = "Sistem Transparansi"; newBlock.subtitle = "Mewujudkan kinerja nyata"; }
             if(type === 'text') { newBlock.content = "Tulis deskripsi organisasi Anda di sini..."; }
-            if(type === 'image') { newBlock.url = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"; }
+            if(type === 'image') { newBlock.url = "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"; newBlock.width = "100%"; newBlock.align = "center"; }
+            if(type === 'video') { newBlock.url = "https://www.youtube.com/embed/dQw4w9WgXcQ"; }
+            if(type === 'newsletter') { newBlock.title = "Berita Terkini"; newBlock.content = "Update terbaru kegiatan BEM..."; }
+            if(type === 'divider') { newBlock.style = "solid"; }
             
             const draggedId = e.dataTransfer.getData('existingId');
             if(draggedId) {
@@ -330,7 +431,16 @@
             renderCanvas();
         }
 
-        // Render Blocks di Panel Tengah Admin
+        function handleImageUpload(input, blockId) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 200 * 1024) { showToast("Gagal: Ukuran gambar melebihi 200KB!", 'error'); input.value = ""; return; }
+                const reader = new FileReader();
+                reader.onload = (e) => { updateBlockData(blockId, 'url', e.target.result); };
+                reader.readAsDataURL(file);
+            }
+        }
+
         function renderCanvas() {
             const dropzone = document.getElementById('canvas-dropzone');
             dropzone.innerHTML = '';
@@ -348,31 +458,30 @@
                     
                     if(block.type === 'hero') {
                         titleIcon = '<i class="fa-solid fa-heading"></i> Blok Hero Banner';
-                        formHtml = `<div class="block-content">
-                            <label style="font-size:0.75rem; color:#777;">Judul Utama</label>
-                            <input type="text" value="${block.title}" onkeyup="updateBlockData('${block.id}', 'title', this.value)">
-                            <label style="font-size:0.75rem; color:#777;">Sub Judul</label>
-                            <input type="text" value="${block.subtitle}" onkeyup="updateBlockData('${block.id}', 'subtitle', this.value)">
-                        </div>`;
+                        formHtml = `<div class="block-content"><label style="font-size:0.75rem; color:#777;">Judul Utama</label><input type="text" value="${block.title}" onkeyup="updateBlockData('${block.id}', 'title', this.value)"><label style="font-size:0.75rem; color:#777;">Sub Judul</label><input type="text" value="${block.subtitle}" onkeyup="updateBlockData('${block.id}', 'subtitle', this.value)"></div>`;
                     } else if(block.type === 'text') {
                         titleIcon = '<i class="fa-solid fa-align-left"></i> Blok Paragraf';
-                        formHtml = `<div class="block-content">
-                            <textarea rows="3" onkeyup="updateBlockData('${block.id}', 'content', this.value)">${block.content}</textarea>
-                        </div>`;
+                        formHtml = `<div class="block-content"><textarea rows="3" onkeyup="updateBlockData('${block.id}', 'content', this.value)">${block.content}</textarea></div>`;
                     } else if(block.type === 'image') {
-                        titleIcon = '<i class="fa-solid fa-image"></i> Blok Gambar';
-                        formHtml = `<div class="block-content">
-                            <label style="font-size:0.75rem; color:#777;">URL Gambar (Link)</label>
-                            <input type="text" value="${block.url}" onchange="updateBlockData('${block.id}', 'url', this.value)">
-                        </div>`;
+                        titleIcon = '<i class="fa-solid fa-image"></i> Blok Gambar (Maks 200KB)';
+                        formHtml = `<div class="block-content"><div class="file-upload-wrapper" onclick="document.getElementById('file_${block.id}').click()"><i class="fa-solid fa-cloud-arrow-up"></i> Klik untuk Upload Gambar (< 200KB)</div><input type="file" id="file_${block.id}" style="display:none;" accept="image/*" onchange="handleImageUpload(this, '${block.id}')"><label style="font-size:0.75rem; color:#777;">URL External</label><input type="text" value="${block.url.substring(0, 30)}${block.url.length > 30 ? '...' : ''}" onchange="updateBlockData('${block.id}', 'url', this.value)" ${block.url.startsWith('data:') ? 'disabled placeholder="Gambar lokal"' : ''}><div style="display:flex; gap:10px;"><div style="flex:1;"><label style="font-size:0.75rem; color:#777;">Lebar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.width) || 100}" onchange="updateBlockData('${block.id}', 'width', this.value + '%')"></div><div style="flex:1;"><label style="font-size:0.75rem; color:#777;">Posisi</label><select onchange="updateBlockData('${block.id}', 'align', this.value)"><option value="left" ${block.align === 'left' ? 'selected' : ''}>Kiri</option><option value="center" ${block.align === 'center' ? 'selected' : ''}>Tengah</option><option value="right" ${block.align === 'right' ? 'selected' : ''}>Kanan</option></select></div></div></div>`;
+                    } else if(block.type === 'video') {
+                        titleIcon = '<i class="fa-brands fa-youtube"></i> Blok Video Embed';
+                        formHtml = `<div class="block-content"><label style="font-size:0.75rem; color:#777;">URL Embed YouTube</label><input type="text" value="${block.url}" onchange="updateBlockData('${block.id}', 'url', this.value)"></div>`;
+                    } else if(block.type === 'newsletter') {
+                        titleIcon = '<i class="fa-regular fa-newspaper" style="color:#e67e22;"></i> Widget Newsletter / Berita';
+                        formHtml = `<div class="block-content"><label style="font-size:0.75rem; color:#777;">Judul Berita</label><input type="text" value="${block.title}" onkeyup="updateBlockData('${block.id}', 'title', this.value)"><label style="font-size:0.75rem; color:#777;">Isi Singkat/Link</label><textarea rows="2" onkeyup="updateBlockData('${block.id}', 'content', this.value)">${block.content}</textarea></div>`;
+                    } else if(block.type === 'divider') {
+                        titleIcon = '<i class="fa-solid fa-minus"></i> Divider (Garis Pembatas)';
+                        formHtml = `<div class="block-content"><select onchange="updateBlockData('${block.id}', 'style', this.value)"><option value="solid" ${block.style === 'solid' ? 'selected' : ''}>Garis Lurus</option><option value="dashed" ${block.style === 'dashed' ? 'selected' : ''}>Garis Putus-putus</option></select></div>`;
                     } else if(block.type === 'finance') {
-                        titleIcon = '<i class="fa-solid fa-wallet" style="color:var(--blue);"></i> Widget Data: Serapan Keuangan';
+                        titleIcon = '<i class="fa-solid fa-wallet" style="color:var(--blue);"></i> Widget Data: Keuangan';
                         formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
                     } else if(block.type === 'kpi') {
-                        titleIcon = '<i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Widget Data: Capaian KPI';
+                        titleIcon = '<i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Widget Data: KPI';
                         formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
                     } else if(block.type === 'program') {
-                        titleIcon = '<i class="fa-solid fa-list-check" style="color:#d35400;"></i> Widget Data: Status Program Kerja';
+                        titleIcon = '<i class="fa-solid fa-list-check" style="color:#d35400;"></i> Widget Data: Program Kerja';
                         formHtml = `<p style="font-size:0.8rem; color:#777;">Data otomatis ditarik dari Dashboard User.</p>`;
                     }
 
@@ -393,96 +502,50 @@
             updateLivePreview();
         }
 
-        function updateBlockData(id, key, value) {
-            const block = layoutBlocks.find(b => b.id === id);
-            if(block) { block[key] = value; updateLivePreview(); }
-        }
-
-        function moveBlock(index, dir) {
-            const temp = layoutBlocks[index];
-            layoutBlocks[index] = layoutBlocks[index + dir];
-            layoutBlocks[index + dir] = temp;
-            renderCanvas();
-        }
-
-        function removeBlock(id) {
-            layoutBlocks = layoutBlocks.filter(b => b.id !== id);
-            renderCanvas();
-        }
+        function updateBlockData(id, key, value) { const block = layoutBlocks.find(b => b.id === id); if(block) { block[key] = value; updateLivePreview(); } }
+        function moveBlock(index, dir) { const temp = layoutBlocks[index]; layoutBlocks[index] = layoutBlocks[index + dir]; layoutBlocks[index + dir] = temp; renderCanvas(); }
+        function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); renderCanvas(); }
 
         // ==========================================
-        // 2. LIVE PREVIEW ENGINE (Bebas Error Parsing)
+        // 2. LIVE PREVIEW ENGINE
         // ==========================================
         function updateLivePreview() {
             const iframe = document.getElementById('preview-iframe');
             const doc = iframe.contentDocument || iframe.contentWindow.document;
             const themeColor = document.getElementById('theme-color-picker').value;
+            const containerWidth = document.getElementById('container-width-select').value;
 
             let bodyHtml = '';
             layoutBlocks.forEach(b => {
-                if (b.type === 'hero') {
-                    bodyHtml += '<div class="hero"><h1>' + b.title + '</h1><p>' + b.subtitle + '</p></div>';
-                } else if (b.type === 'text') {
-                    bodyHtml += '<div class="container"><div class="about-box"><p>' + b.content + '</p></div></div>';
-                } else if (b.type === 'image') {
-                    bodyHtml += '<div class="container"><img src="' + b.url + '" style="width:100%; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px;"></div>';
-                } else if (b.type === 'finance') {
-                    bodyHtml += '<div class="container"><h2 class="section-title">Transparansi Keuangan</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Data Keuangan Realtime akan muncul di sini]</div></div>';
-                } else if (b.type === 'kpi') {
-                    bodyHtml += '<div class="container"><h2 class="section-title">Capaian KPI</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Grafik Bar KPI akan muncul di sini]</div></div>';
-                } else if (b.type === 'program') {
-                    bodyHtml += '<div class="container"><h2 class="section-title">Status Program Kerja</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Daftar Program Kerja akan muncul di sini]</div></div>';
-                }
+                if (b.type === 'hero') { bodyHtml += '<div class="hero"><h1>' + b.title + '</h1><p>' + b.subtitle + '</p></div>'; } 
+                else if (b.type === 'text') { bodyHtml += '<div class="container"><div class="about-box"><p>' + b.content + '</p></div></div>'; } 
+                else if (b.type === 'image') { bodyHtml += `<div class="container" style="text-align:${b.align || 'center'};"><img src="${b.url}" style="width:${b.width || '100%'}; border-radius:15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px; object-fit:cover;"></div>`; } 
+                else if (b.type === 'video') { bodyHtml += `<div class="container"><iframe src="${b.url}" style="width:100%; height:300px; border-radius:15px; margin-bottom:20px;"></iframe></div>`; } 
+                else if (b.type === 'newsletter') { bodyHtml += `<div class="container"><div class="mock-widget" style="border-left-color:#e67e22;"><b>📰 ${b.title}</b><br><small>${b.content}</small></div></div>`; } 
+                else if (b.type === 'divider') { bodyHtml += `<div class="container"><hr style="border:0; border-top:2px ${b.style || 'solid'} #eee; margin: 30px 0;"></div>`; } 
+                else if (b.type === 'finance') { bodyHtml += '<div class="container"><h2 class="section-title">Transparansi Keuangan</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Data Keuangan]</div></div>'; } 
+                else if (b.type === 'kpi') { bodyHtml += '<div class="container"><h2 class="section-title">Capaian KPI</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Grafik KPI]</div></div>'; } 
+                else if (b.type === 'program') { bodyHtml += '<div class="container"><h2 class="section-title">Status Program Kerja</h2><div class="mock-widget" style="border-left-color:' + themeColor + '">[Daftar Program]</div></div>'; }
             });
 
-            const css = `
-                @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
-                :root { --theme-color: ${themeColor}; --bg: #f9fbfd; --text: #333; }
-                body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px;}
-                .hero { background: linear-gradient(135deg, var(--theme-color), #2c3e50); color: white; padding: 60px 20px; text-align: center; border-radius: 0 0 30px 30px;}
-                .hero h1 { font-size: 2.5rem; margin: 0 0 10px 0; font-weight: 800;}
-                .container { padding: 20px; max-width: 800px; margin: 0 auto; }
-                .about-box { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--theme-color); }
-                .section-title { font-size: 1.2rem; color: var(--theme-color); margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 5px; }
-                .mock-widget { background: white; padding: 20px; border-radius: 10px; border-left: 4px solid; color: #777; font-size: 0.9rem; text-align: center; border-color: var(--theme-color); box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
-            `;
+            const css = `@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap'); :root { --theme-color: ${themeColor}; --bg: #f9fbfd; --text: #333; } body { margin: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px;} .hero { background: linear-gradient(135deg, var(--theme-color), #2c3e50); color: white; padding: 40px 20px; text-align: center; border-radius: 0 0 30px 30px;} .hero h1 { font-size: 2rem; margin: 0 0 10px 0; font-weight: 800;} .container { padding: 15px; max-width: ${containerWidth}; margin: 0 auto; transition: max-width 0.3s;} .about-box { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); text-align: center; border-top: 4px solid var(--theme-color); } .section-title { font-size: 1rem; color: var(--theme-color); margin-bottom: 10px; border-bottom: 2px solid #eee; padding-bottom: 5px; } .mock-widget { background: white; padding: 15px; border-radius: 10px; border-left: 4px solid; color: #777; font-size: 0.85rem; text-align: left; border-color: var(--theme-color); box-shadow: 0 2px 10px rgba(0,0,0,0.02); margin-bottom: 15px;}`;
 
-            if (doc) {
-                // Modifikasi DOM iframe secara aman tanpa doc.write
-                doc.head.innerHTML = "<style>" + css + "</style>";
-                doc.body.innerHTML = bodyHtml || "<div style='text-align:center; padding:50px; color:#aaa; font-family:sans-serif;'>Kanvas kosong. Mulai tambahkan widget!</div>";
-            }
+            if (doc) { doc.head.innerHTML = "<style>" + css + "</style>"; doc.body.innerHTML = bodyHtml || "<div style='text-align:center; padding:50px; color:#aaa; font-family:sans-serif;'>Kanvas kosong. Mulai tambahkan widget!</div>"; }
         }
 
-        // ==========================================
-        // 3. DATABASE ACTION (SAVE & DELETE)
-        // ==========================================
         async function saveLandingPage() {
             if(layoutBlocks.length === 0) { alert("Kanvas tidak boleh kosong!"); return; }
-            
-            const payload = {
-                workspace_id: currentWorkspaceId,
-                theme_color: document.getElementById('theme-color-picker').value,
-                layout_data: layoutBlocks,
-                is_published: true,
-                updated_at: new Date().toISOString()
-            };
-
+            const payload = { workspace_id: currentWorkspaceId, theme_color: document.getElementById('theme-color-picker').value, container_width: document.getElementById('container-width-select').value, layout_data: layoutBlocks, is_published: true, updated_at: new Date().toISOString() };
             const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
-            if (error) showToast("Gagal menyimpan: " + error.message, 'error');
-            else { showToast("Desain Website berhasil dipublikasikan!", 'success'); loadLandingPageData(); }
+            if (error) showToast("Gagal menyimpan: " + error.message, 'error'); else { showToast("Desain Website berhasil dipublikasikan!", 'success'); loadLandingPageData(); }
         }
 
         async function deleteLandingPage() {
-            if(confirm("Yakin ingin menghapus dan mereset ulang seluruh website publik ini? Semua desain akan hilang.")) {
-                await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
-                showToast("Website berhasil dihapus.", 'info');
-                loadLandingPageData();
-            }
+            if(confirm("Yakin ingin menghapus seluruh website publik ini?")) { await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId); showToast("Website berhasil dihapus.", 'info'); loadLandingPageData(); }
         }
 
         // ==========================================
-        // TRACKING USER & UTILS LAINNYA
+        // 3. TRACKING & ANALYTICS
         // ==========================================
         function goToUserDashboard() { if (currentWorkspaceId) window.open(`user.html?workspace=${currentWorkspaceId}`, '_blank'); }
         function showInviteCode() { if(currentWorkspaceId) navigator.clipboard.writeText(currentWorkspaceId).then(() => showToast("ID Workspace disalin!", 'info')).catch(()=>prompt("Copy Kode ini:", currentWorkspaceId)); }
@@ -499,34 +562,38 @@
             if (allMembersData.length === 0) return; tbody.innerHTML = '';
             allMembersData.forEach(member => {
                 const isOnline = onlineUsers[member.user_id] ? true : false;
-                const statusBadge = isOnline ? '<span class="badge badge-online"><i class="fa-solid fa-circle"></i> Online Sekarang</span>' : '<span class="badge badge-offline"><i class="fa-regular fa-circle"></i> Offline</span>';
-                let lastSeenText = isOnline ? '<span style="color: var(--green); font-weight: 500;">Aktif saat ini</span>' : (member.last_seen ? new Date(member.last_seen).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : "Belum pernah aktif");
+                const statusBadge = isOnline ? '<span class="badge badge-online"><i class="fa-solid fa-circle"></i> Online</span>' : '<span class="badge badge-offline"><i class="fa-regular fa-circle"></i> Offline</span>';
+                let lastSeenText = isOnline ? '<span style="color: var(--green); font-weight: 500;">Aktif saat ini</span>' : (member.last_seen ? new Date(member.last_seen).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : "Belum aktif");
                 
-                tbody.innerHTML += `
-                    <tr>
-                        <td>
-                            <strong style="color: var(--primary); display: block;">${member.nama_user || 'User Tanpa Nama'}</strong>
-                            <span style="font-size: 0.75rem; color: #aaa;">ID: ${member.user_id.substring(0,8)}...</span>
-                        </td>
-                        <td><span class="badge badge-role">${member.role || 'Member'}</span></td>
-                        <td>${statusBadge}</td>
-                        <td style="font-size: 0.85rem;">${lastSeenText}</td>
-                    </tr>
-                `;
+                tbody.innerHTML += `<tr><td><strong style="color: var(--primary); display: block;">${member.nama_user || 'User Tanpa Nama'}</strong><span style="font-size: 0.75rem; color: #aaa;">ID: ${member.user_id.substring(0,8)}</span></td><td><span class="badge badge-role">${member.role || 'Member'}</span></td><td>${statusBadge}</td><td style="font-size: 0.85rem;">${lastSeenText}</td></tr>`;
             });
         }
 
         function setupRealtimePresence() {
             const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
-            presenceChannel
-                .on('presence', { event: 'sync' }, () => {
-                    const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
-                    for (const key in state) { state[key].forEach(p => { if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; }}); }
-                    document.getElementById('online-count-badge').innerText = count; renderMembersTable();
-                })
-                .on('presence', { event: 'join' }, ({ newPresences }) => { newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'info'); }); })
-                .on('presence', { event: 'leave' }, () => { setTimeout(loadMembers, 2000); })
-                .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
+            presenceChannel.on('presence', { event: 'sync' }, () => {
+                const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
+                for (const key in state) { state[key].forEach(p => { if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; }}); }
+                document.getElementById('online-count-badge').innerText = count; renderMembersTable();
+            }).on('presence', { event: 'join' }, ({ newPresences }) => { newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'info'); }); })
+            .on('presence', { event: 'leave' }, () => { setTimeout(loadMembers, 2000); })
+            .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
+        }
+
+        function initAnalyticsCharts() {
+            const ctx1 = document.getElementById('publicTrafficChart').getContext('2d');
+            new Chart(ctx1, { 
+                type: 'line', 
+                data: { labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'], datasets: [{ label: 'Pengunjung Publik', data: [12, 19, 3, 5, 2, 30, 45], borderColor: '#F6B23B', tension: 0.4, fill: true, backgroundColor: 'rgba(246, 178, 59, 0.1)' }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+            });
+
+            const ctx2 = document.getElementById('userActivityChart').getContext('2d');
+            new Chart(ctx2, { 
+                type: 'bar', 
+                data: { labels: ['Keuangan', 'KPI', 'Program', 'Surat'], datasets: [{ label: 'Akses Modul', data: [25, 10, 40, 15], backgroundColor: '#0A3055', borderRadius: 5 }] }, 
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } 
+            });
         }
 
         function switchMenu(menu) {
@@ -534,6 +601,9 @@
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             document.getElementById(`menu-${menu}`).classList.add('active');
             event.currentTarget.classList.add('active');
+            
+            // Tutup sidebar di mobile setelah klik menu
+            if(window.innerWidth <= 768) { toggleSidebar(); }
         }
 
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
