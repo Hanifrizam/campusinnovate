@@ -9,59 +9,196 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
-        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; }
+        :root { 
+            --primary: #0A3055; 
+            --secondary: #F6B23B; 
+            --bg: #eef2f6; 
+            --text: #333; 
+            --white: #fff;
+            --error: #e74c3c;
+            --success: #2ecc71;
+        }
+        
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
         
-        .auth-container { display: flex; width: 90%; max-width: 1000px; height: 600px; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
-        .brand-panel { flex: 1; background: var(--primary); color: white; padding: 40px; display: flex; flex-direction: column; justify-content: center; position: relative; }
-        .brand-panel h1 { font-size: 3rem; line-height: 1.2; margin-bottom: 15px; z-index: 2; }
-        .brand-panel h1 span { color: var(--secondary); }
-        .brand-panel p { color: rgba(255,255,255,0.8); z-index: 2; }
+        body { 
+            background: linear-gradient(135deg, var(--bg) 0%, #d5e1ef 100%);
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
         
-        /* Dekorasi Lingkaran */
-        .circle { position: absolute; border-radius: 50%; background: linear-gradient(135deg, rgba(246,178,59,0.2), transparent); }
-        .circle-1 { width: 300px; height: 300px; top: -50px; right: -50px; }
-        .circle-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; }
+        /* TOAST NOTIFICATION SYSTEM */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 15px; }
+        .toast { 
+            background: var(--white); 
+            border-left: 5px solid var(--primary); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            padding: 15px 20px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            min-width: 300px; 
+            transform: translateX(120%);
+            animation: slideInToast 0.4s forwards, fadeOutToast 0.4s forwards 3.6s; 
+        }
+        .toast.error { border-left-color: var(--error); }
+        .toast.success { border-left-color: var(--success); }
+        .toast i { font-size: 1.2rem; }
+        .toast.error i { color: var(--error); }
+        .toast.success i { color: var(--success); }
+        .toast-content { display: flex; flex-direction: column; }
+        .toast-title { font-weight: 700; font-size: 0.9rem; color: var(--text); }
+        .toast-message { font-size: 0.8rem; color: #666; }
 
-        .form-panel { flex: 1; padding: 40px; position: relative; display: flex; align-items: center; }
-        .form-wrapper { width: 100%; max-width: 350px; margin: 0 auto; position: absolute; left: 50%; transform: translateX(-50%); transition: all 0.4s ease; opacity: 0; visibility: hidden; }
-        .form-wrapper.active { opacity: 1; visibility: visible; z-index: 10; }
+        @keyframes slideInToast { to { transform: translateX(0); } }
+        @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-20px); visibility: hidden; } }
+
+        /* MAIN CONTAINER */
+        .auth-container { 
+            display: flex; 
+            width: 90%; 
+            max-width: 1000px; 
+            min-height: 600px; 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px);
+            border-radius: 20px; 
+            box-shadow: 0 25px 50px rgba(10, 48, 85, 0.15); 
+            overflow: hidden; 
+        }
         
-        .form-wrapper h2 { color: var(--primary); margin-bottom: 5px; }
-        .form-wrapper p.subtitle { color: #777; margin-bottom: 25px; font-size: 0.9rem; }
+        /* LEFT PANEL (BRAND) */
+        .brand-panel { 
+            flex: 1; 
+            background: linear-gradient(145deg, var(--primary), #1a497d); 
+            color: white; 
+            padding: 50px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            position: relative; 
+            overflow: hidden;
+        }
+        .brand-panel h1 { font-size: 3.2rem; line-height: 1.2; margin-bottom: 15px; z-index: 2; position: relative;}
+        .brand-panel h1 span { color: var(--secondary); }
+        .brand-panel p { color: rgba(255,255,255,0.85); z-index: 2; font-size: 1.05rem; line-height: 1.6; position: relative;}
         
-        .input-group { position: relative; margin-bottom: 15px; }
-        .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; transition: 0.3s; }
-        .input-group input { width: 100%; padding: 12px 15px 12px 45px; border: 2px solid #eee; border-radius: 10px; font-size: 0.95rem; outline: none; transition: 0.3s; }
-        .input-group input:focus { border-color: var(--secondary); }
+        .floating-icon { font-size: 3.5rem; color: var(--secondary); margin-bottom: 25px; z-index: 2; position: relative; animation: float 3s ease-in-out infinite; }
+
+        /* Dekorasi Lingkaran Animasi */
+        .circle { position: absolute; border-radius: 50%; background: linear-gradient(135deg, rgba(246,178,59,0.15), transparent); z-index: 1;}
+        .circle-1 { width: 350px; height: 350px; top: -80px; right: -80px; animation: pulse 6s infinite alternate; }
+        .circle-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; animation: pulse 4s infinite alternate-reverse; }
+
+        /* RIGHT PANEL (FORM) */
+        .form-panel { 
+            flex: 1.2; 
+            padding: 40px; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        .form-wrapper { 
+            width: 100%; 
+            max-width: 380px; 
+            position: absolute; 
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
+            opacity: 0; 
+            visibility: hidden; 
+            transform: translateX(50px);
+        }
+        .form-wrapper.active { 
+            opacity: 1; 
+            visibility: visible; 
+            z-index: 10; 
+            transform: translateX(0);
+        }
+        .form-wrapper.exit {
+            transform: translateX(-50px);
+        }
+        
+        .form-wrapper h2 { color: var(--primary); margin-bottom: 5px; font-size: 1.8rem; }
+        .form-wrapper p.subtitle { color: #777; margin-bottom: 30px; font-size: 0.95rem; }
+        
+        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #aaa; transition: 0.3s; }
+        .input-group input { width: 100%; padding: 14px 15px 14px 50px; border: 2px solid #e1e8ed; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s; background: #fafbfc;}
+        .input-group input:focus { border-color: var(--secondary); background: white; box-shadow: 0 0 0 4px rgba(246, 178, 59, 0.1);}
         .input-group input:focus + i { color: var(--secondary); }
         
-        /* Gaya untuk Pilihan Role */
-        .role-selection { display: flex; gap: 15px; margin-bottom: 20px; justify-content: center; background: var(--bg); padding: 10px; border-radius: 10px;}
-        .role-selection label { cursor: pointer; font-size: 0.85rem; color: var(--primary); font-weight: 500; display: flex; align-items: center; gap: 5px;}
-        .role-selection input[type="radio"] { accent-color: var(--secondary); }
+        /* Role Selection Styling Modern */
+        .role-selection { display: flex; gap: 15px; margin-bottom: 25px; background: #f4f7fa; padding: 5px; border-radius: 12px; }
+        .role-option { flex: 1; position: relative; }
+        .role-option input[type="radio"] { display: none; }
+        .role-option label { 
+            display: block; 
+            text-align: center; 
+            padding: 10px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: #777; 
+            transition: 0.3s;
+        }
+        .role-option input[type="radio"]:checked + label { background: var(--white); color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
-        .btn-primary { width: 100%; padding: 12px; background: var(--secondary); color: var(--primary); border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: 0.3s; margin-top: 5px; font-size: 1rem; }
-        .btn-primary:hover { background: #e0a235; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.3); }
-        .btn-primary:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-primary { 
+            width: 100%; 
+            padding: 14px; 
+            background: var(--secondary); 
+            color: var(--primary); 
+            border: none; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 1rem; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px;
+        }
+        .btn-primary:hover { background: #e0a235; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(246, 178, 59, 0.3); }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
         
-        .switch-text { text-align: center; margin-top: 20px; font-size: 0.9rem; color: #777; }
-        .switch-text span { color: var(--primary); font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .switch-text { text-align: center; margin-top: 25px; font-size: 0.9rem; color: #777; }
+        .switch-text span { color: var(--primary); font-weight: 700; cursor: pointer; transition: 0.3s; }
         .switch-text span:hover { color: var(--secondary); text-decoration: underline; }
 
-        .system-status { margin-top: 15px; text-align: center; font-size: 0.85rem; font-weight: 500; display: none; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.8;} 100% { transform: scale(1.1); opacity: 0.4;} }
+
+        /* RESPONSIVE MOBILE VIEW */
+        @media (max-width: 768px) {
+            body { align-items: flex-start; padding: 20px 0; }
+            .auth-container { flex-direction: column; width: 95%; min-height: auto; }
+            .brand-panel { padding: 40px 20px; text-align: center; align-items: center; }
+            .brand-panel h1 { font-size: 2.5rem; }
+            .brand-panel p { font-size: 0.95rem; }
+            .floating-icon { font-size: 3rem; margin-bottom: 15px; }
+            .form-panel { padding: 40px 20px; min-height: 480px; }
+            .form-wrapper { padding: 0 10px; }
+        }
     </style>
 </head>
 <body>
+
+    <div id="toast-container"></div>
 
     <div class="auth-container">
         <div class="brand-panel">
             <div class="circle circle-1"></div>
             <div class="circle circle-2"></div>
-            <i class="fa-solid fa-chart-pie" style="font-size: 3rem; color: var(--secondary); margin-bottom: 20px; z-index: 2;"></i>
+            <i class="fa-solid fa-layer-group floating-icon"></i>
             <h1>Campus <br><span>Innovate</span></h1>
-            <p>Sistem Manajemen ERP & Workspace Terpadu untuk Organisasi.</p>
+            <p>Sistem Manajemen ERP & Workspace Terpadu untuk menunjang performa Organisasi Anda.</p>
         </div>
 
         <div class="form-panel">
@@ -72,45 +209,52 @@
                 <form onsubmit="handleLogin(event)">
                     <div class="input-group">
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="login-email" placeholder="Email" required>
+                        <input type="email" id="login-email" placeholder="Alamat Email" required autocomplete="email">
                     </div>
                     <div class="input-group">
                         <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="login-password" placeholder="Password" required>
+                        <input type="password" id="login-password" placeholder="Kata Sandi" required autocomplete="current-password">
                     </div>
-                    <button type="submit" class="btn-primary" id="btn-login">Masuk ke Sistem</button>
-                    <p class="system-status" id="login-status" style="color: var(--primary);"><i class="fa-solid fa-spinner fa-spin"></i> Mengecek otoritas...</p>
+                    <button type="submit" class="btn-primary" id="btn-login">
+                        <span id="login-text">Masuk ke Sistem</span>
+                        <i class="fa-solid fa-arrow-right" id="login-icon"></i>
+                    </button>
                 </form>
                 <p class="switch-text">Belum punya akun? <span onclick="switchForm('register')">Daftar Akun Baru</span></p>
             </div>
 
             <div class="form-wrapper" id="register-form">
                 <h2>Buat Akun Baru 🚀</h2>
-                <p class="subtitle">Daftarkan diri Anda untuk masuk ke sistem.</p>
+                <p class="subtitle">Daftarkan diri Anda untuk memulai kolaborasi.</p>
                 <form onsubmit="handleRegister(event)">
                     
                     <div class="role-selection">
-                        <label title="Dapat membuat Ruang Kerja (Workspace) baru">
-                            <input type="radio" name="userRole" value="admin" checked> Admin Organisasi
-                        </label>
-                        <label title="Dapat bergabung ke Ruang Kerja yang sudah ada">
-                            <input type="radio" name="userRole" value="user"> Anggota Biasa
-                        </label>
+                        <div class="role-option" title="Dapat membuat Ruang Kerja (Workspace) baru">
+                            <input type="radio" id="role-admin" name="userRole" value="admin" checked>
+                            <label for="role-admin"><i class="fa-solid fa-building-user"></i> Admin</label>
+                        </div>
+                        <div class="role-option" title="Dapat bergabung ke Ruang Kerja yang sudah ada">
+                            <input type="radio" id="role-user" name="userRole" value="user">
+                            <label for="role-user"><i class="fa-solid fa-users"></i> Anggota</label>
+                        </div>
                     </div>
 
                     <div class="input-group">
                         <i class="fa-solid fa-user"></i>
-                        <input type="text" id="reg-name" placeholder="Nama Lengkap" required>
+                        <input type="text" id="reg-name" placeholder="Nama Lengkap" required autocomplete="name">
                     </div>
                     <div class="input-group">
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="reg-email" placeholder="Email" required>
+                        <input type="email" id="reg-email" placeholder="Alamat Email" required autocomplete="email">
                     </div>
                     <div class="input-group">
                         <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="reg-password" placeholder="Buat Password" required>
+                        <input type="password" id="reg-password" placeholder="Buat Kata Sandi (Min. 6 Karakter)" required autocomplete="new-password" minlength="6">
                     </div>
-                    <button type="submit" class="btn-primary" id="btn-register">Daftar Sekarang</button>
+                    <button type="submit" class="btn-primary" id="btn-register">
+                        <span id="reg-text">Daftar Sekarang</span>
+                        <i class="fa-solid fa-user-plus" id="reg-icon"></i>
+                    </button>
                 </form>
                 <p class="switch-text">Sudah punya akun? <span onclick="switchForm('login')">Masuk di sini</span></p>
             </div>
@@ -120,35 +264,75 @@
 
     <script>
         // 1. KONEKSI SUPABASE
-        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; // UBAH INI
-        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; // UBAH INI
+        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 2. FUNGSI TRANSISI FORM UI
-        function switchForm(target) {
-            document.getElementById('login-form').classList.remove('active');
-            document.getElementById('register-form').classList.remove('active');
-            document.getElementById(`${target}-form`).classList.add('active');
+        // 2. SISTEM NOTIFIKASI TOAST (Pengganti Alert)
+        function showToast(title, message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+            
+            toast.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <div class="toast-content">
+                    <span class="toast-title">${title}</span>
+                    <span class="toast-message">${message}</span>
+                </div>
+            `;
+            container.appendChild(toast);
+            
+            // Hapus elemen setelah animasi selesai (4 detik)
+            setTimeout(() => { toast.remove(); }, 4000);
         }
 
-        // 3. FUNGSI LOGIN & CEK ROLE
+        // 3. FUNGSI TRANSISI FORM UI (Animasi Sliding)
+        function switchForm(target) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (target === 'register') {
+                loginForm.classList.remove('active');
+                loginForm.classList.add('exit');
+                setTimeout(() => {
+                    registerForm.classList.remove('exit');
+                    registerForm.classList.add('active');
+                }, 100);
+            } else {
+                registerForm.classList.remove('active');
+                registerForm.classList.add('exit');
+                setTimeout(() => {
+                    loginForm.classList.remove('exit');
+                    loginForm.classList.add('active');
+                }, 100);
+            }
+        }
+
+        // 4. FUNGSI LOGIN
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
+            
+            // Elemen Tombol UI
             const btn = document.getElementById('btn-login');
-            const status = document.getElementById('login-status');
+            const btnText = document.getElementById('login-text');
+            const btnIcon = document.getElementById('login-icon');
 
+            // Loading State
             btn.disabled = true;
-            status.style.display = 'block';
+            btnText.innerText = "Mengecek otoritas...";
+            btnIcon.className = "fa-solid fa-spinner fa-spin";
 
             // Proses Autentikasi
             const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (authError) {
-                alert("Login gagal: " + authError.message);
-                btn.disabled = false;
-                status.style.display = 'none';
+                showToast("Login Gagal", authError.message, "error");
+                resetButtonState(btn, btnText, btnIcon, "Masuk ke Sistem", "fa-solid fa-arrow-right");
                 return;
             }
 
@@ -160,39 +344,44 @@
                 .single();
 
             if (roleError || !roleData) {
-                alert("Akses Ditolak: Role Anda belum diatur oleh sistem.");
+                showToast("Akses Ditolak", "Role Anda belum diatur oleh sistem.", "error");
                 await supabaseClient.auth.signOut();
-                btn.disabled = false;
-                status.style.display = 'none';
+                resetButtonState(btn, btnText, btnIcon, "Masuk ke Sistem", "fa-solid fa-arrow-right");
                 return;
             }
 
+            showToast("Berhasil Masuk", "Mengalihkan ke dashboard...", "success");
+
             // ROUTING BERDASARKAN ROLE
-            const userRole = roleData.role;
-            if (userRole === 'superadmin') {
-                window.location.href = 'superadmin.html';
-            } else if (userRole === 'admin') {
-                window.location.href = 'admin.html';
-            } else {
-                // ANGGOTA BIASA DIARAHKAN KE LOBI ANGGOTA
-                window.location.href = 'user-hub.html'; 
-            }
+            setTimeout(() => {
+                const userRole = roleData.role;
+                if (userRole === 'superadmin') {
+                    window.location.href = 'superadmin.html';
+                } else if (userRole === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'user-hub.html'; 
+                }
+            }, 1500);
         }
 
-        // 4. FUNGSI REGISTER (Membaca Pilihan Role)
+        // 5. FUNGSI REGISTER
         async function handleRegister(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
-            
-            // Membaca radio button mana yang dipilih (admin atau user)
             const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
             
+            // Elemen Tombol UI
             const btn = document.getElementById('btn-register');
+            const btnText = document.getElementById('reg-text');
+            const btnIcon = document.getElementById('reg-icon');
 
+            // Loading State
             btn.disabled = true;
-            btn.innerText = "Mendaftarkan...";
+            btnText.innerText = "Mendaftarkan...";
+            btnIcon.className = "fa-solid fa-spinner fa-spin";
 
             // Sign Up ke Supabase Auth
             const { data: authData, error: authError } = await supabaseClient.auth.signUp({
@@ -202,13 +391,12 @@
             });
 
             if (authError) {
-                alert("Gagal mendaftar: " + authError.message);
-                btn.disabled = false;
-                btn.innerText = "Daftar Sekarang";
+                showToast("Pendaftaran Gagal", authError.message, "error");
+                resetButtonState(btn, btnText, btnIcon, "Daftar Sekarang", "fa-solid fa-user-plus");
                 return;
             }
 
-            // Masukkan ke tabel user_roles berdasarkan pilihan User
+            // Masukkan ke tabel user_roles
             const { error: insertError } = await supabaseClient
                 .from('user_roles')
                 .insert([{ user_id: authData.user.id, role: selectedRole }]);
@@ -217,16 +405,24 @@
                 console.error("Gagal menetapkan role:", insertError);
             }
 
-            // Pesan sukses yang dinamis
-            const roleName = selectedRole === 'admin' ? "Admin Organisasi" : "Anggota Biasa";
-            alert(`Pendaftaran berhasil! Anda terdaftar sebagai ${roleName}. Silakan Login.`);
+            // Sukses
+            const roleName = selectedRole === 'admin' ? "Admin Organisasi" : "Anggota";
+            showToast("Pendaftaran Sukses!", `Anda terdaftar sebagai ${roleName}. Silakan login.`, "success");
             
+            // Reset Form & UI
             e.target.reset();
-            switchForm('login');
+            setTimeout(() => {
+                switchForm('login');
+                resetButtonState(btn, btnText, btnIcon, "Daftar Sekarang", "fa-solid fa-user-plus");
+            }, 2000);
+        }
+
+        // Utility Function untuk Reset Tombol
+        function resetButtonState(btn, textElement, iconElement, defaultText, defaultIconClass) {
             btn.disabled = false;
-            btn.innerText = "Daftar Sekarang";
+            textElement.innerText = defaultText;
+            iconElement.className = defaultIconClass;
         }
     </script>
 </body>
-
 </html>
