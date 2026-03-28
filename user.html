@@ -33,6 +33,30 @@
         .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
         .workspace-badge { background: rgba(246, 178, 59, 0.2); color: var(--primary); padding: 8px 15px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; border: 1px solid var(--secondary); }
         
+        /* EFEK WATERMARK LOGO DI BACKGROUND */
+.main-content::before {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: calc(50% + 130px); /* Posisi tengah, digeser sedikit memperhitungkan lebar sidebar */
+    transform: translate(-50%, -50%);
+    width: 60vmin;
+    height: 60vmin;
+    background-image: url('logo-campus-innovate.webp'); /* Pastikan path gambarnya benar */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    opacity: 0.03; /* Sangat tipis (3%) agar estetis dan nyaru dengan background */
+    pointer-events: none; /* Penting! Agar watermark tidak menghalangi klik ke elemen lain */
+    z-index: 0;
+}
+
+/* Pastikan kartu dan konten di atas watermark tetap bisa di-klik */
+.topbar, .view-section {
+    position: relative;
+    z-index: 1;
+}
+        
         .view-section { display: none; animation: fadeIn 0.4s; }
         .view-section.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -219,6 +243,12 @@
             
             /* Main Content full width */
             .main-content { margin-left: 0; width: 100%; padding: 15px; }
+
+            .main-content::before {
+            left: 50%;
+            width: 80vmin;
+            height: 80vmin;
+            }
             
             /* Tombol Navigasi Mobile */
             .mobile-menu-btn { display: inline-block; background: none; border: none; font-size: 1.5rem; color: var(--primary); cursor: pointer; padding-right: 15px; }
@@ -267,10 +297,17 @@
     <div class="mobile-overlay-bg" id="mobile-overlay-bg" onclick="toggleMobileMenu()"></div>
 
     <div class="sidebar" id="sidebar">
-        <div class="brand">
-            <div><i class="fa-solid fa-chart-pie"></i> Campus <span>Innovate</span></div>
-            <button class="close-sidebar-btn" onclick="toggleMobileMenu()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
+        <div class="brand" style="flex-direction: column; gap: 12px; align-items: center; position: relative;">
+    <div style="display: flex; align-items: center; background: white; border-radius: 10px; padding: 10px; width: 100%; justify-content: center;">
+        <img src="logo-campus-innovate.webp" alt="Logo Campus Innovate" style="max-height: 40px; width: auto;">
+    </div>
+    
+    <div id="sidebar-workspace-name" style="font-size: 0.95rem; font-weight: bold; color: var(--secondary); text-align: center; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        Memuat...
+    </div>
+
+    <button class="close-sidebar-btn" onclick="toggleMobileMenu()" style="position: absolute; right: 15px; top: 15px;"><i class="fa-solid fa-xmark"></i></button>
+</div>
         <div class="menu-container">
             <div class="nav-item active" onclick="switchTab('dashboard')"><i class="fa-solid fa-border-all"></i> Dashboard Utama</div>
             
@@ -1439,7 +1476,10 @@
             if (!globalWorkspaceId) { alert("Akses Ditolak!"); window.location.href = 'index.html'; return; }
 
             const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
-            if (wsData) document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
+            if (wsData) {
+            document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
+            document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+            }
 
             const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
             userPresenceChannel.subscribe(async (status) => {
