@@ -13,14 +13,12 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--bg); display: flex; flex-direction: column; color: var(--text); overflow-x: hidden; height: 100vh;}
         
-        /* MOBILE HEADER & OVERLAY */
         .mobile-header { display: none; background: var(--primary); padding: 15px 20px; color: white; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 998; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .mobile-header h2 { font-size: 1.2rem; color: var(--secondary); margin: 0;}
         .menu-toggle { background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s; }
         .sidebar-overlay.active { display: block; opacity: 1; }
 
-        /* SIDEBAR */
         .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; top: 0; left: 0; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 1000; overflow-y: auto; transition: transform 0.3s;}
         .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
         .sidebar-subtitle { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 30px; line-height: 1.5; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
@@ -29,34 +27,29 @@
         .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); }
         .premium-badge { background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: auto; }
         
-        /* MAIN CONTENT */
         .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); height: 100vh; overflow-y: auto; animation: fadeIn 0.5s ease; flex-grow: 1; }
         .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
         .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; justify-content: center;}
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); }
         .btn-danger { background: var(--red); color: white; padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;}
-        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
         .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
         .menu-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
         .menu-content.active { display: block; }
         
-        /* ADVANCED BUILDER LAYOUT */
+        /* BUILDER STYLES */
         .builder-wrapper { display: flex; gap: 20px; height: calc(100vh - 120px); }
         .builder-tools { width: 250px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
         .builder-canvas-container { flex: 1; display: flex; flex-direction: column; gap: 15px; }
         .builder-properties { width: 320px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
         .builder-properties.active { display: block; animation: slideInRight 0.3s ease; }
         
-        /* TOOLBOX */
         .tool-category { font-size: 0.75rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;}
         .tool-btn { background: #f8fafc; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; cursor: grab; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 10px; transition: 0.2s;}
         .tool-btn:hover { border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); transform: translateX(3px);}
         
-        /* CANVAS */
         .canvas-area { flex: 1; border: 2px dashed #cbd5e1; border-radius: 10px; padding: 20px; background: #f1f5f9; min-height: 400px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto;}
         .canvas-area.drag-over { background: rgba(46, 204, 113, 0.1); border-color: var(--green); }
         
-        /* BLOCKS IN CANVAS */
         .build-block { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 15px; position: relative; cursor: pointer; animation: slideUp 0.3s ease; transition: 0.2s;}
         .build-block:hover { border-color: var(--blue); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);}
         .build-block.selected { border: 2px solid var(--secondary); box-shadow: 0 4px 15px rgba(246, 178, 59, 0.2); transform: scale(1.01);}
@@ -65,15 +58,12 @@
         .block-preview-text { font-size: 0.8rem; color: #777; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .block-actions button { background: #f8fafc; border: 1px solid #eee; padding: 5px 8px; border-radius: 5px; cursor: pointer; color: #64748b; margin-left: 5px; transition: 0.2s;}
         .block-actions button:hover { background: var(--primary); color: white; }
-        .block-actions .del-btn:hover { background: var(--red); color: white; }
         
-        /* FORM ELEMENTS */
         .prop-group { margin-bottom: 15px; }
         .prop-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 5px;}
         .prop-group input, .prop-group select, .prop-group textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; font-family: 'Poppins'; font-size: 0.85rem; outline: none; transition: 0.2s;}
         .prop-group input:focus, .prop-group textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);}
         
-        /* PREMIUM SECTION */
         .pricing-card { border: 2px solid var(--secondary); border-radius: 15px; padding: 30px; text-align: center; background: linear-gradient(180deg, #fff, #fffdf8); position: relative; overflow: hidden;}
         .pricing-card .badge { position: absolute; top: 15px; right: -30px; background: var(--secondary); color: var(--primary); padding: 5px 40px; transform: rotate(45deg); font-weight: bold; font-size: 0.8rem;}
         
@@ -92,6 +82,14 @@
         table { width: 100%; border-collapse: collapse; margin-top: 15px; min-width: 600px;}
         th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem;}
         th { background: #f8fafc; color: var(--primary); font-weight: 600;}
+
+        /* TRACKING BADGES */
+        .badge-status { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+        .badge-online { background: rgba(46, 204, 113, 0.15); color: #27ae60; }
+        .badge-offline { background: #f1f5f9; color: #64748b; }
+        .badge-role { background: rgba(10, 48, 85, 0.1); color: var(--primary); padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;}
+        .live-counter { background: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid var(--green); display: inline-flex; align-items: center; gap: 15px; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.05); color: var(--primary);}
+        .live-counter .count { background: var(--green); color: white; padding: 2px 10px; border-radius: 15px; font-size: 1.1rem; }
 
         @media (max-width: 1024px) {
             .builder-wrapper { flex-direction: column; height: auto; }
@@ -124,7 +122,6 @@
             <h2><i class="fa-solid fa-layer-group"></i> CI Admin</h2>
             <button onclick="toggleSidebar()" class="menu-toggle" style="display: none; color: white;" id="closeSidebarBtn"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        
         <div class="sidebar-subtitle">Ruang Kerja:<br><strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong></div>
         
         <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-sliders"></i> Konfigurasi Utama</div>
@@ -217,8 +214,7 @@
                         <div id="prop-empty" style="color: #aaa; font-size: 0.85rem; text-align: center; margin-top: 50px;">
                             Klik salah satu blok di kanvas untuk memunculkan pengaturan spesifik.
                         </div>
-                        <div id="prop-form" style="display: none;">
-                            </div>
+                        <div id="prop-form" style="display: none;"></div>
                     </div>
                 </div>
             </div>
@@ -227,44 +223,55 @@
                 <div class="card pricing-card">
                     <div class="badge">PRO</div>
                     <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">Custom Domain Instansi Anda</h2>
-                    <p style="color: #666; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Ubah URL publikasi menjadi lebih profesional (contoh: <b>www.bem-fakultas.or.id</b>). Tanpa *watermark* dan dilengkapi layanan *Dedicated Cloud Hosting*.</p>
-                    
+                    <p style="color: #666; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Ubah URL publikasi menjadi lebih profesional (contoh: <b>www.bem-fakultas.or.id</b>).</p>
                     <div style="background: white; border: 1px solid #eee; padding: 20px; border-radius: 10px; max-width: 500px; margin: 0 auto 30px; text-align: left;">
                         <div class="prop-group">
                             <label>Cek Ketersediaan Nama Domain</label>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" placeholder="nama-organisasi" style="flex: 1;">
                                 <select style="width: 100px;">
-                                    <option>.or.id</option>
-                                    <option>.com</option>
-                                    <option>.id</option>
-                                    <option>.ac.id</option>
+                                    <option>.or.id</option><option>.com</option><option>.id</option><option>.ac.id</option>
                                 </select>
                                 <button class="btn-primary" style="padding: 10px 15px;">Periksa</button>
                             </div>
                         </div>
                     </div>
-
                     <button class="btn-primary" style="font-size: 1.1rem; padding: 15px 40px; background: #000; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i> Hubungi Tim Support Sales</button>
                 </div>
             </div>
 
             <div id="menu-users" class="menu-content">
+                <div class="live-counter">
+                    <i class="fa-solid fa-tower-broadcast" style="color: var(--green);"></i> Pengguna Sedang Online: <span class="count" id="online-count-badge">0</span>
+                </div>
                 <div class="card">
-                    <h2>Tracking Aktivitas Internal</h2>
-                    <p>Real-time log keberadaan user di dalam workspace dashboard.</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2 style="margin: 0; color: var(--primary);"><i class="fa-solid fa-users"></i> Daftar & Aktivitas Anggota</h2>
+                            <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Pantau keberadaan secara *real-time*.</p>
+                        </div>
+                        <button class="btn-primary" style="padding: 10px 20px;" onclick="showInviteCode()"><i class="fa-solid fa-user-plus"></i> Dapatkan Kode Undangan</button>
+                    </div>
                     <div style="overflow-x: auto;">
                         <table style="width:100%; text-align:left;">
-                            <thead><tr><th>Identitas User</th><th>Status Saat Ini</th></tr></thead>
-                            <tbody id="member-list"><tr><td colspan="2">Data akan dimuat otomatis via real-time presence...</td></tr></tbody>
+                            <thead><tr><th>Identitas Anggota</th><th>Peran / Role</th><th>Status Saat Ini</th><th>Terakhir Terlihat</th></tr></thead>
+                            <tbody id="member-list"><tr><td colspan="4" style="text-align: center; padding: 20px;">Memuat data anggota...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
+
             <div id="menu-analytics" class="menu-content">
+                <h2 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-chart-line"></i> Dashboard Analitik Interaksi</h2>
                 <div class="analytics-grid">
-                    <div class="chart-box"><canvas id="publicTrafficChart"></canvas></div>
-                    <div class="chart-box"><canvas id="userActivityChart"></canvas></div>
+                    <div class="chart-box">
+                        <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 15px;">Traffic Pengunjung (Mingguan)</h3>
+                        <div class="chart-container-wrapper"><canvas id="publicTrafficChart"></canvas></div>
+                    </div>
+                    <div class="chart-box">
+                        <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 15px;">Aktivitas Akses Modul (User)</h3>
+                        <div class="chart-container-wrapper"><canvas id="userActivityChart"></canvas></div>
+                    </div>
                 </div>
             </div>
 
@@ -277,8 +284,15 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let currentAdminSession = null; let currentWorkspaceId = null;
-        let layoutBlocks = [];
-        let activeBlockId = null;
+        let layoutBlocks = []; let activeBlockId = null;
+        
+        // VARIABEL TRACKING
+        let onlineUsers = {}; 
+        let allMembersData = [];
+
+        // VARIABEL CHART AGAR TIDAK ERROR "CANVAS ALREADY IN USE"
+        let chartTraffic = null;
+        let chartActivity = null;
 
         function toggleSidebar() {
             document.getElementById('appSidebar').classList.toggle('active');
@@ -297,22 +311,27 @@
             event.currentTarget.classList.add('active');
             if(window.innerWidth <= 768) toggleSidebar();
             
-            // Re-render chart if analytics menu clicked
-            if (menu === 'analytics') initDummyCharts();
+            // Render ulang chart saat tab analitik dibuka (Bug Fixing)
+            if (menu === 'analytics') initChartsSafe();
         }
+        
         function goToUserDashboard() { if (currentWorkspaceId) window.open(`user.html?workspace=${currentWorkspaceId}`, '_blank'); }
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
 
-        // MENDIFINISIKAN FUNGSI HAPUS (Fix Error Reference)
+        // FUNGSI COPY KODE UNDANGAN
+        function showInviteCode() {
+            if(currentWorkspaceId) {
+                navigator.clipboard.writeText(currentWorkspaceId)
+                    .then(() => showToast("Kode Undangan berhasil disalin! Bagikan ke anggota Anda.", 'success'))
+                    .catch(() => prompt("Gagal menyalin otomatis. Silakan copy manual kode ini:", currentWorkspaceId));
+            }
+        }
+
         async function deleteLandingPage() {
             if(confirm("Yakin ingin menghapus seluruh website publik ini beserta desainnya?")) {
                 const { error } = await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
-                if (!error) {
-                    showToast("Website berhasil dihapus.", 'info');
-                    loadLandingPageData(); // Reload UI
-                } else {
-                    showToast("Gagal menghapus: " + error.message, 'error');
-                }
+                if (!error) { showToast("Website berhasil dihapus.", 'info'); loadLandingPageData(); } 
+                else { showToast("Gagal menghapus: " + error.message, 'error'); }
             }
         }
 
@@ -328,11 +347,75 @@
                 document.getElementById('active-workspace-section').style.display = 'block';
                 document.getElementById('header-workspace-name').innerText = wsData.nama_organisasi;
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+                
                 await loadLandingPageData();
+                await loadMembers();         // Muat data anggota dari tabel
+                setupRealtimePresence();     // Nyalakan soket online realtime
             } else {
                 document.getElementById('setup-workspace-section').style.display = 'block';
             }
         });
+
+        // ==========================================
+        // FITUR TRACKING USERS & REALTIME PRESENCE
+        // ==========================================
+        async function loadMembers() {
+            const { data, error } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', currentWorkspaceId);
+            const tbody = document.getElementById('member-list'); 
+            tbody.innerHTML = '';
+            
+            if (error || !data || data.length === 0) { 
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 30px;">Belum ada anggota yang bergabung ke Workspace ini.<br>Silakan klik tombol <b>Dapatkan Kode Undangan</b>.</td></tr>`; 
+                return; 
+            }
+            allMembersData = data; 
+            renderMembersTable();
+        }
+
+        function renderMembersTable() {
+            const tbody = document.getElementById('member-list');
+            if (allMembersData.length === 0) return; 
+            tbody.innerHTML = '';
+            
+            allMembersData.forEach(member => {
+                const isOnline = onlineUsers[member.user_id] ? true : false;
+                const statusBadge = isOnline ? '<span class="badge-status badge-online"><i class="fa-solid fa-circle"></i> Online</span>' : '<span class="badge-status badge-offline"><i class="fa-regular fa-circle"></i> Offline</span>';
+                let lastSeenText = isOnline ? '<span style="color: #2ecc71; font-weight: 500;">Aktif saat ini</span>' : (member.last_seen ? new Date(member.last_seen).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : "Belum aktif");
+                
+                tbody.innerHTML += `<tr>
+                    <td><strong style="color: var(--primary); display: block;">${member.nama_user || 'User Tanpa Nama'}</strong><span style="font-size: 0.75rem; color: #aaa;">ID: ${member.user_id.substring(0,8)}...</span></td>
+                    <td><span class="badge-role">${member.role || 'Member'}</span></td>
+                    <td>${statusBadge}</td>
+                    <td style="font-size: 0.85rem;">${lastSeenText}</td>
+                </tr>`;
+            });
+        }
+
+        function setupRealtimePresence() {
+            const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
+            
+            presenceChannel.on('presence', { event: 'sync' }, () => {
+                const state = presenceChannel.presenceState(); 
+                onlineUsers = {}; 
+                let count = 0;
+                for (const key in state) { 
+                    state[key].forEach(p => { 
+                        if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; }
+                    }); 
+                }
+                document.getElementById('online-count-badge').innerText = count; 
+                renderMembersTable();
+            })
+            .on('presence', { event: 'join' }, ({ newPresences }) => { 
+                newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'info'); }); 
+            })
+            .on('presence', { event: 'leave' }, () => { setTimeout(loadMembers, 2000); })
+            .subscribe(async (status) => { 
+                if (status === 'SUBSCRIBED') {
+                    await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); 
+                }
+            });
+        }
 
         // ==========================================
         // SYSTEM BACKWARD COMPATIBILITY & LOADING
@@ -344,14 +427,9 @@
             const delBtn = document.getElementById('btn-hapus-web');
 
             if (data && data.is_published) {
-                // FIX ERROR 1: Migrasi otomatis struktur lama (tanpa .data & .styles) ke struktur baru.
                 let rawBlocks = data.layout_data || [];
                 layoutBlocks = rawBlocks.map(b => {
-                    // Beri default style jika tidak ada
-                    if (!b.styles) {
-                        b.styles = { bg: '#ffffff', padding: '40px', borderRadius: '15px' };
-                    }
-                    // Pindahkan atribut lama ke object 'data'
+                    if (!b.styles) b.styles = { bg: '#ffffff', padding: '40px', borderRadius: '15px' };
                     if (!b.data) {
                         b.data = {};
                         if(b.title !== undefined) b.data.title = b.title;
@@ -379,7 +457,7 @@
             renderCanvas();
         }
 
-        // DRAG & DROP
+        // DRAG & DROP BUILDER
         function dragStartTool(e, type) { e.dataTransfer.setData('blockType', type); }
         function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
         function dropToCanvas(e) {
@@ -388,15 +466,8 @@
             const type = e.dataTransfer.getData('blockType');
             if(!type) return;
 
-            // Default Format Baru
-            let newBlock = { 
-                id: 'block_' + Date.now(), 
-                type: type,
-                styles: { bg: '#ffffff', padding: '40px', borderRadius: '15px' },
-                data: {}
-            };
+            let newBlock = { id: 'block_' + Date.now(), type: type, styles: { bg: '#ffffff', padding: '40px', borderRadius: '15px' }, data: {} };
 
-            // Setup Data Default
             if(type === 'hero') { newBlock.data = { title: "Visi Misi Organisasi", subtitle: "Membangun masa depan bersama", url: "" }; }
             if(type === 'text') { newBlock.data = { content: "Tulis narasi atau informasi Anda di sini..." }; }
             if(type === 'image') { newBlock.data = { url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80", width: "100%", align: "center" }; }
@@ -414,7 +485,6 @@
         function renderCanvas() {
             const dropzone = document.getElementById('canvas-dropzone');
             dropzone.innerHTML = '';
-            
             if(layoutBlocks.length === 0) {
                 dropzone.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 100px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px;"></i><br>Tarik elemen dari panel kiri ke kanvas ini</div>`;
                 return;
@@ -455,9 +525,6 @@
             });
         }
 
-        // ==========================================
-        // DYNAMIC PROPERTIES PANEL
-        // ==========================================
         function selectBlock(id) {
             activeBlockId = id;
             renderCanvas();
@@ -469,141 +536,60 @@
             const propForm = document.getElementById('prop-form');
             propForm.style.display = 'block';
             
-            // 1. Pengaturan Styling (Tersedia untuk semua blok)
             let html = `
-                <div class="prop-group">
-                    <label>Warna Background (Latar)</label>
-                    <input type="color" value="${block.styles.bg}" onchange="updateBlockStyle('${id}', 'bg', this.value)" style="height: 40px; cursor: pointer; padding: 2px;">
-                </div>
-                <div class="prop-group">
-                    <label>Jarak Internal / Padding</label>
-                    <select onchange="updateBlockStyle('${id}', 'padding', this.value)">
-                        <option value="10px" ${block.styles.padding==='10px'?'selected':''}>Tipis (10px)</option>
-                        <option value="20px" ${block.styles.padding==='20px'?'selected':''}>Kecil (20px)</option>
-                        <option value="40px" ${block.styles.padding==='40px'?'selected':''}>Normal (40px)</option>
-                        <option value="80px" ${block.styles.padding==='80px'?'selected':''}>Besar / Luas (80px)</option>
-                    </select>
-                </div>
-                <div class="prop-group">
-                    <label>Bentuk Sudut (Border Radius)</label>
-                    <select onchange="updateBlockStyle('${id}', 'borderRadius', this.value)">
-                        <option value="0px" ${block.styles.borderRadius==='0px'?'selected':''}>Kotak Tegas (0px)</option>
-                        <option value="15px" ${block.styles.borderRadius==='15px'?'selected':''}>Sudut Halus (15px)</option>
-                        <option value="30px" ${block.styles.borderRadius==='30px'?'selected':''}>Sangat Bulat (30px)</option>
-                    </select>
-                </div>
-                <hr style="border:1px dashed #e2e8f0; margin:20px 0;">
-                <h4 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem;">📝 Isi Konten Data</h4>
+                <div class="prop-group"><label>Warna Background (Latar)</label><input type="color" value="${block.styles.bg}" onchange="updateBlockStyle('${id}', 'bg', this.value)" style="height: 40px; cursor: pointer; padding: 2px;"></div>
+                <div class="prop-group"><label>Jarak Internal / Padding</label><select onchange="updateBlockStyle('${id}', 'padding', this.value)"><option value="10px" ${block.styles.padding==='10px'?'selected':''}>Tipis (10px)</option><option value="20px" ${block.styles.padding==='20px'?'selected':''}>Kecil (20px)</option><option value="40px" ${block.styles.padding==='40px'?'selected':''}>Normal (40px)</option><option value="80px" ${block.styles.padding==='80px'?'selected':''}>Besar / Luas (80px)</option></select></div>
+                <div class="prop-group"><label>Bentuk Sudut (Border Radius)</label><select onchange="updateBlockStyle('${id}', 'borderRadius', this.value)"><option value="0px" ${block.styles.borderRadius==='0px'?'selected':''}>Kotak Tegas (0px)</option><option value="15px" ${block.styles.borderRadius==='15px'?'selected':''}>Sudut Halus (15px)</option><option value="30px" ${block.styles.borderRadius==='30px'?'selected':''}>Sangat Bulat (30px)</option></select></div>
+                <hr style="border:1px dashed #e2e8f0; margin:20px 0;"><h4 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem;">📝 Isi Konten Data</h4>
             `;
 
-            // 2. Pengaturan Konten berdasarkan Tipe
             if(block.type === 'hero') {
-                html += `
-                    <div class="prop-group"><label>Judul Utama (Heading)</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                    <div class="prop-group"><label>Sub Judul / Slogan</label><textarea rows="3" oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle || ''}</textarea></div>
-                    <div class="prop-group"><label>URL Gambar Banner Background</label><input type="text" placeholder="https://..." value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>
-                `;
+                html += `<div class="prop-group"><label>Judul Utama (Heading)</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Sub Judul / Slogan</label><textarea rows="3" oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle || ''}</textarea></div><div class="prop-group"><label>URL Gambar Banner Latar</label><input type="text" placeholder="https://..." value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`;
             } 
-            else if (block.type === 'text') {
-                html += `<div class="prop-group"><label>Teks Paragraf (Mendukung tag HTML)</label><textarea rows="8" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`;
-            } 
-            else if (block.type === 'image') {
-                html += `
-                    <div class="prop-group"><label>URL Gambar</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>
-                    <div class="prop-group"><label>Lebar Gambar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.data.width) || 100}" onchange="updateBlockData('${id}', 'width', this.value + '%')"></div>
-                    <div class="prop-group"><label>Posisi Align</label>
-                        <select onchange="updateBlockData('${id}', 'align', this.value)">
-                            <option value="left" ${block.data.align==='left'?'selected':''}>Kiri</option>
-                            <option value="center" ${block.data.align==='center'?'selected':''}>Tengah</option>
-                            <option value="right" ${block.data.align==='right'?'selected':''}>Kanan</option>
-                        </select>
-                    </div>
-                `;
-            }
-            else if (block.type === 'video') {
-                html += `<div class="prop-group"><label>Link Embed YouTube</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`;
-            }
-            else if (block.type === 'newsletter') {
-                html += `
-                    <div class="prop-group"><label>Judul Newsletter</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                    <div class="prop-group"><label>Deskripsi Singkat</label><textarea rows="3" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>
-                `;
-            }
-            else if (block.type === 'divider') {
-                html += `<div class="prop-group"><label>Tipe Garis Pembatas</label>
-                    <select onchange="updateBlockData('${id}', 'style', this.value)">
-                        <option value="solid" ${block.data.style==='solid'?'selected':''}>Garis Lurus (Solid)</option>
-                        <option value="dashed" ${block.data.style==='dashed'?'selected':''}>Garis Putus-putus (Dashed)</option>
-                        <option value="dotted" ${block.data.style==='dotted'?'selected':''}>Titik-titik (Dotted)</option>
-                    </select>
-                </div>`;
-            }
-            else if (block.type === 'grid-news') {
-                html += `
-                    <div class="prop-group"><label>Judul Bagian Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                    <div class="prop-group"><label>Layout Kolom (PC)</label>
-                        <select onchange="updateBlockData('${id}', 'columns', this.value)">
-                            <option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom Grid</option>
-                            <option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom Grid</option>
-                            <option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom Grid</option>
-                        </select>
-                    </div>
-                `;
-            } 
-            else if (block.type === 'struktur') {
-                 html += `<div class="prop-group"><label>Judul Blok Struktur</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                 <div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">*Data anggota ditarik otomatis dari tabel Sistem (Menu Tracking).</div>`;
-            } 
-            else {
-                 html += `<div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">Konten untuk widget ini (Keuangan/KPI/Proker) ditarik otomatis dan *real-time* dari modul aktivitas Dashboard Internal User Anda.</div>`;
-            }
+            else if (block.type === 'text') { html += `<div class="prop-group"><label>Teks Paragraf (Mendukung HTML)</label><textarea rows="8" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`; } 
+            else if (block.type === 'image') { html += `<div class="prop-group"><label>URL Gambar</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div><div class="prop-group"><label>Lebar Gambar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.data.width) || 100}" onchange="updateBlockData('${id}', 'width', this.value + '%')"></div><div class="prop-group"><label>Posisi Align</label><select onchange="updateBlockData('${id}', 'align', this.value)"><option value="left" ${block.data.align==='left'?'selected':''}>Kiri</option><option value="center" ${block.data.align==='center'?'selected':''}>Tengah</option><option value="right" ${block.data.align==='right'?'selected':''}>Kanan</option></select></div>`; }
+            else if (block.type === 'video') { html += `<div class="prop-group"><label>Link Embed YouTube</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`; }
+            else if (block.type === 'newsletter') { html += `<div class="prop-group"><label>Judul Newsletter</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Deskripsi Singkat</label><textarea rows="3" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`; }
+            else if (block.type === 'divider') { html += `<div class="prop-group"><label>Tipe Garis Pembatas</label><select onchange="updateBlockData('${id}', 'style', this.value)"><option value="solid" ${block.data.style==='solid'?'selected':''}>Garis Lurus (Solid)</option><option value="dashed" ${block.data.style==='dashed'?'selected':''}>Garis Putus-putus (Dashed)</option><option value="dotted" ${block.data.style==='dotted'?'selected':''}>Titik-titik (Dotted)</option></select></div>`; }
+            else if (block.type === 'grid-news') { html += `<div class="prop-group"><label>Judul Bagian Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Layout Kolom (PC)</label><select onchange="updateBlockData('${id}', 'columns', this.value)"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom Grid</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom Grid</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom Grid</option></select></div>`; } 
+            else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Judul Blok Struktur</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">*Data anggota ditarik otomatis dari tabel Sistem (Menu Tracking User).</div>`; } 
+            else { html += `<div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">Konten untuk widget ini ditarik otomatis dari modul aktivitas Dashboard Internal User Anda.</div>`; }
 
             propForm.innerHTML = html;
         }
 
-        // UPDATE HELPERS
         function updateBlockStyle(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) b.styles[key] = val; }
-        function updateBlockData(id, key, val) { 
-            const b = layoutBlocks.find(x => x.id === id); 
-            if(b) b.data[key] = val; 
-            renderCanvas(); // Update title preview list in canvas
-        }
-        
-        function moveBlock(idx, dir) { 
-            if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return;
-            const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; 
-            renderCanvas(); 
-        }
-        
-        function removeBlock(id) { 
-            layoutBlocks = layoutBlocks.filter(b => b.id !== id); 
-            if(activeBlockId === id) { 
-                document.getElementById('prop-form').style.display='none'; 
-                document.getElementById('prop-empty').style.display='block'; 
-                activeBlockId = null;
-            }
-            renderCanvas(); 
-        }
+        function updateBlockData(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) b.data[key] = val; renderCanvas(); }
+        function moveBlock(idx, dir) { if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return; const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; renderCanvas(); }
+        function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; activeBlockId = null; } renderCanvas(); }
 
         async function saveLandingPage() {
-            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong! Tolong tambahkan setidaknya 1 blok desain.", "error");
-            
+            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong! Tambahkan setidaknya 1 blok desain.", "error");
             const payload = { workspace_id: currentWorkspaceId, layout_data: layoutBlocks, is_published: true, updated_at: new Date().toISOString() };
             const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
-            
-            if (error) {
-                showToast("Gagal menyimpan: " + error.message, 'error');
-            } else { 
-                showToast("Berhasil! Website publik diperbarui dengan struktur layout baru.", 'success'); 
-                loadLandingPageData(); 
-            }
+            if (error) { showToast("Gagal menyimpan: " + error.message, 'error'); } else { showToast("Berhasil! Website publik diperbarui.", 'success'); loadLandingPageData(); }
         }
 
-        // Dummy Chart Initiator for Analytics Menu
-        function initDummyCharts() {
-            if (document.getElementById('publicTrafficChart').classList.contains('chartjs-render-monitor')) return;
-            new Chart(document.getElementById('publicTrafficChart').getContext('2d'), { type: 'line', data: { labels: ['S', 'S', 'R', 'K', 'J', 'S', 'M'], datasets: [{ label: 'Visits', data: [12, 19, 3, 5, 2, 30, 45], borderColor: '#F6B23B'}] }});
-            new Chart(document.getElementById('userActivityChart').getContext('2d'), { type: 'bar', data: { labels: ['KPI', 'Finance', 'Proker'], datasets: [{ label: 'Modul Akses', data: [10, 25, 15], backgroundColor: '#0A3055'}] }});
+        // FIX BUG: MENGHANCURKAN GRAFIK LAMA SEBELUM MEMBUAT YANG BARU
+        function initChartsSafe() {
+            const ctx1 = document.getElementById('publicTrafficChart');
+            const ctx2 = document.getElementById('userActivityChart');
+            
+            if(ctx1 && ctx2) {
+                // Destroy jika sudah pernah dibuat sebelumnya
+                if (chartTraffic) chartTraffic.destroy();
+                if (chartActivity) chartActivity.destroy();
+                
+                chartTraffic = new Chart(ctx1.getContext('2d'), { 
+                    type: 'line', 
+                    data: { labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], datasets: [{ label: 'Visits', data: [12, 19, 3, 5, 2, 30, 45], borderColor: '#F6B23B', tension: 0.4}] }
+                });
+                
+                chartActivity = new Chart(ctx2.getContext('2d'), { 
+                    type: 'bar', 
+                    data: { labels: ['KPI', 'Finance', 'Proker'], datasets: [{ label: 'Modul Akses', data: [10, 25, 15], backgroundColor: '#0A3055'}] }
+                });
+            }
         }
     </script>
 </body>
