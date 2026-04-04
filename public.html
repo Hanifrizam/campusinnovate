@@ -98,6 +98,17 @@
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
         document.getElementById('year').innerText = new Date().getFullYear();
 
+        // Helper untuk mencegah syntax error string
+        function escapeHtml(unsafe) {
+            if(!unsafe) return '';
+            return unsafe
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const workspaceId = urlParams.get('workspace');
@@ -106,164 +117,177 @@
                 document.getElementById('loader').innerHTML = `<h2 style="color:red;">Akses Ditolak: Parameter Workspace ID Hilang!</h2>`; return;
             }
 
-            const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', workspaceId).single();
-            if (!config || !config.is_published) {
-                document.getElementById('loader').innerHTML = `<h2>Mohon Maaf, halaman ini belum dipublikasikan oleh Admin.</h2>`; return;
-            }
-
-            const containerHtml = document.getElementById('main-content');
-            let rawBlocks = config.layout_data || [];
-            
-            // FIX ERROR: Backward Compatibility Parser untuk memastikan render tidak gagal membaca data versi lama
-            let blocks = rawBlocks.map(b => {
-                if (!b.styles) b.styles = { bg: 'transparent', padding: '20px', borderRadius: '15px' };
-                if (!b.data) {
-                    b.data = {};
-                    if(b.title !== undefined) b.data.title = b.title;
-                    if(b.subtitle !== undefined) b.data.subtitle = b.subtitle;
-                    if(b.content !== undefined) b.data.content = b.content;
-                    if(b.url !== undefined) b.data.url = b.url;
-                    if(b.columns !== undefined) b.data.columns = b.columns;
-                    if(b.style !== undefined) b.data.style = b.style;
-                    if(b.align !== undefined) b.data.align = b.align;
-                    if(b.width !== undefined) b.data.width = b.width;
+            try {
+                const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', workspaceId).single();
+                if (!config || !config.is_published) {
+                    document.getElementById('loader').innerHTML = `<h2>Mohon Maaf, halaman ini belum dipublikasikan oleh Admin.</h2>`; return;
                 }
-                return b;
-            });
-            
-            // Render Loop Engine
-            for (let i = 0; i < blocks.length; i++) {
-                let b = blocks[i];
-                // Ekstrak styling properties
-                let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
-                let inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
+
+                const containerHtml = document.getElementById('main-content');
+                let rawBlocks = config.layout_data || [];
                 
-                let html = `<section class="dynamic-block" style="${inlineStyle}"><div class="page-container">`;
+                let blocks = rawBlocks.map(b => {
+                    if (!b.styles) b.styles = { bg: 'transparent', padding: '20px', borderRadius: '15px' };
+                    if (!b.data) {
+                        b.data = {};
+                        if(b.title !== undefined) b.data.title = b.title;
+                        if(b.subtitle !== undefined) b.data.subtitle = b.subtitle;
+                        if(b.content !== undefined) b.data.content = b.content;
+                        if(b.url !== undefined) b.data.url = b.url;
+                        if(b.columns !== undefined) b.data.columns = b.columns;
+                        if(b.style !== undefined) b.data.style = b.style;
+                        if(b.align !== undefined) b.data.align = b.align;
+                        if(b.width !== undefined) b.data.width = b.width;
+                    }
+                    return b;
+                });
+                
+                // Gunakan Array untuk menampung DOM (Aman dari Syntax Error Literal)
+                let blocksHTMLString = '';
 
-                if (b.type === 'hero') {
-                    let bgImg = b.data.url ? `background-image: url('${b.data.url}');` : `background-color: var(--theme-color);`;
-                    html = `<section class="dynamic-block hero-layout" style="border-radius: ${b.styles.borderRadius}; ${bgImg}">
-                                <div class="hero-content">
-                                    <h1>${b.data.title || 'Judul Organisasi'}</h1><p>${b.data.subtitle || ''}</p>
-                                </div>
-                            </section>`;
-                } 
-                else if (b.type === 'text') {
-                    html += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${(b.data.content || '').replace(/\n/g, '<br>')}</div>`;
-                }
-                else if (b.type === 'image') {
-                    html += `<div style="text-align:${b.data.align || 'center'};"><img src="${b.data.url}" style="width:${b.data.width || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:500px; object-fit:cover;"></div>`;
-                }
-                else if (b.type === 'video') {
-                    html += `<div><iframe src="${b.data.url}" style="width:100%; height:400px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1);"></iframe></div>`;
-                }
-                else if (b.type === 'newsletter') {
-                    html += `<div class="widget-newsletter" style="border-radius:${b.styles.borderRadius};"><h3 style="margin-bottom:10px; color:#e67e22;"><i class="fa-solid fa-bullhorn"></i> ${b.data.title}</h3><p style="color:#64748b;">${b.data.content}</p></div>`;
-                }
-                else if (b.type === 'divider') {
-                    html += `<hr style="border:0; border-top: 3px ${b.data.style || 'solid'} #cbd5e1; margin: 10px 0;">`;
-                }
-                else if (b.type === 'grid-news') {
-                    let cols = b.data.columns || '3';
-                    html += `<h2 class="section-heading">${b.data.title || 'Kabar Terbaru'}</h2>
-                             <div class="news-grid" style="grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'230px':'300px'}, 1fr));">`;
+                for (let i = 0; i < blocks.length; i++) {
+                    let b = blocks[i];
+                    let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
+                    let inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
                     
-                    // Contoh Layout Grid Dummy Berita
-                    for(let j=1; j<=parseInt(cols); j++) {
-                        html += `
-                        <div class="news-card" style="border-radius: ${b.styles.borderRadius};">
-                            <div class="news-image" style="background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&q=80');"></div>
-                            <div class="news-body">
-                                <div class="news-meta"><span><i class="fa-solid fa-calendar"></i> Hari Ini</span></div>
-                                <h3 class="news-title">Agenda Strategis Organisasi Bagian ${j}</h3>
-                                <p class="news-desc">Informasi terkait agenda yang akan dilaksanakan untuk mendorong kemajuan organisasi.</p>
-                            </div>
-                        </div>`;
+                    let htmlChunk = `<section class="dynamic-block" style="${inlineStyle}"><div class="page-container">`;
+
+                    if (b.type === 'hero') {
+                        let bgImg = b.data.url ? `background-image: url('${escapeHtml(b.data.url)}');` : `background-color: var(--theme-color);`;
+                        htmlChunk = `<section class="dynamic-block hero-layout" style="border-radius: ${b.styles.borderRadius}; ${bgImg}">
+                                    <div class="hero-content">
+                                        <h1>${escapeHtml(b.data.title) || 'Judul Organisasi'}</h1><p>${escapeHtml(b.data.subtitle) || ''}</p>
+                                    </div>
+                                </section>`;
+                    } 
+                    else if (b.type === 'text') {
+                        let textContent = (b.data.content || '').replace(/\n/g, '<br>');
+                        htmlChunk += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${textContent}</div>`;
                     }
-                    html += `</div>`;
-                }
-                else if (b.type === 'struktur') {
-                    html += `<h2 class="section-heading">${b.data.title || 'Struktur Kabinet'}</h2><div class="struktur-grid">`;
-                    const { data: members } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', workspaceId);
-                    if(members && members.length > 0) {
-                        members.forEach(m => {
-                            html += `<div class="member-card" style="border-radius: ${b.styles.borderRadius};"><div class="member-avatar"><i class="fa-solid fa-user"></i></div><div class="member-name">${m.nama_user || 'Anggota'}</div><div class="member-role">${m.role}</div></div>`;
+                    else if (b.type === 'image') {
+                        htmlChunk += `<div style="text-align:${escapeHtml(b.data.align) || 'center'};"><img src="${escapeHtml(b.data.url)}" style="width:${escapeHtml(b.data.width) || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:500px; object-fit:cover;"></div>`;
+                    }
+                    else if (b.type === 'video') {
+                        htmlChunk += `<div><iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:400px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1);"></iframe></div>`;
+                    }
+                    else if (b.type === 'newsletter') {
+                        htmlChunk += `<div class="widget-newsletter" style="border-radius:${b.styles.borderRadius};"><h3 style="margin-bottom:10px; color:#e67e22;"><i class="fa-solid fa-bullhorn"></i> ${escapeHtml(b.data.title)}</h3><p style="color:#64748b;">${escapeHtml(b.data.content)}</p></div>`;
+                    }
+                    else if (b.type === 'divider') {
+                        htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #cbd5e1; margin: 10px 0;">`;
+                    }
+                    else if (b.type === 'grid-news') {
+                        let cols = b.data.columns || '3';
+                        htmlChunk += `<h2 class="section-heading">${escapeHtml(b.data.title) || 'Kabar Terbaru'}</h2>
+                                 <div class="news-grid" style="grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'230px':'300px'}, 1fr));">`;
+                        for(let j=1; j<=parseInt(cols); j++) {
+                            htmlChunk += `
+                            <div class="news-card" style="border-radius: ${b.styles.borderRadius};">
+                                <div class="news-image" style="background-image: url('https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&q=80');"></div>
+                                <div class="news-body">
+                                    <div class="news-meta"><span><i class="fa-solid fa-calendar"></i> Hari Ini</span></div>
+                                    <h3 class="news-title">Agenda Strategis Organisasi Bagian ${j}</h3>
+                                    <p class="news-desc">Informasi terkait agenda yang akan dilaksanakan untuk mendorong kemajuan organisasi.</p>
+                                </div>
+                            </div>`;
+                        }
+                        htmlChunk += `</div>`;
+                    }
+                    else if (b.type === 'struktur') {
+                        htmlChunk += `<h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Kabinet'}</h2><div class="struktur-grid" id="struktur-container-${i}">Memuat anggota...</div>`;
+                        
+                        // Async load members
+                        supabaseClient.from('workspace_members').select('*').eq('workspace_id', workspaceId).then(({data: members}) => {
+                            let sHtml = '';
+                            if(members && members.length > 0) {
+                                members.forEach(m => { sHtml += `<div class="member-card" style="border-radius: ${b.styles.borderRadius};"><div class="member-avatar"><i class="fa-solid fa-user"></i></div><div class="member-name">${escapeHtml(m.nama_user) || 'Anggota'}</div><div class="member-role">${escapeHtml(m.role)}</div></div>`; });
+                            } else { sHtml = `<p style="color:#777;">Data kepengurusan belum tersedia di dashboard internal.</p>`; }
+                            let sc = document.getElementById(`struktur-container-${i}`);
+                            if(sc) sc.innerHTML = sHtml;
                         });
-                    } else {
-                        html += `<p style="color:#777;">Data kepengurusan belum tersedia di dashboard internal.</p>`;
                     }
-                    html += `</div>`;
-                }
-                else if (b.type === 'finance') {
-                    const { data: fData } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single();
-                    let total = fData ? parseFloat(fData.total_rab) : 0; let real = fData ? parseFloat(fData.realisasi_rab) : 0;
-                    html += `
-                        <h2 class="section-heading"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
-                        <div class="data-grid-2">
-                            <div>
-                                <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #e2e8f0;">
-                                    <div><h3 style="color:#64748b; font-size:1rem; margin-bottom:5px;">Rencana Anggaran</h3><div class="amount" style="color:#1e293b;">${formatRp(total)}</div></div>
+                    else if (b.type === 'finance') {
+                        htmlChunk += `
+                            <h2 class="section-heading"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
+                            <div class="data-grid-2">
+                                <div>
+                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #e2e8f0;">
+                                        <div><h3 style="color:#64748b; font-size:1rem; margin-bottom:5px;">Rencana Anggaran</h3><div class="amount" style="color:#1e293b;" id="fin-rab-${i}">...</div></div>
+                                    </div>
+                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #2ecc71;">
+                                        <div><h3 style="color:#64748b; font-size:1rem; margin-bottom:5px;">Realisasi / Terpakai</h3><div class="amount" style="color:#2ecc71;" id="fin-real-${i}">...</div></div>
+                                    </div>
                                 </div>
-                                <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #2ecc71;">
-                                    <div><h3 style="color:#64748b; font-size:1rem; margin-bottom:5px;">Realisasi / Terpakai</h3><div class="amount" style="color:#2ecc71;">${formatRp(real)}</div></div>
-                                </div>
-                            </div>
-                            <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius};"><canvas id="chart-fin-${i}" style="max-height:220px;"></canvas></div>
-                        </div>`;
+                                <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius};"><canvas id="chart-fin-${i}" style="max-height:220px;"></canvas></div>
+                            </div>`;
+                        
+                        // Async load finance
+                        supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single().then(({data: fData}) => {
+                            let total = fData ? parseFloat(fData.total_rab) : 0; let real = fData ? parseFloat(fData.realisasi_rab) : 0;
+                            let v1 = document.getElementById(`fin-rab-${i}`); if(v1) v1.innerText = formatRp(total);
+                            let v2 = document.getElementById(`fin-real-${i}`); if(v2) v2.innerText = formatRp(real);
+                            
+                            let ctx = document.getElementById(`chart-fin-${i}`);
+                            if(ctx) {
+                                new Chart(ctx.getContext('2d'), {
+                                    type: 'doughnut', data: { labels: ['Terpakai', 'Tersisa'], datasets: [{ data: [real, total-real<0?0:total-real], backgroundColor: ['#2ecc71', '#e2e8f0'] }] },
+                                    options: { plugins: { legend: { position: 'bottom'} } }
+                                });
+                            }
+                        });
+                    }
+                    else if (b.type === 'kpi') {
+                        htmlChunk += `<h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2><div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;" id="kpi-container-${i}">Memuat KPI...</div>`;
+                        
+                        // Async load KPI
+                        supabaseClient.from('kpi_items').select('*').eq('workspace_id', workspaceId).then(({data: kData}) => {
+                            let kpiHtml = '';
+                            if(!kData || kData.length === 0) kpiHtml = '<p style="color:#aaa;">Belum ada target KPI yang ditetapkan.</p>';
+                            else {
+                                kData.forEach(kpi => {
+                                    let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
+                                    if(persen > 100) persen = 100;
+                                    kpiHtml += `<div class="kpi-card" style="border-radius: ${b.styles.borderRadius};"><strong style="color: #2d3436; font-size:1.1rem;">${escapeHtml(kpi.nama_kpi)}</strong><div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-top:15px; color:#777;"><span>Target: <b>${escapeHtml(kpi.target)} ${escapeHtml(kpi.satuan)}</b></span><span style="color:${persen >= 100 ? '#2ecc71' : 'var(--theme-color)'}; font-weight:800;">${escapeHtml(kpi.capaian)} ${escapeHtml(kpi.satuan)} (${persen.toFixed(1)}%)</span></div><div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: ${persen}%; background: ${persen >= 100 ? '#2ecc71' : 'var(--theme-color)'};"></div></div></div>`;
+                                });
+                            }
+                            let kc = document.getElementById(`kpi-container-${i}`); if(kc) kc.innerHTML = kpiHtml;
+                        });
+                    }
+                    else if (b.type === 'program') {
+                        htmlChunk += `<h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2><div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>`;
+                        
+                        // Async load Programs
+                        supabaseClient.from('programs').select('*').eq('workspace_id', workspaceId).then(({data: pData}) => {
+                            let pHtml = '';
+                            if(pData && pData.length > 0) {
+                                pData.forEach(p => {
+                                    let bg = p.status==='Selesai'?'#dcfce7':(p.status==='Progress'?'#fef3c7':'#f1f5f9');
+                                    let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
+                                    pHtml += `<div class="prog-item" style="border-radius: ${b.styles.borderRadius};"><h3 style="font-size:1.1rem; margin-bottom:10px; color:var(--text);">${escapeHtml(p.nama_program)}</h3><p style="font-size:0.85rem; color:#64748b;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p><span class="badge-status" style="background:${bg}; color:${col};">${escapeHtml(p.status)}</span></div>`;
+                                });
+                            } else { pHtml = `<p style="color:#777;">Belum ada rekapitulasi data program kerja.</p>`; }
+                            let pc = document.getElementById(`prog-container-${i}`); if(pc) pc.innerHTML = pHtml;
+                        });
+                    }
+
+                    if(b.type !== 'hero') htmlChunk += `</div></section>`;
                     
-                    setTimeout(() => {
-                        new Chart(document.getElementById(`chart-fin-${i}`).getContext('2d'), {
-                            type: 'doughnut', data: { labels: ['Terpakai', 'Tersisa'], datasets: [{ data: [real, total-real<0?0:total-real], backgroundColor: ['#2ecc71', '#e2e8f0'] }] },
-                            options: { plugins: { legend: { position: 'bottom'} } }
-                        });
-                    }, 500);
-                }
-                else if (b.type === 'kpi') {
-                    const { data: kData } = await supabaseClient.from('kpi_items').select('*').eq('workspace_id', workspaceId);
-                    let kpiHtml = '';
-                    if(!kData || kData.length === 0) kpiHtml = '<p style="color:#aaa;">Belum ada target KPI yang ditetapkan.</p>';
-                    else {
-                        kData.forEach(kpi => {
-                            let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
-                            if(persen > 100) persen = 100;
-                            kpiHtml += `
-                            <div class="kpi-card" style="border-radius: ${b.styles.borderRadius};">
-                                <strong style="color: #2d3436; font-size:1.1rem;">${kpi.nama_kpi}</strong>
-                                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-top:15px; color:#777;">
-                                    <span>Target: <b>${kpi.target} ${kpi.satuan}</b></span>
-                                    <span style="color:${persen >= 100 ? '#2ecc71' : 'var(--theme-color)'}; font-weight:800;">${kpi.capaian} ${kpi.satuan} (${persen.toFixed(1)}%)</span>
-                                </div>
-                                <div class="kpi-bar-bg"><div class="kpi-bar-fill" style="width: ${persen}%; background: ${persen >= 100 ? '#2ecc71' : 'var(--theme-color)'};"></div></div>
-                            </div>`;
-                        });
-                    }
-                    html += `<h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2><div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">${kpiHtml}</div>`;
-                }
-                else if (b.type === 'program') {
-                    const { data: pData } = await supabaseClient.from('programs').select('*').eq('workspace_id', workspaceId);
-                    html += `<h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2><div class="prog-grid">`;
-                    if(pData && pData.length > 0) {
-                        pData.forEach(p => {
-                            let bg = p.status==='Selesai'?'#dcfce7':(p.status==='Progress'?'#fef3c7':'#f1f5f9');
-                            let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
-                            html += `<div class="prog-item" style="border-radius: ${b.styles.borderRadius};">
-                                <h3 style="font-size:1.1rem; margin-bottom:10px; color:var(--text);">${p.nama_program}</h3>
-                                <p style="font-size:0.85rem; color:#64748b;"><i class="fa-regular fa-calendar"></i> ${p.tanggal_pelaksanaan || 'Belum diatur'}</p>
-                                <span class="badge-status" style="background:${bg}; color:${col};">${p.status}</span>
-                            </div>`;
-                        });
-                    } else { html += `<p style="color:#777;">Belum ada rekapitulasi data program kerja.</p>`; }
-                    html += `</div>`;
+                    blocksHTMLString += htmlChunk;
                 }
 
-                if(b.type !== 'hero') html += `</div></section>`;
-                containerHtml.innerHTML += html;
+                // Inject safely
+                containerHtml.innerHTML = blocksHTMLString;
+
+                // Animate entry
+                document.querySelectorAll('.dynamic-block').forEach((el, index) => { el.style.animationDelay = `${index * 0.1s}`; });
+
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('footer').style.display = 'block';
+
+            } catch(e) {
+                document.getElementById('loader').innerHTML = `<h2 style="color:red;">Error saat merender halaman: ${e.message}</h2>`;
+                console.error(e);
             }
-
-            document.querySelectorAll('.dynamic-block').forEach((el, index) => { el.style.animationDelay = `${index * 0.1s}`; });
-
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('footer').style.display = 'block';
         });
     </script>
 </body>
