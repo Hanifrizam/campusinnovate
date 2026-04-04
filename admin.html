@@ -35,20 +35,21 @@
         .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; justify-content: center;}
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); }
         .btn-danger { background: var(--red); color: white; padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;}
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4); }
         .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
         .menu-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
         .menu-content.active { display: block; }
         
         /* ADVANCED BUILDER LAYOUT */
         .builder-wrapper { display: flex; gap: 20px; height: calc(100vh - 120px); }
-        .builder-tools { width: 250px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 15px;}
+        .builder-tools { width: 250px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
         .builder-canvas-container { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .builder-properties { width: 300px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
+        .builder-properties { width: 320px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
         .builder-properties.active { display: block; animation: slideInRight 0.3s ease; }
         
         /* TOOLBOX */
-        .tool-category { font-size: 0.75rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;}
-        .tool-btn { background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; cursor: grab; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 10px; transition: 0.2s; margin-bottom: 8px;}
+        .tool-category { font-size: 0.75rem; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;}
+        .tool-btn { background: #f8fafc; border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; cursor: grab; font-size: 0.8rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 10px; transition: 0.2s;}
         .tool-btn:hover { border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); transform: translateX(3px);}
         
         /* CANVAS */
@@ -59,8 +60,9 @@
         .build-block { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 15px; position: relative; cursor: pointer; animation: slideUp 0.3s ease; transition: 0.2s;}
         .build-block:hover { border-color: var(--blue); box-shadow: 0 4px 10px rgba(52, 152, 219, 0.1);}
         .build-block.selected { border: 2px solid var(--secondary); box-shadow: 0 4px 15px rgba(246, 178, 59, 0.2); transform: scale(1.01);}
-        .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #eee;}
+        .block-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 1px dashed #eee;}
         .block-title { font-weight: bold; color: var(--primary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;}
+        .block-preview-text { font-size: 0.8rem; color: #777; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .block-actions button { background: #f8fafc; border: 1px solid #eee; padding: 5px 8px; border-radius: 5px; cursor: pointer; color: #64748b; margin-left: 5px; transition: 0.2s;}
         .block-actions button:hover { background: var(--primary); color: white; }
         .block-actions .del-btn:hover { background: var(--red); color: white; }
@@ -171,26 +173,32 @@
             </div>
 
             <div id="menu-builder" class="menu-content">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h2 style="color: var(--primary); margin: 0;"><i class="fa-solid fa-pen-ruler"></i> Web Builder Studio</h2>
-                        <p style="font-size: 0.8rem; color: #777;">Drag komponen ke kanvas, klik komponen untuk mengatur detail (Warna, Kolom, Shape).</p>
+                        <p style="font-size: 0.8rem; color: #777;">Drag komponen ke kanvas, klik komponen untuk mengatur detail layout (Warna, Padding, Shape).</p>
                     </div>
                     <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-cloud-arrow-up"></i> Publish Update</button>
                 </div>
 
                 <div class="builder-wrapper">
                     <div class="builder-tools">
-                        <div class="tool-category">Struktur & Layout</div>
+                        <div class="tool-category">Struktur Utama</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-image"></i> Hero Section</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'text')"><i class="fa-solid fa-align-left"></i> Teks / Artikel</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'grid-news')"><i class="fa-solid fa-table-cells-large"></i> Grid Berita/Event</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'text')"><i class="fa-solid fa-align-left"></i> Paragraf Artikel</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'image')"><i class="fa-solid fa-image"></i> Single Image</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'video')"><i class="fa-brands fa-youtube"></i> Video Embed</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'divider')"><i class="fa-solid fa-minus"></i> Divider</div>
+                        
+                        <div class="tool-category">Modul Berita & Info</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'grid-news')"><i class="fa-solid fa-table-cells-large"></i> Grid Artikel/Berita</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'newsletter')"><i class="fa-regular fa-newspaper"></i> Newsletter / Pengumuman</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'struktur')"><i class="fa-solid fa-sitemap"></i> Struktur Kabinet</div>
                         
-                        <div class="tool-category" style="margin-top: 10px;">Widget Transparansi</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'finance')"><i class="fa-solid fa-wallet" style="color:var(--blue);"></i> Realisasi Keuangan</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'kpi')"><i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Capaian KPI</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Timeline Proker</div>
+                        <div class="tool-category">Widget Transparansi</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'finance')"><i class="fa-solid fa-wallet" style="color:var(--blue);"></i> Keuangan Dashboard</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'kpi')"><i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Capaian KPI Target</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Status Program Kerja</div>
                     </div>
 
                     <div class="builder-canvas-container">
@@ -204,10 +212,10 @@
 
                     <div class="builder-properties" id="properties-panel">
                         <h3 style="font-size: 1rem; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">
-                            <i class="fa-solid fa-sliders"></i> Pengaturan Blok
+                            <i class="fa-solid fa-sliders"></i> Detail Komponen
                         </h3>
                         <div id="prop-empty" style="color: #aaa; font-size: 0.85rem; text-align: center; margin-top: 50px;">
-                            Klik salah satu blok di kanvas untuk memunculkan pengaturan detail.
+                            Klik salah satu blok di kanvas untuk memunculkan pengaturan spesifik.
                         </div>
                         <div id="prop-form" style="display: none;">
                             </div>
@@ -218,36 +226,39 @@
             <div id="menu-premium" class="menu-content">
                 <div class="card pricing-card">
                     <div class="badge">PRO</div>
-                    <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">Gunakan Domain Organisasi Anda</h2>
-                    <p style="color: #666; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Tingkatkan profesionalitas dengan custom domain (contoh: <b>www.bem-ipb.or.id</b>). Hilangkan watermark Campus Innovate dan dapatkan analitik prioritas.</p>
+                    <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px;">Custom Domain Instansi Anda</h2>
+                    <p style="color: #666; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Ubah URL publikasi menjadi lebih profesional (contoh: <b>www.bem-fakultas.or.id</b>). Tanpa *watermark* dan dilengkapi layanan *Dedicated Cloud Hosting*.</p>
                     
                     <div style="background: white; border: 1px solid #eee; padding: 20px; border-radius: 10px; max-width: 500px; margin: 0 auto 30px; text-align: left;">
                         <div class="prop-group">
-                            <label>Cek Ketersediaan Domain</label>
+                            <label>Cek Ketersediaan Nama Domain</label>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" placeholder="nama-organisasi" style="flex: 1;">
                                 <select style="width: 100px;">
                                     <option>.or.id</option>
                                     <option>.com</option>
                                     <option>.id</option>
+                                    <option>.ac.id</option>
                                 </select>
-                                <button class="btn-primary" style="padding: 10px 15px;">Cek</button>
+                                <button class="btn-primary" style="padding: 10px 15px;">Periksa</button>
                             </div>
                         </div>
                     </div>
 
-                    <button class="btn-primary" style="font-size: 1.1rem; padding: 15px 40px; background: #000; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"><i class="fa-solid fa-rocket"></i> Hubungi Tim Sales Kami</button>
+                    <button class="btn-primary" style="font-size: 1.1rem; padding: 15px 40px; background: #000; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i> Hubungi Tim Support Sales</button>
                 </div>
             </div>
 
             <div id="menu-users" class="menu-content">
                 <div class="card">
                     <h2>Tracking Aktivitas Internal</h2>
-                    <p>Real-time log user panel.</p>
-                    <table style="width:100%; text-align:left;">
-                        <thead><tr><th>User</th><th>Status</th></tr></thead>
-                        <tbody id="member-list"><tr><td colspan="2">Memuat...</td></tr></tbody>
-                    </table>
+                    <p>Real-time log keberadaan user di dalam workspace dashboard.</p>
+                    <div style="overflow-x: auto;">
+                        <table style="width:100%; text-align:left;">
+                            <thead><tr><th>Identitas User</th><th>Status Saat Ini</th></tr></thead>
+                            <tbody id="member-list"><tr><td colspan="2">Data akan dimuat otomatis via real-time presence...</td></tr></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div id="menu-analytics" class="menu-content">
@@ -261,7 +272,6 @@
     </div>
 
     <script>
-        // INISIALISASI SUPABASE (Biarkan sesuai aslinya)
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -270,7 +280,6 @@
         let layoutBlocks = [];
         let activeBlockId = null;
 
-        // FUNGSI DASAR
         function toggleSidebar() {
             document.getElementById('appSidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -287,11 +296,26 @@
             document.getElementById(`menu-${menu}`).classList.add('active');
             event.currentTarget.classList.add('active');
             if(window.innerWidth <= 768) toggleSidebar();
+            
+            // Re-render chart if analytics menu clicked
+            if (menu === 'analytics') initDummyCharts();
         }
         function goToUserDashboard() { if (currentWorkspaceId) window.open(`user.html?workspace=${currentWorkspaceId}`, '_blank'); }
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
 
-        // BOOTSTRAP DATA
+        // MENDIFINISIKAN FUNGSI HAPUS (Fix Error Reference)
+        async function deleteLandingPage() {
+            if(confirm("Yakin ingin menghapus seluruh website publik ini beserta desainnya?")) {
+                const { error } = await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
+                if (!error) {
+                    showToast("Website berhasil dihapus.", 'info');
+                    loadLandingPageData(); // Reload UI
+                } else {
+                    showToast("Gagal menghapus: " + error.message, 'error');
+                }
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
@@ -303,6 +327,7 @@
                 document.getElementById('setup-workspace-section').style.display = 'none';
                 document.getElementById('active-workspace-section').style.display = 'block';
                 document.getElementById('header-workspace-name').innerText = wsData.nama_organisasi;
+                document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
                 await loadLandingPageData();
             } else {
                 document.getElementById('setup-workspace-section').style.display = 'block';
@@ -310,16 +335,46 @@
         });
 
         // ==========================================
-        // ADVANCED BUILDER LOGIC
+        // SYSTEM BACKWARD COMPATIBILITY & LOADING
         // ==========================================
         async function loadLandingPageData() {
             const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
+            const statusTxt = document.getElementById('ws-status-text');
+            const linkBtn = document.getElementById('link-public');
+            const delBtn = document.getElementById('btn-hapus-web');
+
             if (data && data.is_published) {
-                layoutBlocks = data.layout_data || [];
-                document.getElementById('ws-status-text').innerHTML = `<span style="color:var(--green); font-weight:bold;">Website Aktif</span>`;
-                document.getElementById('link-public').href = `public.html?workspace=${currentWorkspaceId}`;
-                document.getElementById('link-public').style.display = 'inline-flex';
-                document.getElementById('btn-hapus-web').style.display = 'inline-flex';
+                // FIX ERROR 1: Migrasi otomatis struktur lama (tanpa .data & .styles) ke struktur baru.
+                let rawBlocks = data.layout_data || [];
+                layoutBlocks = rawBlocks.map(b => {
+                    // Beri default style jika tidak ada
+                    if (!b.styles) {
+                        b.styles = { bg: '#ffffff', padding: '40px', borderRadius: '15px' };
+                    }
+                    // Pindahkan atribut lama ke object 'data'
+                    if (!b.data) {
+                        b.data = {};
+                        if(b.title !== undefined) b.data.title = b.title;
+                        if(b.subtitle !== undefined) b.data.subtitle = b.subtitle;
+                        if(b.content !== undefined) b.data.content = b.content;
+                        if(b.url !== undefined) b.data.url = b.url;
+                        if(b.columns !== undefined) b.data.columns = b.columns;
+                        if(b.style !== undefined) b.data.style = b.style;
+                        if(b.align !== undefined) b.data.align = b.align;
+                        if(b.width !== undefined) b.data.width = b.width;
+                    }
+                    return b;
+                });
+
+                statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check"></i> Website Telah Terpublikasi</span>`;
+                linkBtn.href = `public.html?workspace=${currentWorkspaceId}`;
+                linkBtn.style.display = 'inline-flex';
+                delBtn.style.display = 'inline-flex';
+            } else {
+                layoutBlocks = [];
+                statusTxt.innerHTML = `<span style="color:#aaa;"><i class="fa-solid fa-circle-exclamation"></i> Belum ada website yang dibuat.</span>`;
+                linkBtn.style.display = 'none';
+                delBtn.style.display = 'none';
             }
             renderCanvas();
         }
@@ -333,21 +388,27 @@
             const type = e.dataTransfer.getData('blockType');
             if(!type) return;
 
-            // Default Schema untuk setiap blok
+            // Default Format Baru
             let newBlock = { 
                 id: 'block_' + Date.now(), 
                 type: type,
-                styles: { bg: '#ffffff', padding: '40px', borderRadius: '15px' } 
+                styles: { bg: '#ffffff', padding: '40px', borderRadius: '15px' },
+                data: {}
             };
 
+            // Setup Data Default
             if(type === 'hero') { newBlock.data = { title: "Visi Misi Organisasi", subtitle: "Membangun masa depan bersama", url: "" }; }
-            if(type === 'text') { newBlock.data = { content: "Tulis narasi atau sambutan ketua di sini..." }; }
+            if(type === 'text') { newBlock.data = { content: "Tulis narasi atau informasi Anda di sini..." }; }
+            if(type === 'image') { newBlock.data = { url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80", width: "100%", align: "center" }; }
+            if(type === 'video') { newBlock.data = { url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }; }
+            if(type === 'newsletter') { newBlock.data = { title: "Berita Terkini", content: "Update terbaru kegiatan..." }; }
+            if(type === 'divider') { newBlock.data = { style: "solid" }; newBlock.styles.padding = '20px'; }
             if(type === 'grid-news') { newBlock.data = { title: "Berita & Agenda Terkini", columns: "3" }; }
-            if(type === 'struktur') { newBlock.data = { title: "Struktur Kabinet" }; }
+            if(type === 'struktur') { newBlock.data = { title: "Struktur Organisasi" }; }
             
             layoutBlocks.push(newBlock);
             renderCanvas();
-            selectBlock(newBlock.id); // Langsung buka properties
+            selectBlock(newBlock.id);
         }
 
         function renderCanvas() {
@@ -355,7 +416,7 @@
             dropzone.innerHTML = '';
             
             if(layoutBlocks.length === 0) {
-                dropzone.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 100px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px;"></i><br>Tarik elemen dari kiri ke sini</div>`;
+                dropzone.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 100px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px;"></i><br>Tarik elemen dari panel kiri ke kanvas ini</div>`;
                 return;
             }
 
@@ -364,20 +425,29 @@
                 bDiv.className = `build-block ${activeBlockId === block.id ? 'selected' : ''}`;
                 bDiv.onclick = (e) => { e.stopPropagation(); selectBlock(block.id); };
                 
-                let icon = ''; let previewText = '';
-                if(block.type === 'hero') { icon = 'fa-image'; previewText = `Hero: ${block.data.title}`; }
-                if(block.type === 'text') { icon = 'fa-align-left'; previewText = `Teks Paragraf`; }
-                if(block.type === 'grid-news') { icon = 'fa-table-cells-large'; previewText = `Grid Berita (${block.data.columns} Kolom)`; }
-                if(block.type === 'struktur') { icon = 'fa-sitemap'; previewText = `Bagan Struktur Organisasi`; }
-                if(['finance','kpi','program'].includes(block.type)) { icon = 'fa-database'; previewText = `Widget Data Dinamis: ${block.type.toUpperCase()}`; }
+                let icon = 'fa-box'; 
+                let prevText = (block.data && block.data.title) ? block.data.title : (block.data && block.data.content ? block.data.content : '');
+                
+                if(block.type === 'hero') icon = 'fa-image';
+                if(block.type === 'text') icon = 'fa-align-left';
+                if(block.type === 'image') icon = 'fa-image';
+                if(block.type === 'video') { icon = 'fa-youtube'; prevText = "Video Youtube Embedded"; }
+                if(block.type === 'newsletter') icon = 'fa-newspaper';
+                if(block.type === 'divider') { icon = 'fa-minus'; prevText = "Pembatas Ruang (Divider)"; }
+                if(block.type === 'grid-news') icon = 'fa-table-cells-large';
+                if(block.type === 'struktur') icon = 'fa-sitemap';
+                if(['finance','kpi','program'].includes(block.type)) { icon = 'fa-database'; prevText = "Widget Data: " + block.type.toUpperCase(); }
 
                 bDiv.innerHTML = `
                     <div class="block-header" style="margin:0; padding:0; border:none;">
-                        <div class="block-title"><i class="fa-solid ${icon}"></i> ${previewText}</div>
+                        <div>
+                            <div class="block-title"><i class="fa-solid ${icon}"></i> ${block.type.toUpperCase()}</div>
+                            <div class="block-preview-text">${prevText.substring(0,40)}</div>
+                        </div>
                         <div class="block-actions">
-                            <button onclick="event.stopPropagation(); moveBlock(${index}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
-                            <button onclick="event.stopPropagation(); moveBlock(${index}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
-                            <button class="del-btn" onclick="event.stopPropagation(); removeBlock('${block.id}')"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="event.stopPropagation(); moveBlock(${index}, -1)" title="Naikkan"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button onclick="event.stopPropagation(); moveBlock(${index}, 1)" title="Turunkan"><i class="fa-solid fa-arrow-down"></i></button>
+                            <button class="del-btn" onclick="event.stopPropagation(); removeBlock('${block.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -385,94 +455,155 @@
             });
         }
 
-        // PROPERTIES PANEL LOGIC
+        // ==========================================
+        // DYNAMIC PROPERTIES PANEL
+        // ==========================================
         function selectBlock(id) {
             activeBlockId = id;
-            renderCanvas(); // highlight selected
+            renderCanvas();
             const block = layoutBlocks.find(b => b.id === id);
+            if (!block) return;
             
             document.getElementById('properties-panel').classList.add('active');
             document.getElementById('prop-empty').style.display = 'none';
             const propForm = document.getElementById('prop-form');
             propForm.style.display = 'block';
             
-            // Build Form based on Block Type
+            // 1. Pengaturan Styling (Tersedia untuk semua blok)
             let html = `
                 <div class="prop-group">
-                    <label>Background Color</label>
-                    <input type="color" value="${block.styles.bg}" onchange="updateBlockStyle('${id}', 'bg', this.value)">
+                    <label>Warna Background (Latar)</label>
+                    <input type="color" value="${block.styles.bg}" onchange="updateBlockStyle('${id}', 'bg', this.value)" style="height: 40px; cursor: pointer; padding: 2px;">
                 </div>
                 <div class="prop-group">
-                    <label>Jarak / Padding</label>
+                    <label>Jarak Internal / Padding</label>
                     <select onchange="updateBlockStyle('${id}', 'padding', this.value)">
+                        <option value="10px" ${block.styles.padding==='10px'?'selected':''}>Tipis (10px)</option>
                         <option value="20px" ${block.styles.padding==='20px'?'selected':''}>Kecil (20px)</option>
-                        <option value="40px" ${block.styles.padding==='40px'?'selected':''}>Sedang (40px)</option>
-                        <option value="80px" ${block.styles.padding==='80px'?'selected':''}>Besar (80px)</option>
+                        <option value="40px" ${block.styles.padding==='40px'?'selected':''}>Normal (40px)</option>
+                        <option value="80px" ${block.styles.padding==='80px'?'selected':''}>Besar / Luas (80px)</option>
                     </select>
                 </div>
                 <div class="prop-group">
-                    <label>Bentuk / Border Radius</label>
+                    <label>Bentuk Sudut (Border Radius)</label>
                     <select onchange="updateBlockStyle('${id}', 'borderRadius', this.value)">
-                        <option value="0px" ${block.styles.borderRadius==='0px'?'selected':''}>Kotak Tajam (0px)</option>
+                        <option value="0px" ${block.styles.borderRadius==='0px'?'selected':''}>Kotak Tegas (0px)</option>
                         <option value="15px" ${block.styles.borderRadius==='15px'?'selected':''}>Sudut Halus (15px)</option>
                         <option value="30px" ${block.styles.borderRadius==='30px'?'selected':''}>Sangat Bulat (30px)</option>
                     </select>
                 </div>
-                <hr style="border:1px solid #eee; margin:20px 0;">
-                <h4 style="margin-bottom:10px; color:var(--primary); font-size:0.9rem;">Konten Internal</h4>
+                <hr style="border:1px dashed #e2e8f0; margin:20px 0;">
+                <h4 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem;">📝 Isi Konten Data</h4>
             `;
 
-            // Content Fields
+            // 2. Pengaturan Konten berdasarkan Tipe
             if(block.type === 'hero') {
                 html += `
-                    <div class="prop-group"><label>Judul Utama</label><input type="text" value="${block.data.title}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                    <div class="prop-group"><label>Sub Judul</label><textarea oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle}</textarea></div>
-                    <div class="prop-group"><label>URL Gambar Latar</label><input type="text" placeholder="https://..." value="${block.data.url}" oninput="updateBlockData('${id}', 'url', this.value)"></div>
+                    <div class="prop-group"><label>Judul Utama (Heading)</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
+                    <div class="prop-group"><label>Sub Judul / Slogan</label><textarea rows="3" oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle || ''}</textarea></div>
+                    <div class="prop-group"><label>URL Gambar Banner Background</label><input type="text" placeholder="https://..." value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>
                 `;
-            } else if (block.type === 'text') {
+            } 
+            else if (block.type === 'text') {
+                html += `<div class="prop-group"><label>Teks Paragraf (Mendukung tag HTML)</label><textarea rows="8" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`;
+            } 
+            else if (block.type === 'image') {
                 html += `
-                    <div class="prop-group"><label>Teks Paragraf (Bisa format HTML)</label><textarea rows="6" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content}</textarea></div>
-                `;
-            } else if (block.type === 'grid-news') {
-                html += `
-                    <div class="prop-group"><label>Judul Section Berita</label><input type="text" value="${block.data.title}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                    <div class="prop-group"><label>Jumlah Kolom Grid</label>
-                        <select onchange="updateBlockData('${id}', 'columns', this.value)">
-                            <option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom Berjejer</option>
-                            <option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom Berjejer</option>
-                            <option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom Berjejer</option>
+                    <div class="prop-group"><label>URL Gambar</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>
+                    <div class="prop-group"><label>Lebar Gambar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.data.width) || 100}" onchange="updateBlockData('${id}', 'width', this.value + '%')"></div>
+                    <div class="prop-group"><label>Posisi Align</label>
+                        <select onchange="updateBlockData('${id}', 'align', this.value)">
+                            <option value="left" ${block.data.align==='left'?'selected':''}>Kiri</option>
+                            <option value="center" ${block.data.align==='center'?'selected':''}>Tengah</option>
+                            <option value="right" ${block.data.align==='right'?'selected':''}>Kanan</option>
                         </select>
                     </div>
                 `;
-            } else if (block.type === 'struktur') {
-                 html += `<div class="prop-group"><label>Judul Section</label><input type="text" value="${block.data.title}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
-                 <p style="font-size:0.8rem; color:#777;">*Data anggota ditarik otomatis dari tabel User Role di Database.</p>`;
-            } else {
-                 html += `<p style="font-size:0.8rem; color:#777;">Konten untuk widget data ditarik otomatis dari aktivitas dashboard internal.</p>`;
+            }
+            else if (block.type === 'video') {
+                html += `<div class="prop-group"><label>Link Embed YouTube</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`;
+            }
+            else if (block.type === 'newsletter') {
+                html += `
+                    <div class="prop-group"><label>Judul Newsletter</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
+                    <div class="prop-group"><label>Deskripsi Singkat</label><textarea rows="3" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>
+                `;
+            }
+            else if (block.type === 'divider') {
+                html += `<div class="prop-group"><label>Tipe Garis Pembatas</label>
+                    <select onchange="updateBlockData('${id}', 'style', this.value)">
+                        <option value="solid" ${block.data.style==='solid'?'selected':''}>Garis Lurus (Solid)</option>
+                        <option value="dashed" ${block.data.style==='dashed'?'selected':''}>Garis Putus-putus (Dashed)</option>
+                        <option value="dotted" ${block.data.style==='dotted'?'selected':''}>Titik-titik (Dotted)</option>
+                    </select>
+                </div>`;
+            }
+            else if (block.type === 'grid-news') {
+                html += `
+                    <div class="prop-group"><label>Judul Bagian Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
+                    <div class="prop-group"><label>Layout Kolom (PC)</label>
+                        <select onchange="updateBlockData('${id}', 'columns', this.value)">
+                            <option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom Grid</option>
+                            <option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom Grid</option>
+                            <option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom Grid</option>
+                        </select>
+                    </div>
+                `;
+            } 
+            else if (block.type === 'struktur') {
+                 html += `<div class="prop-group"><label>Judul Blok Struktur</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div>
+                 <div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">*Data anggota ditarik otomatis dari tabel Sistem (Menu Tracking).</div>`;
+            } 
+            else {
+                 html += `<div style="background:#f1f5f9; padding:10px; border-radius:5px; font-size:0.8rem; color:#64748b;">Konten untuk widget ini (Keuangan/KPI/Proker) ditarik otomatis dan *real-time* dari modul aktivitas Dashboard Internal User Anda.</div>`;
             }
 
             propForm.innerHTML = html;
         }
 
+        // UPDATE HELPERS
         function updateBlockStyle(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) b.styles[key] = val; }
-        function updateBlockData(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) b.data[key] = val; renderCanvas(); }
+        function updateBlockData(id, key, val) { 
+            const b = layoutBlocks.find(x => x.id === id); 
+            if(b) b.data[key] = val; 
+            renderCanvas(); // Update title preview list in canvas
+        }
         
         function moveBlock(idx, dir) { 
             if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return;
             const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; 
             renderCanvas(); 
         }
+        
         function removeBlock(id) { 
             layoutBlocks = layoutBlocks.filter(b => b.id !== id); 
-            if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; }
+            if(activeBlockId === id) { 
+                document.getElementById('prop-form').style.display='none'; 
+                document.getElementById('prop-empty').style.display='block'; 
+                activeBlockId = null;
+            }
             renderCanvas(); 
         }
 
         async function saveLandingPage() {
-            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong!", "error");
+            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong! Tolong tambahkan setidaknya 1 blok desain.", "error");
+            
             const payload = { workspace_id: currentWorkspaceId, layout_data: layoutBlocks, is_published: true, updated_at: new Date().toISOString() };
             const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
-            if (error) showToast("Gagal: " + error.message, 'error'); else { showToast("Website Dipublikasi!"); loadLandingPageData(); }
+            
+            if (error) {
+                showToast("Gagal menyimpan: " + error.message, 'error');
+            } else { 
+                showToast("Berhasil! Website publik diperbarui dengan struktur layout baru.", 'success'); 
+                loadLandingPageData(); 
+            }
+        }
+
+        // Dummy Chart Initiator for Analytics Menu
+        function initDummyCharts() {
+            if (document.getElementById('publicTrafficChart').classList.contains('chartjs-render-monitor')) return;
+            new Chart(document.getElementById('publicTrafficChart').getContext('2d'), { type: 'line', data: { labels: ['S', 'S', 'R', 'K', 'J', 'S', 'M'], datasets: [{ label: 'Visits', data: [12, 19, 3, 5, 2, 30, 45], borderColor: '#F6B23B'}] }});
+            new Chart(document.getElementById('userActivityChart').getContext('2d'), { type: 'bar', data: { labels: ['KPI', 'Finance', 'Proker'], datasets: [{ label: 'Modul Akses', data: [10, 25, 15], backgroundColor: '#0A3055'}] }});
         }
     </script>
 </body>
