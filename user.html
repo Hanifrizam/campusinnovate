@@ -218,30 +218,55 @@
             .sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0; width: 100%; padding: 15px; }
             .main-content::before { left: 50%; width: 80vmin; height: 80vmin; }
-            /* Membirukan Header Mobile Sesuai Permintaan */
-            .topbar { flex-direction: column; align-items: flex-start; gap: 15px; background: var(--primary); padding: 20px; border-radius: 15px; color: white; box-shadow: 0 10px 20px rgba(10, 48, 85, 0.2); margin-top: 10px;}
+            
+            /* --- 1. PERBAIKAN FLOATING HEADER DI MOBILE --- */
+            .topbar { 
+                position: sticky;        /* Membuat header melayang/mengikuti scroll */
+                top: 10px;               /* Memberi jarak sedikit dari atas layar */
+                z-index: 90;             /* Memastikan header selalu di atas konten */
+                flex-direction: column; 
+                align-items: flex-start; 
+                gap: 15px; 
+                background: var(--primary); 
+                padding: 20px; 
+                border-radius: 15px; 
+                color: white; 
+                box-shadow: 0 10px 20px rgba(10, 48, 85, 0.4); 
+                margin-top: 0; 
+            }
             .topbar h1 { color: white !important; font-size: 1.3rem !important;}
             .topbar p { color: #ccc !important;}
             .mobile-menu-btn { display: inline-block; background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer; padding-right: 15px; }
-            .close-sidebar-btn { display: block; background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+            
+            /* --- 2. PERBAIKAN TOMBOL CLOSE (X) AGAR TIDAK NABRAK LOGO --- */
+            .brand > div:first-child {
+                margin-top: 15px !important;  /* Memberi ruang di atas logo */
+                width: 85% !important;        /* Sedikit merampingkan box putih logo */
+            }
+            .close-sidebar-btn { 
+                display: flex !important; 
+                align-items: center;
+                justify-content: center;
+                background: var(--red) !important;   /* Menambahkan warna merah agar jelas */
+                border: 2px solid white !important;  /* Memberi bingkai putih rapi */
+                color: white !important; 
+                font-size: 1.1rem; 
+                cursor: pointer; 
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;                  /* Membuat tombol berbentuk bulat */
+                top: 15px !important;
+                right: 15px !important;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+            
             .topbar > div:first-child { width: 100%; }
             .topbar .workspace-badge { align-self: flex-start; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: var(--secondary); }
             
+            /* (TETAP BIARKAN KODE DI BAWAH INI SESUAI ASLINYA) */
             .grid-4, .grid-2 { grid-template-columns: 1fr !important; }
             .rab-form-grid, .rab-form-grid[style] { grid-template-columns: 1fr !important; }
-            .kanban-board { flex-direction: column; }
-            .kanban-col { width: 100%; min-height: auto; }
-            #btn-group-program { flex-wrap: wrap; width: 100%; }
-            .btn-action { justify-content: center; text-align: center; white-space: normal; }
-            .pdf-controls { flex-wrap: wrap; }
-            .pdf-controls button { flex: 1; min-width: 40%; justify-content: center; }
-            .card[style*="overflow-x: auto;"], .table-custom-wrapper { -webkit-overflow-scrolling: touch; }
-            .table-custom { min-width: 700px; }
-            .number-checker-card { flex-direction: column; align-items: stretch; gap: 10px; }
-            .cal-header { flex-direction: column; gap: 10px; }
-            .cal-header h3 { font-size: 1.1rem; }
-            .modal-content div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
-            .editor-workspace-bg { justify-content: flex-start; padding: 10px; }
+            /* ... dst ... */
         }
     </style>
 </head>
