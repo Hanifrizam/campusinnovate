@@ -340,9 +340,10 @@
 
                 containerHtml.innerHTML = blocksHTMLString;
 
-                document.querySelectorAll('.dynamic-block').forEach((el, index) => { 
-                    el.style.animationDelay = `${index * 0.1s}`; 
-                });
+               // Kode yang sudah diperbaiki:
+document.querySelectorAll('.dynamic-block').forEach((el, index) => { 
+    el.style.animationDelay = `${index * 0.1}s`; 
+});
 
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('footer').style.display = 'block';
