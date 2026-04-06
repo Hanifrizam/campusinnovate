@@ -317,12 +317,14 @@
             document.getElementById('appSidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
         }
+        
         function showToast(msg, type = 'success') {
             const container = document.getElementById('toast-container');
             const t = document.createElement('div'); t.className = `toast ${type}`;
             t.innerHTML = `<i class="fa-solid ${type==='success'?'fa-check-circle':'fa-circle-exclamation'}" style="color:${type==='success'?'var(--green)':'var(--red)'}; font-size:1.2rem;"></i> <span>${msg}</span>`; 
             container.appendChild(t); setTimeout(() => t.remove(), 3000);
         }
+        
         function switchMenu(menu) {
             document.querySelectorAll('.menu-content').forEach(e => e.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
@@ -344,12 +346,36 @@
             }
         }
 
+        // [BUG FIX]: Fungsi hapus LP 
         async function deleteLandingPage() {
             if(confirm("Yakin ingin menghapus seluruh website publik ini beserta desainnya?")) {
                 const { error } = await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
                 if (!error) { showToast("Website berhasil dihapus.", 'success'); loadLandingPageData(); } 
                 else { showToast("Gagal menghapus: " + error.message, 'error'); }
             }
+        }
+
+        // [BUG FIX]: Mengembalikan Fungsi Publish yang Hilang
+        async function saveLandingPage() {
+            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong! Tambahkan setidaknya 1 blok desain.", "error");
+            
+            // Animasi Loading Tombol
+            const btnPublish = document.querySelector('button[onclick="saveLandingPage()"]');
+            btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mempublish...';
+            btnPublish.disabled = true;
+
+            const payload = { workspace_id: currentWorkspaceId, layout_data: layoutBlocks, is_published: true, updated_at: new Date().toISOString() };
+            const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
+            
+            if (error) { 
+                showToast("Gagal menyimpan: " + error.message, 'error'); 
+            } else { 
+                showToast("Berhasil! Website publik diperbarui.", 'success'); 
+                loadLandingPageData(); 
+            }
+            
+            btnPublish.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Publish Update';
+            btnPublish.disabled = false;
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -437,13 +463,16 @@
         function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
         function dropToCanvas(e) {
             e.preventDefault();
+            e.stopPropagation(); // Mencegah trigger dobel
+            
             document.getElementById('canvas-dropzone').classList.remove('drag-over');
             const type = e.dataTransfer.getData('blockType');
             if(!type) return;
 
             let newBlock = { id: 'block_' + Date.now(), type: type, styles: { bg: '#ffffff', padding: '40px', borderRadius: '15px' }, data: {} };
 
-            if(type === 'hero') { newBlock.data = { title: "Visi Misi Organisasi", subtitle: "Membangun masa depan bersama", url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1000&q=80" }; newBlock.styles.bg = 'transparent'; }
+            // [BUG FIX]: Mengubah 'transparent' menjadi valid HEX '#0A3055'
+            if(type === 'hero') { newBlock.data = { title: "Visi Misi Organisasi", subtitle: "Membangun masa depan bersama", url: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1000&q=80" }; newBlock.styles.bg = '#0A3055'; }
             else if(type === 'text') { newBlock.data = { content: "Tulis narasi atau informasi Anda di sini. Berikan deskripsi yang jelas dan menarik untuk pengunjung." }; }
             else if(type === 'image') { newBlock.data = { url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80", width: "100%", align: "center" }; }
             else if(type === 'video') { newBlock.data = { url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }; }
@@ -465,7 +494,6 @@
             layoutBlocks.push(newBlock);
             renderCanvas();
             selectBlock(newBlock.id);
-            // Scroll to the new block
             setTimeout(() => { document.getElementById('preview-window').scrollTop = document.getElementById('preview-window').scrollHeight; }, 100);
         }
 
@@ -474,9 +502,13 @@
             const previewWindow = document.getElementById('preview-window');
             
             if(layoutBlocks.length === 0) {
-                previewWindow.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 150px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1;"></i><br>Tarik elemen dari panel kiri ke kanvas website ini</div>`;
+                // Tampilan jika kosong
+                previewWindow.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 150px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1;"></i><br>Drop elemen desain ke area website ini</div>`;
                 return;
             }
+
+            // [BUG FIX]: Wajib clear isi HTML agar tidak duplikat menumpuk
+            previewWindow.innerHTML = ''; 
 
             let htmlString = '';
 
@@ -584,7 +616,7 @@
                                     </div>`;
                 }
 
-                // Wrap with Preview Selector Logic
+                // Masukkan ke HTML dengan Format = (Overwriting), BUKAN +=
                 htmlString += `
                     <div id="section-${block.id}" class="preview-section ${isSelected}" onclick="event.stopPropagation(); selectBlock('${block.id}')" style="${inlineStyle}">
                         ${blockContent}
@@ -597,13 +629,14 @@
                 `;
             });
 
-            previewWindow.innerHTML += `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
+            // [BUG FIX]: Memakai '=' untuk menimpa konten agar tidak terjadi tumpukan duplikat
+            previewWindow.innerHTML = `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
         }
 
         // --- RENDER DYNAMIC PROPERTIES PANEL ---
         function selectBlock(id) {
             activeBlockId = id;
-            renderCanvas(); // Update selected border in preview
+            renderCanvas(); 
             
             const block = layoutBlocks.find(b => b.id === id);
             if (!block) return;
@@ -634,7 +667,6 @@
             else if (block.type === 'grid-news') { 
                 html += `<div class="prop-group"><label>Judul Section Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Jumlah Kolom (Untuk Layar Lebar)</label><select onchange="updateBlockData('${id}', 'columns', this.value); updateGridItemsLength('${id}', this.value);"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Grid Kolom</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Grid Kolom</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Grid Kolom</option></select></div><hr style="margin:20px 0; border:1px solid #eee;">`; 
                 
-                // Looping individual grid item
                 (block.data.items || []).forEach((it, idx) => {
                     html += `
                     <div class="grid-item-editor">
@@ -647,7 +679,7 @@
                 });
             } 
             else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik secara otomatis dari tabel menu "Tracking User". Desain di atas hanya preview ilustrasi.</div>`; } 
-            else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini akan otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal (Tidak perlu diatur manual).</div>`; }
+            else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal.</div>`; }
 
             propForm.innerHTML = html;
         }
@@ -676,7 +708,7 @@
                 if(b.data.items.length > cols) {
                     b.data.items.splice(cols);
                 }
-                selectBlock(blockId); // Re-render property panel
+                selectBlock(blockId); 
             }
         }
 
