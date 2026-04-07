@@ -252,17 +252,22 @@
                     <div class="badge">PRO</div>
                     <h2 style="color: var(--primary); font-size: 2rem; margin-bottom: 10px; font-weight: 800;">Custom Domain Instansi</h2>
                     <p style="color: #666; margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Ubah URL publikasi menjadi lebih profesional (contoh: <b>www.bem-fakultas.or.id</b>).</p>
-                    <div style="background: white; border: 1px solid #eee; padding: 20px; border-radius: 10px; max-width: 500px; margin: 0 auto 30px; text-align: left;">
-                        <div class="prop-group">
+                    <div style="background: white; border: 1px solid #eee; padding: 20px; border-radius: 10px; max-width: 550px; margin: 0 auto 30px; text-align: left;">
+                        <div class="prop-group" style="margin-bottom: 0;">
                             <label>Cek Ketersediaan Nama Domain</label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" placeholder="nama-organisasi" style="flex: 1;">
-                                <select style="width: 100px;">
-                                    <option>.or.id</option><option>.com</option><option>.id</option><option>.ac.id</option>
+                                <input type="text" id="domain-input" placeholder="contoh: uninus" style="flex: 1;">
+                                <select id="domain-ext" style="width: 100px;">
+                                    <option value=".com">.com</option>
+                                    <option value=".id">.id</option>
+                                    <option value=".or.id">.or.id</option>
+                                    <option value=".ac.id">.ac.id</option>
+                                    <option value=".my.id">.my.id</option>
                                 </select>
-                                <button class="btn-primary" style="padding: 10px 15px;">Periksa</button>
+                                <button id="btn-check-domain" class="btn-primary" style="padding: 10px 15px;" onclick="checkDomainAvailability()">Periksa</button>
                             </div>
                         </div>
+                        <div id="domain-result"></div>
                     </div>
                     <button class="btn-primary" style="font-size: 1.1rem; padding: 15px 40px; background: #000; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i> Hubungi Tim Support Sales</button>
                 </div>
@@ -320,6 +325,8 @@
         let onlineUsers = {}; 
         let allMembersData = [];
         let chartTraffic = null; let chartActivity = null;
+
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
 
         const escapeHtml = (unsafe) => {
             if (unsafe === null || unsafe === undefined) return '';
@@ -392,7 +399,6 @@
         function toggleFullscreenBuilder() {
             const wrapper = document.getElementById('builder-main-wrapper');
             
-            // Toggle Class Fullscreen
             wrapper.classList.toggle('builder-fullscreen');
             
             if(wrapper.classList.contains('builder-fullscreen')) {
@@ -400,6 +406,67 @@
             } else {
                 document.body.style.overflow = 'auto';
             }
+        }
+
+        // SIMULASI SEARCH ENGINE DOMAIN (Maks harga promo ~Rp 50.000)
+        function checkDomainAvailability() {
+            let inputName = document.getElementById('domain-input').value.toLowerCase().replace(/[^a-z0-9-]/g, '');
+            const ext = document.getElementById('domain-ext').value;
+            const resultContainer = document.getElementById('domain-result');
+
+            if(inputName.length < 3) {
+                showToast("Nama domain minimal 3 karakter!", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btn-check-domain');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Simulasi harga dasar per ekstensi domain
+                let basePrice = 0;
+                if(ext === '.com') basePrice = 30000;
+                else if(ext === '.id') basePrice = 40000;
+                else if(ext === '.or.id') basePrice = 25000;
+                else if(ext === '.ac.id') basePrice = 20000;
+                else if(ext === '.my.id') basePrice = 10000;
+
+                // Logika panjang karakter: Semakin pendek namanya, semakin langka/mahal.
+                // Maksimal tambahan harga adalah (15 - 3) * 1200 = Rp 14.400
+                // Base harga tertinggi (.id) = 40.000 + 14.400 = 54.400 (Mendekati ekspektasi 50k user)
+                let lengthModifier = Math.max(0, 15 - inputName.length) * 1200;
+                let finalPrice = basePrice + lengthModifier;
+
+                // Simulasi acak apakah domain tersebut sudah dipakai (biasanya nama umum)
+                const commonNames = ['bem', 'dema', 'kampus', 'univ', 'organisasi'];
+                const isTaken = commonNames.includes(inputName) && (ext === '.com' || ext === '.id');
+
+                if(isTaken) {
+                    resultContainer.innerHTML = `
+                        <div style="background: #fef2f2; border: 1px solid #f87171; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
+                            <div>
+                                <strong style="color: #b91c1c; font-size: 1.1rem;">${inputName}${ext}</strong>
+                                <div style="font-size: 0.85rem; color: #7f1d1d; margin-top: 5px;">Domain sudah tidak tersedia (Digunakan).</div>
+                            </div>
+                            <i class="fa-solid fa-circle-xmark" style="color: #ef4444; font-size: 1.5rem;"></i>
+                        </div>
+                    `;
+                } else {
+                    resultContainer.innerHTML = `
+                        <div style="background: #f0fdf4; border: 1px solid #4ade80; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
+                            <div>
+                                <strong style="color: #166534; font-size: 1.1rem;">${inputName}${ext}</strong>
+                                <div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">Tersedia! Est. Harga Promo: <b>${formatRp(finalPrice)}</b> / thn</div>
+                            </div>
+                            <button class="btn-primary" style="padding: 8px 15px; font-size: 0.85rem;" onclick="showToast('Permintaan klaim domain dikirim ke Tim Support.', 'success')"><i class="fa-solid fa-cart-shopping"></i> Klaim</button>
+                        </div>
+                    `;
+                }
+
+                btn.innerHTML = 'Periksa';
+                btn.disabled = false;
+            }, 800);
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
@@ -418,7 +485,6 @@
                 await loadLandingPageData();
                 await loadMembers();
                 
-                // Track Admin's own presence in DB to fix the "last_seen" bug universally
                 updateAdminPresenceToDB();
                 setInterval(updateAdminPresenceToDB, 60000);
                 window.addEventListener('beforeunload', () => updateAdminPresenceToDB());
@@ -453,7 +519,6 @@
             if (allMembersData.length === 0) return; 
             tbody.innerHTML = '';
             
-            // Urutkan berdasarkan yang online, lalu yang last_seen terdekat
             const sortedMembers = [...allMembersData].sort((a, b) => {
                 const aOnline = onlineUsers[a.user_id] ? 1 : 0;
                 const bOnline = onlineUsers[b.user_id] ? 1 : 0;
@@ -471,7 +536,6 @@
         }
 
         function setupRealtimePresence() {
-            // Listen to Realtime Presence Channel (For "Online/Offline" indicator)
             const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
             presenceChannel.on('presence', { event: 'sync' }, () => {
                 const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
@@ -480,12 +544,10 @@
             }).on('presence', { event: 'join' }, ({ newPresences }) => { 
                 newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); }); 
             }).on('presence', { event: 'leave' }, () => { 
-                // Delay sedikit agar DB punya waktu terupdate oleh leave event si user, lalu fetch ulang last_seen
                 setTimeout(loadMembers, 2000); 
             })
             .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
 
-            // Listen directly to DB changes on workspace_members table (For "Last Seen" bug fix)
             supabaseClient.channel('db-changes')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, payload => {
                     const updatedMember = payload.new;
@@ -563,6 +625,9 @@
 
         function renderCanvas() {
             const previewWindow = document.getElementById('preview-window');
+            
+            // [BUG FIX]: Simpan posisi Scroll saat ini sebelum merender ulang HTML
+            const currentScroll = previewWindow.scrollTop;
             
             if(layoutBlocks.length === 0) {
                 previewWindow.innerHTML = `<div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 150px;"><i class="fa-solid fa-hand-pointer" style="font-size: 3rem; margin-bottom: 15px; color: #cbd5e1;"></i><br>Drop elemen desain ke area website ini</div>`;
@@ -686,6 +751,9 @@
             });
 
             previewWindow.innerHTML = `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
+            
+            // [BUG FIX]: Mengembalikan posisi Scroll ke semula secara presisi
+            previewWindow.scrollTop = currentScroll;
         }
 
         function selectBlock(id) {
