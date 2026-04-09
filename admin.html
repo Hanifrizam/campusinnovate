@@ -147,7 +147,7 @@
         
         <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-sliders"></i> Konfigurasi Utama</div>
         <div class="nav-item" onclick="switchMenu('builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Advanced Builder</div>
-        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Tracking User</div>
+        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Tracking Pengurus</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-chart-line"></i> Analitik Interaksi</div>
         <div class="nav-item" onclick="switchMenu('premium')" style="background: rgba(246, 178, 59, 0.1); color: var(--secondary); border: 1px solid var(--secondary); margin-top: 15px;">
             <i class="fa-solid fa-crown"></i> Domain & Pro <span class="premium-badge">NEW</span>
@@ -800,7 +800,7 @@
                     </div>`;
                 });
             } 
-            else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik secara otomatis dari tabel menu "Tracking User". Desain di atas hanya preview ilustrasi.</div>`; } 
+            else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik secara otomatis dari tabel menu "Tracking Pengurus". Desain di atas hanya preview ilustrasi.</div>`; } 
             else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal.</div>`; }
 
             propForm.innerHTML = html;
@@ -880,7 +880,7 @@
                     data: { 
                         labels: labelsTraffic, 
                         datasets: [{ 
-                            label: 'User Aktif', 
+                            label: 'Pengurus Aktif', 
                             data: dataTraffic, 
                             borderColor: '#F6B23B', 
                             backgroundColor: 'rgba(246, 178, 59, 0.15)',

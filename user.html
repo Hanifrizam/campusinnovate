@@ -313,7 +313,7 @@
             <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
             
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Produktivitas Pribadi</p>
-            <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Integrasi Word & Excel</div>
+            <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Workspace</div>
         </div>
         <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1);" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
     </div>
@@ -416,10 +416,10 @@
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <label class="btn-action" style="background: var(--green); color: white; cursor: pointer;">
-                        <i class="fa-solid fa-file-excel"></i> Import Excel Cerdas
+                        <i class="fa-solid fa-file-excel"></i> Import RAB
                         <input type="file" id="upload-excel-rab" accept=".xlsx, .xls" style="display: none;" onchange="importRabFromExcel(event)">
                     </label>
-                    <button class="btn-action" onclick="exportTableToExcel('tabel-rab-asli', 'Data_Rencana_RAB')"><i class="fa-solid fa-download"></i> Export Excel</button>
+                    <button class="btn-action" onclick="exportTableToExcel('tabel-rab-asli', 'Data_Rencana_RAB')"><i class="fa-solid fa-download"></i> Export RAB</button>
                 </div>
             </div>
             
@@ -558,7 +558,7 @@
                             <th>Tanggal Input</th>
                             <th>Departemen</th>
                             <th>Program</th>
-                            <th>Keterangan Bukti</th>
+                            <th>Keterangan</th>
                             <th style="color: var(--green);">Sumber Dana Terpakai</th>
                             <th style="background: var(--green);">Nominal Keluar</th>
                             <th style="text-align: center;" class="no-export">Aksi</th>
@@ -622,18 +622,18 @@
 
         <div id="view-absensi" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2>Sistem Absensi</h2>
+                <h2>Sistem Presensi</h2>
                 <div id="absen-live-time" style="background: var(--primary); color: white; padding: 5px 15px; border-radius: 20px; font-family: monospace; font-size: 1.1rem;">00:00:00</div>
             </div>
             
             <div class="card" style="text-align: center; padding: 40px 20px;" id="panel-absen-user">
                 <i class="fa-solid fa-fingerprint" style="font-size: 4rem; color: var(--secondary); margin-bottom: 15px;"></i>
-                <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang, Peserta!</h3>
+                <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang, Pengurus!</h3>
                 <p style="color: #666; margin-bottom: 20px;">Silakan catat kehadiran Anda untuk hari ini beserta keterangannya.</p>
                 
                 <div style="max-width: 400px; margin: 0 auto 20px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
                     <div class="radio-group" style="border-bottom: 1px dashed #ccc; padding-bottom: 15px;">
-                        <label><input type="radio" name="tipe_absen" value="Harian" checked onchange="toggleAbsenProgram(false)"> Absen Daily (Harian)</label>
+                        <label><input type="radio" name="tipe_absen" value="Harian" checked onchange="toggleAbsenProgram(false)"> Presensi Kegiatan (Harian)</label>
                         <label><input type="radio" name="tipe_absen" value="Program" onchange="toggleAbsenProgram(true)"> Khusus Program</label>
                     </div>
                     <div id="absen-program-selector" style="display: none; margin-top: 15px; margin-bottom: 15px;">
@@ -679,7 +679,7 @@
                         <h3 style="color: var(--primary); margin-bottom: 15px;">Ringkasan Kehadiran Hari Ini</h3>
                         <div style="display: flex; gap: 15px;">
                             <div style="flex: 1; text-align: center; padding: 15px; background: var(--bg); border-radius: 10px;">
-                                <b style="font-size: 2rem; color: var(--primary);" id="stat-total-user">0</b><br><small>Total User Terdaftar</small>
+                                <b style="font-size: 2rem; color: var(--primary);" id="stat-total-user">0</b><br><small>Total Pengurus Terdaftar</small>
                             </div>
                             <div style="flex: 1; text-align: center; padding: 15px; background: rgba(46, 204, 113, 0.2); border-radius: 10px;">
                                 <b style="font-size: 2rem; color: var(--green);" id="stat-user-hadir">0</b><br><small>Telah Submit Absen</small>
@@ -782,7 +782,7 @@
         <div id="view-notulensi" class="view-section">
             <div id="notulensi-folder-view">
                 <div class="topbar" style="margin-bottom: 20px; flex-wrap: wrap;">
-                    <h2>Folder Notulensi (Docs)</h2>
+                    <h2>Folder Notulensi</h2>
                     <button class="btn-action" onclick="openModal('folderModal')"><i class="fa-solid fa-folder-plus"></i> Buat Folder Baru</button>
                 </div>
                 <div class="folder-grid" id="folder-grid-container">
@@ -886,7 +886,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2>Digital Office (E-Sign & Pengajuan)</h2>
-                    <p style="color: #666; font-size: 0.9rem;">Ajukan surat atau dokumen untuk ditandatangani oleh user lain atau Admin secara digital.</p>
+                    <p style="color: #666; font-size: 0.9rem;">Ajukan surat atau dokumen untuk ditandatangani oleh Pengurus lain atau Admin secara digital.</p>
                 </div>
                 <button class="btn-action" onclick="openAjukanSuratModal()"><i class="fa-solid fa-paper-plane"></i> Buat Pengajuan Baru</button>
             </div>
@@ -1178,7 +1178,7 @@
                 </div>
                 <div class="input-group">
                     <label>Pilih Penerima (Tujuan Tanda Tangan)</label>
-                    <select id="do-penerima" required><option value="">-- Memuat User... --</option></select>
+                    <select id="do-penerima" required><option value="">-- Memuat Mengurus... --</option></select>
                 </div>
                 <div class="input-group">
                     <label>Upload Dokumen PDF</label>
@@ -1386,7 +1386,7 @@
             
             if(!data || data.length === 0) { showNotification("Tidak ada data absensi untuk diexport", "error"); return; }
             
-            let csvData = [["No", "Nama User", "Tipe Absensi", "Program/Event", "Tanggal", "Waktu Masuk", "Status Kehadiran", "Detail Aktivitas/Deskripsi"]];
+            let csvData = [["No", "Nama Pengurus", "Tipe Absensi", "Program/Event", "Tanggal", "Waktu Masuk", "Status Kehadiran", "Detail Aktivitas/Deskripsi"]];
             
             data.forEach((h, i) => {
                 let progName = h.programs ? h.programs.nama_program : 'Harian/Umum';
@@ -1614,7 +1614,7 @@
             currentUserRole = roleData ? roleData.role : 'user';
             
             document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
-            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "ANGGOTA / USER";
+            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
             
             const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
             if (savedSig) { userSignatureBase64 = savedSig; }
@@ -2418,7 +2418,7 @@
                 const tgl = new Date(item.created_at).toLocaleDateString('id-ID');
                 const pengirimData = globalWorkspaceUsers.find(u => u.id === item.pengirim_id);
                 const namaPengirim = pengirimData ? pengirimData.name : 'Unknown';
-                let statusBadge = item.status === 'Disetujui' ? `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Tertandatangan</span>` : `<span style="color:#d35400; font-weight:bold;"><i class="fa-solid fa-clock"></i> Belum (Menunggu/Ditolak)</span>`;
+                let statusBadge = item.status === 'Disetujui' ? `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check-circle"></i> Signed</span>` : `<span style="color:#d35400; font-weight:bold;"><i class="fa-solid fa-clock"></i> Tertolak</span>`;
                 tbody.innerHTML += `<tr><td>${tgl}</td><td style="font-family: monospace; font-weight: bold;">${item.nomor_surat}</td><td>${item.surat_contexts?.nama_konteks || '-'}</td><td>${namaPengirim}</td><td>${statusBadge}</td><td style="text-align: center;"><a href="${item.file_url}" target="_blank" style="background: var(--blue); color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none; font-size: 0.8rem;"><i class="fa-solid fa-file-pdf"></i> Buka</a></td></tr>`;
             });
         }
