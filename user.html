@@ -133,13 +133,20 @@
         .cal-header button:hover { background: var(--secondary); color: var(--primary); }
         .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8fafc; border-bottom: 1px solid #eee;}
         .cal-day-name { text-align: center; padding: 10px 0; font-weight: 600; font-size: 0.85rem; color: var(--primary); }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(80px, auto); }
-        .cal-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 5px; position: relative; transition: 0.2s;}
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: 110px; }
+        .cal-cell { border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 5px; position: relative; transition: 0.2s; overflow-y: auto; overflow-x: hidden; }
+        .cal-cell::-webkit-scrollbar { width: 3px; }
+        .cal-cell::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .cal-cell.interactive:hover { background: #f0f4f8; cursor: pointer; }
         .cal-cell:nth-child(7n) { border-right: none; }
         .cal-date-num { font-size: 0.85rem; color: #777; font-weight: bold; margin-bottom: 5px; display: inline-block;}
-        .cal-event-badge { font-size: 0.65rem; padding: 3px 5px; border-radius: 4px; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid; font-weight: 600; transition: 0.2s;}
-        .cal-event-badge:hover { filter: brightness(0.8); border: 1px solid var(--red); opacity: 0.8; text-decoration: line-through; }
+        .cal-event-badge { font-size: 0.65rem; padding: 3px 5px; border-radius: 4px; margin-bottom: 3px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 2px solid; font-weight: 600; transition: 0.2s; position: relative; cursor: pointer;}
+        .cal-event-badge:hover::after {
+            content: attr(data-tooltip); position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: rgba(10, 48, 85, 0.95); color: white; padding: 8px 12px; border-radius: 8px; font-size: 0.75rem; 
+            white-space: pre-line; width: max-content; max-width: 200px; z-index: 999; box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+            pointer-events: none; text-align: left;
+        }
         .cal-event-badge.program { border-left-color: var(--secondary); color: #d35400; background: rgba(246, 178, 59, 0.2); }
         .cal-event-badge.rapat { border-left-color: var(--blue); color: var(--blue); background: rgba(52, 152, 219, 0.2); }
         .cal-event-badge.tugas { border-left-color: var(--green); color: var(--green); background: rgba(46, 204, 113, 0.2); }
@@ -201,6 +208,14 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
+        /* PRINT STYLE */
+        @media print {
+            body * { visibility: hidden; }
+            #notulensi-editor-view, #notulensi-editor-view * { visibility: visible; }
+            #notulensi-editor-view { position: absolute; left: 0; top: 0; width: 100%; }
+            .rte-toolbar, .btn-action { display: none !important; }
+        }
+
         /* MEDIA QUERIES */
         .mobile-overlay-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; }
         .mobile-overlay-bg.active { display: block; }
@@ -219,54 +234,33 @@
             .main-content { margin-left: 0; width: 100%; padding: 15px; }
             .main-content::before { left: 50%; width: 80vmin; height: 80vmin; }
             
-            /* --- 1. PERBAIKAN FLOATING HEADER DI MOBILE --- */
             .topbar { 
-                position: sticky;        /* Membuat header melayang/mengikuti scroll */
-                top: 10px;               /* Memberi jarak sedikit dari atas layar */
-                z-index: 90;             /* Memastikan header selalu di atas konten */
-                flex-direction: column; 
-                align-items: flex-start; 
-                gap: 15px; 
-                background: var(--primary); 
-                padding: 20px; 
-                border-radius: 15px; 
-                color: white; 
-                box-shadow: 0 10px 20px rgba(10, 48, 85, 0.4); 
-                margin-top: 0; 
+                position: sticky; top: 10px; z-index: 90; flex-direction: column; 
+                align-items: flex-start; gap: 15px; background: var(--primary); 
+                padding: 20px; border-radius: 15px; color: white; 
+                box-shadow: 0 10px 20px rgba(10, 48, 85, 0.4); margin-top: 0; 
             }
             .topbar h1 { color: white !important; font-size: 1.3rem !important;}
             .topbar p { color: #ccc !important;}
             .mobile-menu-btn { display: inline-block; background: none; border: none; font-size: 1.5rem; color: white; cursor: pointer; padding-right: 15px; }
             
-            /* --- 2. PERBAIKAN TOMBOL CLOSE (X) AGAR TIDAK NABRAK LOGO --- */
-            .brand > div:first-child {
-                margin-top: 15px !important;  /* Memberi ruang di atas logo */
-                width: 85% !important;        /* Sedikit merampingkan box putih logo */
-            }
+            .brand > div:first-child { margin-top: 15px !important; width: 85% !important; }
             .close-sidebar-btn { 
-                display: flex !important; 
-                align-items: center;
-                justify-content: center;
-                background: var(--red) !important;   /* Menambahkan warna merah agar jelas */
-                border: 2px solid white !important;  /* Memberi bingkai putih rapi */
-                color: white !important; 
-                font-size: 1.1rem; 
-                cursor: pointer; 
-                width: 30px;
-                height: 30px;
-                border-radius: 50%;                  /* Membuat tombol berbentuk bulat */
-                top: 15px !important;
-                right: 15px !important;
+                display: flex !important; align-items: center; justify-content: center;
+                background: var(--red) !important; border: 2px solid white !important; color: white !important; 
+                font-size: 1.1rem; cursor: pointer; width: 30px; height: 30px;
+                border-radius: 50%; top: 15px !important; right: 15px !important;
                 box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             }
             
             .topbar > div:first-child { width: 100%; }
             .topbar .workspace-badge { align-self: flex-start; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: var(--secondary); }
             
-            /* (TETAP BIARKAN KODE DI BAWAH INI SESUAI ASLINYA) */
             .grid-4, .grid-2 { grid-template-columns: 1fr !important; }
             .rab-form-grid, .rab-form-grid[style] { grid-template-columns: 1fr !important; }
-            /* ... dst ... */
+            .input-group label { font-size: 0.85rem; }
+            .table-custom th, .table-custom td { padding: 8px; font-size: 0.75rem; }
+            .cal-event-badge { font-size: 0.55rem; padding: 2px 4px; }
         }
     </style>
 </head>
@@ -353,7 +347,7 @@
                 <div class="card" style="background: var(--green); color: white;">
                     <h3 style="color: #eee; font-size: 0.9rem; margin-bottom: 10px;"><i class="fa-solid fa-user-check"></i> Rata-rata Kehadiran Peserta</h3>
                     <div id="dash-absen-rate" style="font-size: 2.5rem; font-weight: bold;">0%</div>
-                    <div style="font-size: 0.85rem; margin-top: 5px;">Berdasarkan absensi hari ini</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px;">Berdasarkan absensi bulan ini</div>
                 </div>
             </div>
 
@@ -424,6 +418,9 @@
             </div>
             
             <div class="card" style="margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div style="background: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--blue); padding: 10px; margin-bottom: 15px; font-size: 0.85rem; border-radius: 4px;">
+                    <i class="fa-solid fa-circle-info"></i> <b>Panduan Import Excel:</b> Header kolom di baris pertama <b>WAJIB</b> mengandung kata: <i>Departemen, Program, Nama Barang, Rincian, Volume, Satuan, Harga Satuan, Sumber Dana</i>.
+                </div>
                 <form onsubmit="saveRabDetail(event)" id="form-rab">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);" id="rab-form-title">Input Manual Rencana RAB</h3>
@@ -444,7 +441,11 @@
                             <input type="text" id="rab-nama-barang" placeholder="Contoh: Konsumsi Panitia" required>
                         </div>
                     </div>
-                    <div class="rab-form-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="rab-form-grid" style="grid-template-columns: repeat(5, 1fr);">
+                        <div class="input-group">
+                            <label>Rincian Hitungan</label>
+                            <input type="text" id="rab-rincian" placeholder="Contoh: 1 kegiatan x 2 hari">
+                        </div>
                         <div class="input-group">
                             <label>Volume / Jumlah</label>
                             <input type="number" id="rab-volume" placeholder="Contoh: 30" required>
@@ -459,7 +460,7 @@
                         </div>
                         <div class="input-group">
                             <label style="color: var(--blue);">Sumber Dana Rencana</label>
-                            <input type="text" id="rab-sumber-dana" placeholder="Contoh: Sponsor, Kas BEM..." style="border-color: var(--blue);" required>
+                            <input type="text" id="rab-sumber-dana" placeholder="Contoh: Sponsor, Kas..." style="border-color: var(--blue);" required>
                         </div>
                     </div>
                     <button type="submit" class="btn-action" id="btn-save-rab" style="width: 100%;"><i class="fa-solid fa-plus"></i> Simpan Data RAB</button>
@@ -475,6 +476,7 @@
                             <th>Departemen</th>
                             <th>Program</th>
                             <th>Nama Barang</th>
+                            <th>Rincian</th>
                             <th>Vol</th>
                             <th>Harga Satuan</th>
                             <th style="color: var(--blue);">Sumber Dana</th>
@@ -483,7 +485,7 @@
                         </tr>
                     </thead>
                     <tbody id="table-rab-body">
-                        <tr><td colspan="9" style="text-align: center;">Memuat data RAB...</td></tr>
+                        <tr><td colspan="10" style="text-align: center;">Memuat data RAB...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -535,7 +537,11 @@
                             <input type="text" id="real-keterangan" placeholder="Contoh: Pembayaran Lunas Cetak Banner" required>
                         </div>
                     </div>
-                    <div class="rab-form-grid" style="grid-template-columns: repeat(2, 1fr);">
+                    <div class="rab-form-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="input-group">
+                            <label>Rincian Hitungan</label>
+                            <input type="text" id="real-rincian" placeholder="Contoh: 1 kegiatan x 2 hari">
+                        </div>
                         <div class="input-group">
                             <label style="color: var(--green);">Nominal Dana Keluar (Rp)</label>
                             <input type="number" id="real-nominal" placeholder="Masukkan uang aktual dibayarkan..." required>
@@ -559,13 +565,14 @@
                             <th>Departemen</th>
                             <th>Program</th>
                             <th>Keterangan</th>
+                            <th>Rincian</th>
                             <th style="color: var(--green);">Sumber Dana Terpakai</th>
                             <th style="background: var(--green);">Nominal Keluar</th>
                             <th style="text-align: center;" class="no-export">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-realisasi-body">
-                        <tr><td colspan="8" style="text-align: center;">Memuat data realisasi...</td></tr>
+                        <tr><td colspan="9" style="text-align: center;">Memuat data realisasi...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -577,7 +584,7 @@
                     <h2>Rekapitulasi RAB (Departemen & Program)</h2>
                     <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan struktur departemen.</p>
                 </div>
-                <button class="btn-action" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Excel Keseluruhan</button>
+                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Excel Keseluruhan</button>
             </div>
 
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -676,13 +683,13 @@
                 </div>
                 <div class="grid-2">
                     <div class="card">
-                        <h3 style="color: var(--primary); margin-bottom: 15px;">Ringkasan Kehadiran Hari Ini</h3>
+                        <h3 style="color: var(--primary); margin-bottom: 15px;">Ringkasan Kehadiran Bulan Ini</h3>
                         <div style="display: flex; gap: 15px;">
                             <div style="flex: 1; text-align: center; padding: 15px; background: var(--bg); border-radius: 10px;">
                                 <b style="font-size: 2rem; color: var(--primary);" id="stat-total-user">0</b><br><small>Total Pengurus Terdaftar</small>
                             </div>
                             <div style="flex: 1; text-align: center; padding: 15px; background: rgba(46, 204, 113, 0.2); border-radius: 10px;">
-                                <b style="font-size: 2rem; color: var(--green);" id="stat-user-hadir">0</b><br><small>Telah Submit Absen</small>
+                                <b style="font-size: 2rem; color: var(--green);" id="stat-user-hadir">0</b><br><small>Hadir (Bulan Ini)</small>
                             </div>
                         </div>
                     </div>
@@ -736,10 +743,11 @@
                             <th>Status Kehadiran</th>
                             <th>Keterangan / Deskripsi</th>
                             <th style="color: var(--blue);">Waktu Submit</th>
+                            <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-absen-body">
-                        <tr><td colspan="7" style="text-align: center;">Memuat data absensi...</td></tr>
+                        <tr><td colspan="8" style="text-align: center;">Memuat data absensi...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -803,16 +811,13 @@
 
             <div id="notulensi-editor-view" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <button style="background: none; border: none; color: #777; cursor: pointer; font-size: 1rem;" onclick="backToList()"><i class="fa-solid fa-arrow-left"></i> Batal & Kembali</button>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" id="notulensi-judul" placeholder="Ketik Judul Dokumen..." style="border: 1px solid #ccc; padding: 8px 15px; border-radius: 5px; width: 100%; max-width: 300px; outline: none; font-weight: bold; color: var(--primary);">
-                        <button class="btn-action" onclick="saveNotulensi()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan</button>
-                    </div>
+                    <button style="background: none; border: none; color: #777; cursor: pointer; font-size: 1rem;" onclick="backToList()"><i class="fa-solid fa-arrow-left"></i> Kembali</button>
+                    <button class="btn-action" onclick="saveNotulensi()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Dokumen</button>
                 </div>
                 
                 <div class="editor-workspace-bg">
-                    <div style="display: flex; flex-direction: column; width: 100%; max-width: 230mm; position: relative;">
-                        <div class="rte-toolbar">
+                    <div style="display: flex; flex-direction: column; width: 100%; max-width: 210mm; position: relative; background: white; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                        <div class="rte-toolbar" style="border-bottom: 1px solid #ccc; border-radius: 0;">
                             <button type="button" onclick="formatDoc('undo')" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
                             <button type="button" onclick="formatDoc('redo')" title="Redo"><i class="fa-solid fa-rotate-right"></i></button>
                             <div style="width: 1px; background: #ddd; height: 20px; margin: 0 5px;"></div>
@@ -842,11 +847,16 @@
                             <button type="button" onclick="insertPageBreak()" title="Tambah Page Break (Halaman Baru)"><i class="fa-solid fa-file-lines"></i> PB</button>
                             
                             <div style="flex-grow: 1;"></div>
+                            <button type="button" onclick="exportWordNotulensi()" style="color: var(--blue); border-color: var(--blue);" title="Download as Word"><i class="fa-solid fa-file-word"></i> Word</button>
+                            <button type="button" onclick="window.print()" style="color: var(--red); border-color: var(--red);" title="Cetak / Save as PDF"><i class="fa-solid fa-file-pdf"></i> PDF</button>
                             <button type="button" onclick="zoomDoc(-0.1)" title="Zoom Out"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
                             <span id="doc-zoom-level" style="font-size: 0.8rem; font-weight: bold; width: 40px; text-align: center;">100%</span>
                             <button type="button" onclick="zoomDoc(0.1)" title="Zoom In"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
                         </div>
-                        <div id="rte-editor" contenteditable="true" class="rte-editor-page"><p>Mulai mengetik dokumen di sini...</p></div>
+                        <div style="padding: 20mm 20mm 0 20mm;">
+                            <input type="text" id="notulensi-judul" placeholder="Ketik Judul Dokumen..." style="width: 100%; font-size: 1.8rem; border: none; border-bottom: 2px solid #eee; outline: none; margin-bottom: 15px; font-family: 'Poppins'; color: var(--primary); font-weight: bold; background: transparent;">
+                        </div>
+                        <div id="rte-editor" contenteditable="true" class="rte-editor-page" style="box-shadow: none; min-height: auto; padding-top: 0;"><p>Mulai mengetik dokumen di sini...</p></div>
                     </div>
                 </div>
             </div>
@@ -1020,57 +1030,31 @@
         <div id="view-integrasi-docs" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h2>Integrasi Google Workspace (Docs & Sheets)</h2>
-                    <p style="color: #666; font-size: 0.9rem;">Buka, buat, dan edit dokumen langsung di dalam dashboard ini.</p>
+                    <h2>Integrasi Google Workspace</h2>
+                    <p style="color: #666; font-size: 0.9rem;">Pilih layanan untuk membuka dokumen baru di tab baru.</p>
                 </div>
             </div>
             
-            <div class="grid-2" id="integrasi-cards">
-                <div class="card" style="text-align: center; border-top: 4px solid #4285F4; box-shadow: 0 10px 20px rgba(66, 133, 244, 0.1);">
+            <div class="grid-4" id="integrasi-cards">
+                <div class="card" onclick="window.open('https://docs.new', '_blank')" style="text-align: center; border-top: 4px solid #4285F4; cursor: pointer; transition: 0.3s;">
                     <i class="fa-solid fa-file-word" style="font-size: 3rem; color: #4285F4; margin-bottom: 15px;"></i>
-                    <h3 style="margin-bottom: 10px; color: var(--primary);">Google Docs</h3>
-                    <p style="font-size: 0.85rem; color: #777; margin-bottom: 20px;">Platform pemrosesan teks untuk membuat proposal, surat menyurat, dan laporan kegiatan secara kolaboratif.</p>
-                    <button onclick="openWorkspaceIframe('https://docs.google.com/document/create', 'docs')" class="btn-action" style="background: #4285F4; color: white; width: 100%;"><i class="fa-solid fa-plus"></i> Buat Dokumen Baru</button>
-                    <div style="margin-top:15px; text-align: left;">
-                        <label style="font-size: 0.8rem; color: #555; font-weight: 500;">Atau Buka URL Docs Pribadi (Set ke Publik Terlebih Dahulu):</label>
-                        <div style="display:flex; gap:5px; margin-top: 5px;">
-                            <input type="text" id="docs-url-input" placeholder="Paste URL Docs Anda di sini..." style="flex:1; padding:8px; border:1px solid #ccc; border-radius:5px; font-size:0.8rem; outline:none;">
-                            <button onclick="openSpecificDocs()" class="btn-action" style="background: #f8fafc; color: #4285F4; border: 1px solid #4285F4; padding:8px 15px;"><i class="fa-solid fa-folder-open"></i> Load</button>
-                        </div>
-                    </div>
+                    <h3 style="color: var(--primary);">Google Docs</h3>
+                    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">Buat dokumen teks baru</p>
                 </div>
-                
-                <div class="card" style="text-align: center; border-top: 4px solid #0F9D58; box-shadow: 0 10px 20px rgba(15, 157, 88, 0.1);">
+                <div class="card" onclick="window.open('https://sheets.new', '_blank')" style="text-align: center; border-top: 4px solid #0F9D58; cursor: pointer; transition: 0.3s;">
                     <i class="fa-solid fa-file-excel" style="font-size: 3rem; color: #0F9D58; margin-bottom: 15px;"></i>
-                    <h3 style="margin-bottom: 10px; color: var(--primary);">Google Sheets</h3>
-                    <p style="font-size: 0.85rem; color: #777; margin-bottom: 20px;">Platform data tabular untuk membuat rancangan Excel, database kepanitiaan, perhitungan RAB dinamis, dll.</p>
-                    <button onclick="openWorkspaceIframe('https://docs.google.com/spreadsheets/create', 'sheets')" class="btn-action" style="background: #0F9D58; color: white; width: 100%;"><i class="fa-solid fa-plus"></i> Buat Spreadsheet Baru</button>
-                    <div style="margin-top:15px; text-align: left;">
-                        <label style="font-size: 0.8rem; color: #555; font-weight: 500;">Atau Buka URL Sheets Pribadi (Set ke Publik Terlebih Dahulu):</label>
-                        <div style="display:flex; gap:5px; margin-top: 5px;">
-                            <input type="text" id="sheets-url-input" placeholder="Paste URL Sheets Anda di sini..." style="flex:1; padding:8px; border:1px solid #ccc; border-radius:5px; font-size:0.8rem; outline:none;">
-                            <button onclick="openSpecificSheets()" class="btn-action" style="background: #f8fafc; color: #0F9D58; border: 1px solid #0F9D58; padding:8px 15px;"><i class="fa-solid fa-folder-open"></i> Load</button>
-                        </div>
-                    </div>
+                    <h3 style="color: var(--primary);">Google Sheets</h3>
+                    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">Buat spreadsheet baru</p>
                 </div>
-            </div>
-
-            <div id="workspace-iframe-container" style="display: none; flex-direction: column; height: 75vh; margin-top: 10px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #fff; padding: 10px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-                    <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
-                        <span id="iframe-icon" style="font-size: 1.5rem;"></span>
-                        <input type="text" id="active-iframe-url" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 0.85rem;" readonly>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-left: 20px;">
-                        <button onclick="refreshIframe()" class="btn-action" style="padding: 8px 15px; font-size: 0.85rem; background: #eee;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                        <button onclick="closeWorkspaceIframe()" class="btn-action" style="background: var(--red); color: white; padding: 8px 15px; font-size: 0.85rem;"><i class="fa-solid fa-xmark"></i> Tutup Workspace</button>
-                    </div>
+                <div class="card" onclick="window.open('https://slides.new', '_blank')" style="text-align: center; border-top: 4px solid #F4B400; cursor: pointer; transition: 0.3s;">
+                    <i class="fa-solid fa-file-powerpoint" style="font-size: 3rem; color: #F4B400; margin-bottom: 15px;"></i>
+                    <h3 style="color: var(--primary);">Google Slides</h3>
+                    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">Buat presentasi baru</p>
                 </div>
-                <div style="flex: 1; background: #fff; border-radius: 10px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-                    <iframe id="google-workspace-iframe" src="" style="width: 100%; height: 100%; border: none;"></iframe>
-                </div>
-                <div style="background: rgba(246, 178, 59, 0.1); border: 1px solid var(--secondary); color: #d35400; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 0.8rem; text-align: center;">
-                    <i class="fa-solid fa-circle-info"></i> <b>Penting:</b> Berdasarkan aturan keamanan *Google*, file yang baru dibuat akan terbuka di *tab* baru secara otomatis. Untuk dapat mengeditnya di *frame* ini, silakan ubah pengaturan *Sharing* file Google tersebut menjadi *"Anyone with the link can edit"*, kemudian tempelkan URL-nya di halaman sebelumnya.
+                <div class="card" onclick="window.open('https://forms.new', '_blank')" style="text-align: center; border-top: 4px solid #7248B9; cursor: pointer; transition: 0.3s;">
+                    <i class="fa-solid fa-file-signature" style="font-size: 3rem; color: #7248B9; margin-bottom: 15px;"></i>
+                    <h3 style="color: var(--primary);">Google Forms</h3>
+                    <p style="font-size: 0.8rem; color: #777; margin-top: 10px;">Buat formulir survei baru</p>
                 </div>
             </div>
         </div>
@@ -1313,57 +1297,6 @@
             }
         }
 
-        // INTEGRASI GOOGLE WORKSPACE
-        function openWorkspaceIframe(url, type = 'docs') {
-            document.getElementById('integrasi-cards').style.display = 'none';
-            document.getElementById('workspace-iframe-container').style.display = 'flex';
-            
-            let iframe = document.getElementById('google-workspace-iframe');
-            
-            // Otomatisasi pembukaan file baru di tab lain
-            if(url.includes('/create')) {
-                window.open(url, '_blank');
-                showNotification("Silakan buat dokumen di tab yang baru saja terbuka, atur akses Share ke 'Anyone with the link', dan salin URL-nya ke kolom input.", "info");
-                closeWorkspaceIframe();
-                return;
-            }
-
-            iframe.src = url;
-            document.getElementById('active-iframe-url').value = url;
-            
-            const iconEl = document.getElementById('iframe-icon');
-            if(type === 'docs') {
-                iconEl.innerHTML = '<i class="fa-solid fa-file-word" style="color: #4285F4;"></i>';
-            } else {
-                iconEl.innerHTML = '<i class="fa-solid fa-file-excel" style="color: #0F9D58;"></i>';
-            }
-        }
-
-        function closeWorkspaceIframe() {
-            document.getElementById('workspace-iframe-container').style.display = 'none';
-            document.getElementById('integrasi-cards').style.display = 'grid';
-            document.getElementById('google-workspace-iframe').src = '';
-        }
-
-        function refreshIframe() {
-            const iframe = document.getElementById('google-workspace-iframe');
-            iframe.src = iframe.src;
-        }
-
-        function openSpecificDocs() {
-            const url = document.getElementById('docs-url-input').value;
-            if(!url) { showNotification("Masukkan URL Google Docs terlebih dahulu!", "error"); return; }
-            let finalUrl = url.replace('/edit', '/preview'); // Rekomendasi meminimalisir masalah X-Frame
-            openWorkspaceIframe(finalUrl, 'docs');
-        }
-
-        function openSpecificSheets() {
-            const url = document.getElementById('sheets-url-input').value;
-            if(!url) { showNotification("Masukkan URL Google Sheets terlebih dahulu!", "error"); return; }
-            let finalUrl = url.replace('/edit', '/preview');
-            openWorkspaceIframe(finalUrl, 'sheets');
-        }
-
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
 
@@ -1400,7 +1333,6 @@
             showNotification("Berhasil mengunduh Rekap Absensi Keseluruhan", "success");
         }
 
-        // FITUR TAMBAHAN: EXPORT ABSEN INDIVIDU DENGAN FILTER
         async function exportAbsensiIndividu() {
             const startDt = document.getElementById('filter-absen-mulai').value;
             const endDt = document.getElementById('filter-absen-selesai').value;
@@ -1425,28 +1357,26 @@
             showNotification("Data absensi individu berhasil diunduh!", "success");
         }
 
-        // FITUR TAMBAHAN: EKSPOR REKAP PER DEPARTEMEN
         function exportDeptExcel(deptId, deptName) {
-            // Ambil data hanya yang memiliki class row khusus departemen ini
             const rows = document.querySelectorAll(`.export-row-dept-${deptId}`);
             if(rows.length === 0) { showNotification("Tidak ada data untuk diekspor pada departemen ini", "error"); return; }
 
-            let exportData = [["Departemen", "Program", "Nama Barang", "Volume/Satuan", "Harga Satuan", "Total Rencana RAB (Rp)", "Total Realisasi (Rp)", "Sisa/Selisih (+/-)", "Sumber Dana"]];
+            let exportData = [["Departemen", "Program", "Nama Barang", "Rincian", "Volume/Satuan", "Harga Satuan", "Total Rencana RAB (Rp)", "Total Realisasi (Rp)", "Sisa/Selisih (+/-)", "Sumber Dana"]];
             
             rows.forEach(tr => {
                 const progName = tr.getAttribute('data-prog-name') || '-';
-                const itemType = tr.getAttribute('data-type'); // 'prog_header' atau 'rab_item'
+                const itemType = tr.getAttribute('data-type'); 
 
                 if (itemType === 'prog_header') {
-                    // Beri penanda ini adalah header program untuk Excel
-                    exportData.push([deptName, `[PROGRAM] ${progName}`, "", "", "", tr.getAttribute('data-rencana'), tr.getAttribute('data-realisasi'), tr.getAttribute('data-selisih'), ""]);
+                    exportData.push([deptName, `[PROGRAM] ${progName}`, "", "", "", "", tr.getAttribute('data-rencana'), tr.getAttribute('data-realisasi'), tr.getAttribute('data-selisih'), ""]);
                 } else if (itemType === 'rab_item') {
                     const itemName = tr.getAttribute('data-nama');
+                    const itemRincian = tr.getAttribute('data-rincian') || '-';
                     const itemVolSat = tr.getAttribute('data-volsat');
                     const itemHarga = tr.getAttribute('data-harga');
                     const itemTotal = tr.getAttribute('data-total');
                     const itemDana = tr.getAttribute('data-dana');
-                    exportData.push(["", "", itemName, itemVolSat, itemHarga, itemTotal, "", "", itemDana]);
+                    exportData.push(["", "", itemName, itemRincian, itemVolSat, itemHarga, itemTotal, "", "", itemDana]);
                 }
             });
 
@@ -1461,7 +1391,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            showConfirm("Apakah Anda yakin ingin mengimpor data RAB dari Excel?\n\nSistem secara otomatis akan membuat 'Departemen' atau 'Program' baru jika teks pada Excel belum terdaftar di database.", () => {
+            showConfirm("Apakah Anda yakin ingin mengimpor data RAB dari Excel?\n\nSistem secara otomatis akan membuat 'Departemen' atau 'Program' baru jika teks pada Excel belum terdaftar.", () => {
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
@@ -1477,6 +1407,7 @@
                         const idxDept = headers.findIndex(h => String(h).toLowerCase().includes('departemen'));
                         const idxProg = headers.findIndex(h => String(h).toLowerCase().includes('program'));
                         const idxNama = headers.findIndex(h => String(h).toLowerCase().includes('nama barang'));
+                        const idxRincian = headers.findIndex(h => String(h).toLowerCase().includes('rincian'));
                         const idxVol = headers.findIndex(h => String(h).toLowerCase().includes('volume'));
                         const idxSatuan = headers.findIndex(h => String(h).toLowerCase().includes('satuan'));
                         const idxHarga = headers.findIndex(h => String(h).toLowerCase().includes('harga satuan'));
@@ -1486,7 +1417,6 @@
                             showNotification("Gagal memproses! Pastikan kolom Departemen, Program, Nama Barang, Volume, Satuan, dan Harga Satuan ada di Excel.", "error"); return;
                         }
 
-                        // Menggunakan sistem cache dan validasi pembuat otomatis
                         const { data: listDept } = await supabaseClient.from('departments').select('id, nama_departemen').eq('workspace_id', globalWorkspaceId);
                         
                         let deptCache = {}; 
@@ -1504,6 +1434,7 @@
                             let strDept = String(row[idxDept] || '').trim();
                             let strProg = String(row[idxProg] || '').trim();
                             let dNama = String(row[idxNama] || '').trim();
+                            let dRincian = idxRincian !== -1 ? String(row[idxRincian] || '').trim() : '-';
                             let dVol = parseFloat(row[idxVol] || 0);
                             let dSatuan = String(row[idxSatuan] || '').trim();
                             let dHarga = parseFloat(row[idxHarga] || 0);
@@ -1511,14 +1442,12 @@
 
                             if(!strDept || !strProg || !dNama || dVol === 0 || dHarga === 0) continue;
 
-                            // Auto-create Departemen (Fleksibel)
                             let deptId = deptCache[strDept.toLowerCase()];
                             if (!deptId) {
                                 const { data: newDept } = await supabaseClient.from('departments').insert({ workspace_id: globalWorkspaceId, nama_departemen: strDept }).select('id').single();
                                 if(newDept) { deptId = newDept.id; deptCache[strDept.toLowerCase()] = deptId; }
                             }
 
-                            // Auto-create Program (Fleksibel)
                             let progId = progCache[`${deptId}_${strProg.toLowerCase()}`];
                             if (!progId) {
                                 const { data: newProg } = await supabaseClient.from('programs').insert({ workspace_id: globalWorkspaceId, department_id: deptId, nama_program: strProg, status: 'Belum', created_by: currentUserId }).select('id').single();
@@ -1529,7 +1458,7 @@
 
                             payloads.push({
                                 workspace_id: globalWorkspaceId, department_id: deptId, program_id: progId,
-                                nama_barang: dNama, volume: dVol, satuan: dSatuan, harga_satuan: dHarga,
+                                nama_barang: dNama, rincian: dRincian, volume: dVol, satuan: dSatuan, harga_satuan: dHarga,
                                 total_harga: dVol * dHarga, sumber_dana: dDana, created_by: currentUserId
                             });
                         }
@@ -1537,7 +1466,7 @@
                         if(payloads.length > 0) {
                             await supabaseClient.from('rab_items').insert(payloads);
                             showNotification(`Berhasil mengimpor ${payloads.length} data RAB dari Excel (Fleksibel)!`, "success");
-                            await loadDepartments(); await loadProgramData(); // Reload master data just in case new ones created
+                            await loadDepartments(); await loadProgramData(); 
                             await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData();
                         } else {
                             showNotification("Tidak ada baris data yang valid di dalam Excel tersebut.", "error");
@@ -1566,6 +1495,22 @@
 
         function insertImageDoc() { const url = prompt("Masukkan URL Gambar (Contoh: https://linkgambar.com/img.jpg):"); if (url) { document.execCommand('insertImage', false, url); } }
         function insertPageBreak() { const pbHTML = `<hr class="page-break" />`; document.execCommand('insertHTML', false, pbHTML); }
+
+        function exportWordNotulensi() {
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+            const footer = "</body></html>";
+            const judul = document.getElementById('notulensi-judul').value || 'Dokumen_Notulensi';
+            const html = header + `<h1>${judul}</h1>` + document.getElementById('rte-editor').innerHTML + footer;
+            
+            const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+            const url = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(html);
+            const downloadLink = document.createElement("a");
+            document.body.appendChild(downloadLink);
+            downloadLink.href = url;
+            downloadLink.download = judul + '.doc';
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
 
         function toRoman(num) {
             const roman = {M:1000,CM:900,D:500,CD:400,C:100,XC:90,L:50,XL:40,X:10,IX:9,V:5,IV:4,I:1};
@@ -1623,6 +1568,8 @@
                 document.getElementById('btn-group-program').style.display = 'none'; 
                 document.getElementById('btn-add-kpi').style.display = 'none'; 
                 document.getElementById('menu-database-surat').style.display = 'none'; 
+                const btnRekap = document.getElementById('btn-export-rekap');
+                if(btnRekap) btnRekap.style.display = 'none';
             }
 
             const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
@@ -1630,8 +1577,8 @@
 
             const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
             if (wsData) {
-            document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
-            document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+                document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
+                document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
             }
 
             const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
@@ -1800,8 +1747,9 @@
                 const progsToday = globalPrograms.filter(p => p.tanggal_pelaksanaan === dateStr);
                 progsToday.forEach(p => {
                     let wkt = p.waktu_pelaksanaan ? p.waktu_pelaksanaan.substring(0,5) : '';
-                    let delAttr = isAdmin ? `onclick="event.stopPropagation(); deleteProgramAction('${p.id}', '${p.nama_program.replace(/'/g, "\\'")}')" title="Klik untuk Hapus Program"` : `onclick="event.stopPropagation();" title="${p.nama_program}"`;
-                    badges += `<span class="cal-event-badge program" ${delAttr}>${wkt} ${p.nama_program}</span>`;
+                    let delAttr = isAdmin ? `onclick="event.stopPropagation(); deleteProgramAction('${p.id}', '${p.nama_program.replace(/'/g, "\\'")}')" title="Klik untuk Hapus Program"` : `onclick="event.stopPropagation();"`;
+                    let tooltipProg = `Tipe: Program/Event\nLokasi: ${p.tempat || 'Belum diatur'}`;
+                    badges += `<span class="cal-event-badge program" data-tooltip="${tooltipProg}" ${delAttr}>${wkt} ${p.nama_program}</span>`;
                 });
 
                 globalSchedules.forEach(s => {
@@ -1814,8 +1762,9 @@
                         else if(tipeLower.includes('tugas') || tipeLower.includes('penugasan')) typeClass = 'tugas';
 
                         let isOwner = s.created_by === currentUserId;
-                        let delAttr = (isAdmin || isOwner) ? `onclick="event.stopPropagation(); deleteScheduleAction('${s.id}')" title="Klik untuk Hapus Jadwal"` : `onclick="event.stopPropagation();" title="${s.judul_kegiatan}"`;
-                        badges += `<span class="cal-event-badge ${typeClass}" ${delAttr}>${wkt} ${s.judul_kegiatan}</span>`;
+                        let delAttr = (isAdmin || isOwner) ? `onclick="event.stopPropagation(); deleteScheduleAction('${s.id}')" title="Klik untuk Hapus Jadwal"` : `onclick="event.stopPropagation();"`;
+                        let tooltipSched = `Tipe: ${s.tipe_jadwal}\nKet: ${s.keterangan || '-'}`;
+                        badges += `<span class="cal-event-badge ${typeClass}" data-tooltip="${tooltipSched}" ${delAttr}>${wkt} ${s.judul_kegiatan}</span>`;
                     }
                 });
 
@@ -1926,29 +1875,57 @@
             e.preventDefault(); 
             const vol = parseFloat(document.getElementById('rab-volume').value || 0); 
             const hrg = parseFloat(document.getElementById('rab-harga').value || 0); 
-            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('rab-select-dept').value, program_id: document.getElementById('rab-select-prog').value, nama_barang: document.getElementById('rab-nama-barang').value, volume: vol, satuan: document.getElementById('rab-satuan').value, harga_satuan: hrg, total_harga: vol * hrg, sumber_dana: document.getElementById('rab-sumber-dana').value || 'Lainnya' }; 
+            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('rab-select-dept').value, program_id: document.getElementById('rab-select-prog').value, nama_barang: document.getElementById('rab-nama-barang').value, rincian: document.getElementById('rab-rincian').value, volume: vol, satuan: document.getElementById('rab-satuan').value, harga_satuan: hrg, total_harga: vol * hrg, sumber_dana: document.getElementById('rab-sumber-dana').value || 'Lainnya' }; 
             if (editingRabId) { await supabaseClient.from('rab_items').update(payload).eq('id', editingRabId); editingRabId = null; document.getElementById('btn-cancel-rab').style.display = 'none'; showNotification("RAB Diupdate", "success"); } 
             else { payload.created_by = currentUserId; await supabaseClient.from('rab_items').insert([payload]); showNotification("RAB Disimpan", "success"); } 
             document.getElementById('form-rab').reset(); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); 
         }
         
-        async function loadRabTable() { const { data } = await supabaseClient.from('rab_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); const tbody = document.getElementById('table-rab-body'); tbody.innerHTML = ''; if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Kosong.</td></tr>'; return; } data.forEach((item, index) => { let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, '${item.sumber_dana||''}')"><i class="fa-solid fa-pen"></i></button><button class="btn-table-del" onclick="deleteRabAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } else if (item.created_by === currentUserId) { actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, '${item.sumber_dana||''}')"><i class="fa-solid fa-pen"></i></button>`; } const badgeDana = `<span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:8px; font-size:0.75rem;">${item.sumber_dana}</span>`; tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.nama_barang}</strong></td><td>${item.volume} ${item.satuan}</td><td>${formatRp(item.harga_satuan)}</td><td>${badgeDana}</td><td style="font-weight: bold; color: var(--primary);">${formatRp(item.total_harga)}</td><td style="text-align: center;" class="no-export">${actionButtons}</td></tr>`; }); }
+        async function loadRabTable() { 
+            const { data } = await supabaseClient.from('rab_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); 
+            const tbody = document.getElementById('table-rab-body'); tbody.innerHTML = ''; 
+            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Kosong.</td></tr>'; return; } 
+            
+            data.forEach((item, index) => { 
+                let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; 
+                if (currentUserRole === 'admin' || item.created_by === currentUserId) { 
+                    actionButtons = `<button class="btn-table-edit" onclick="editRabAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.nama_barang}', '${item.rincian || ''}', ${item.volume}, '${item.satuan}', ${item.harga_satuan}, '${item.sumber_dana||''}')"><i class="fa-solid fa-pen"></i></button>`;
+                    if(currentUserRole === 'admin') actionButtons += `<button class="btn-table-del" onclick="deleteRabAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; 
+                } 
+                
+                const badgeDana = `<span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:8px; font-size:0.75rem;">${item.sumber_dana}</span>`; 
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.nama_barang}</strong></td><td>${item.rincian || '-'}</td><td>${item.volume} ${item.satuan}</td><td>${formatRp(item.harga_satuan)}</td><td>${badgeDana}</td><td style="font-weight: bold; color: var(--primary);">${formatRp(item.total_harga)}</td><td style="text-align: center;" class="no-export">${actionButtons}</td></tr>`; 
+            }); 
+        }
         
-        async function editRabAction(id, deptId, progId, nama, vol, satuan, harga, sumberDana) { editingRabId = id; document.getElementById('btn-cancel-rab').style.display = 'block'; document.getElementById('rab-select-dept').value = deptId; await fetchProgByDept(deptId, document.getElementById('rab-select-prog')); document.getElementById('rab-select-prog').value = progId; document.getElementById('rab-nama-barang').value = nama; document.getElementById('rab-volume').value = vol; document.getElementById('rab-satuan').value = satuan; document.getElementById('rab-harga').value = harga; document.getElementById('rab-sumber-dana').value = sumberDana; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        async function editRabAction(id, deptId, progId, nama, rincian, vol, satuan, harga, sumberDana) { editingRabId = id; document.getElementById('btn-cancel-rab').style.display = 'block'; document.getElementById('rab-select-dept').value = deptId; await fetchProgByDept(deptId, document.getElementById('rab-select-prog')); document.getElementById('rab-select-prog').value = progId; document.getElementById('rab-nama-barang').value = nama; document.getElementById('rab-rincian').value = rincian; document.getElementById('rab-volume').value = vol; document.getElementById('rab-satuan').value = satuan; document.getElementById('rab-harga').value = harga; document.getElementById('rab-sumber-dana').value = sumberDana; window.scrollTo({ top: 0, behavior: 'smooth' }); }
         function cancelEditRab() { editingRabId = null; document.getElementById('form-rab').reset(); document.getElementById('btn-cancel-rab').style.display = 'none'; }
         async function deleteRabAction(id) { showConfirm("Hapus Rencana RAB?", async () => { await supabaseClient.from('rab_items').delete().eq('id', id); await loadRabTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); showNotification("Dihapus", "success"); }); }
 
         async function saveRealisasiDetail(e) { 
             e.preventDefault(); 
             const nom = parseFloat(document.getElementById('real-nominal').value || 0);
-            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('real-select-dept').value, program_id: document.getElementById('real-select-prog').value, keterangan: document.getElementById('real-keterangan').value, nominal: nom, sumber_dana: document.getElementById('real-sumber-dana').value || 'Lainnya', created_by: currentUserId }; 
+            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('real-select-dept').value, program_id: document.getElementById('real-select-prog').value, keterangan: document.getElementById('real-keterangan').value, rincian: document.getElementById('real-rincian').value, nominal: nom, sumber_dana: document.getElementById('real-sumber-dana').value || 'Lainnya', created_by: currentUserId }; 
             await supabaseClient.from('realisasi_items').insert([payload]); 
             document.getElementById('form-realisasi').reset(); 
             await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); 
             showNotification("Realisasi Disimpan", "success");
         }
         
-        async function loadRealisasiTable() { const { data } = await supabaseClient.from('realisasi_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); const tbody = document.getElementById('table-realisasi-body'); tbody.innerHTML = ''; if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Kosong.</td></tr>'; return; } data.forEach((item, index) => { const tgl = new Date(item.created_at).toLocaleDateString('id-ID'); let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-del" onclick="deleteRealisasiAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } let badgeDana = `<span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:8px; font-size:0.7rem;">${item.sumber_dana}</span>`; tbody.innerHTML += `<tr><td>${index + 1}</td><td>${tgl}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.keterangan}</strong></td><td>${badgeDana}</td><td style="color:var(--green); font-weight:bold;">${formatRp(item.nominal)}</td><td style="text-align: center;" class="no-export">${actionButtons}</td></tr>`; }); }
+        async function loadRealisasiTable() { 
+            const { data } = await supabaseClient.from('realisasi_items').select(`*, departments(nama_departemen), programs(nama_program)`).eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false }); 
+            const tbody = document.getElementById('table-realisasi-body'); tbody.innerHTML = ''; 
+            if (!data || data.length === 0) { tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Kosong.</td></tr>'; return; } 
+            
+            data.forEach((item, index) => { 
+                const tgl = new Date(item.created_at).toLocaleDateString('id-ID'); 
+                let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; 
+                if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-del" onclick="deleteRealisasiAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } 
+                
+                let badgeDana = `<span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:8px; font-size:0.7rem;">${item.sumber_dana}</span>`; 
+                tbody.innerHTML += `<tr><td>${index + 1}</td><td>${tgl}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.keterangan}</strong></td><td>${item.rincian || '-'}</td><td>${badgeDana}</td><td style="color:var(--green); font-weight:bold;">${formatRp(item.nominal)}</td><td style="text-align: center;" class="no-export">${actionButtons}</td></tr>`; 
+            }); 
+        }
         
         async function deleteRealisasiAction(id) { showConfirm("Hapus catatan realisasi ini?", async () => { await supabaseClient.from('realisasi_items').delete().eq('id', id); await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); showNotification("Dihapus", "success"); }); }
 
@@ -2008,7 +1985,7 @@
                     deptRealisasi += progSumRealisasi;
 
                     let selisihProg = progSumRencana - progSumRealisasi;
-                    let strSelisihProg = selisihProg < 0 ? `<span style="color:var(--red);">- ${formatRp(Math.abs(selisihProg))} (Over)</span>` : `<span style="color:var(--green);">+ ${formatRp(selisihProg)} (Sisa)</span>`;
+                    let strSelisihProg = selisihProg < 0 ? `<span style="color:var(--red); font-weight:bold;">${formatRp(Math.abs(selisihProg))}</span>` : `<span style="color:var(--green); font-weight:bold;">${formatRp(Math.abs(selisihProg))}</span>`;
 
                     progHtml += `
                         <tr class="export-row-dept-${dept.id}" data-type="prog_header" data-prog-name="${prog.nama_program}" data-rencana="${progSumRencana}" data-realisasi="${progSumRealisasi}" data-selisih="${selisihProg}" style="background-color: #f8fafc; border-bottom: 1px dashed #e2e8f0;">
@@ -2023,7 +2000,7 @@
 
                     progRabs.forEach(item => {
                         progHtml += `
-                            <tr class="export-row-dept-${dept.id}" data-type="rab_item" data-nama="${item.nama_barang}" data-volsat="${item.volume} ${item.satuan}" data-harga="${item.harga_satuan}" data-total="${item.total_harga}" data-dana="${item.sumber_dana}">
+                            <tr class="export-row-dept-${dept.id}" data-type="rab_item" data-nama="${item.nama_barang}" data-rincian="${item.rincian || ''}" data-volsat="${item.volume} ${item.satuan}" data-harga="${item.harga_satuan}" data-total="${item.total_harga}" data-dana="${item.sumber_dana}">
                                 <td></td>
                                 <td></td>
                                 <td style="padding-left: 40px; color: #555;">- ${item.nama_barang} <span style="font-size:0.75rem;">(${item.volume} ${item.satuan})</span></td>
@@ -2040,7 +2017,7 @@
                 globalRealisasi += deptRealisasi;
 
                 let selisihDept = deptRencana - deptRealisasi;
-                let strSelisihDept = selisihDept < 0 ? `<span style="color:var(--red);">- ${formatRp(Math.abs(selisihDept))} (Minus)</span>` : `<span style="color:var(--green);">+ ${formatRp(selisihDept)} (Sisa)</span>`;
+                let strSelisihDept = selisihDept < 0 ? `<span style="color:var(--red); font-weight:bold;">${formatRp(Math.abs(selisihDept))}</span>` : `<span style="color:var(--green); font-weight:bold;">${formatRp(Math.abs(selisihDept))}</span>`;
 
                 html += `
                     <tr style="background-color: #e2e8f0; border-top: 2px solid #cbd5e1;">
@@ -2060,8 +2037,8 @@
             document.getElementById('rekap-global-rencana').innerText = formatRp(globalRencana); 
             document.getElementById('rekap-global-realisasi').innerText = formatRp(globalRealisasi); 
             const sisaTotal = globalRencana - globalRealisasi;
-            document.getElementById('rekap-global-sisa').innerText = sisaTotal < 0 ? `- ${formatRp(Math.abs(sisaTotal))}` : `+ ${formatRp(sisaTotal)}`; 
-            document.getElementById('rekap-global-sisa').style.color = sisaTotal < 0 ? 'var(--red)' : 'var(--primary)'; 
+            document.getElementById('rekap-global-sisa').innerText = formatRp(Math.abs(sisaTotal)); 
+            document.getElementById('rekap-global-sisa').style.color = sisaTotal < 0 ? 'var(--red)' : 'var(--green)'; 
             document.getElementById('rekap-global-dept').innerText = totalDepts;
             document.getElementById('chart-total-serapan').innerText = formatRp(globalRealisasi);
         
@@ -2159,7 +2136,7 @@
             let countTotal = 0, countHadir = 0, countIzin = 0, countAlpha = 0;
             
             if (!historyData || historyData.length === 0) { 
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #aaa;">Belum ada riwayat absensi.</td></tr>'; 
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #aaa;">Belum ada riwayat absensi.</td></tr>'; 
             } else { 
                 tbody.innerHTML = ''; 
                 historyData.forEach((h, index) => { 
@@ -2170,7 +2147,12 @@
                     if(h.kehadiran === 'Izin') { statKehadiranColor = '#d35400'; statKehadiranBg = 'rgba(246, 178, 59, 0.2)'; }
                     else if(h.kehadiran === 'Tidak Hadir') { statKehadiranColor = 'var(--red)'; statKehadiranBg = 'rgba(231, 76, 60, 0.2)'; }
 
-                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td></tr>`; 
+                    let actionBtn = '';
+                    if (currentUserRole === 'admin') {
+                        actionBtn = `<button class="btn-table-del" onclick="deleteAbsenAction('${h.id}')" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>`;
+                    }
+
+                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td><td style="text-align:center;">${actionBtn}</td></tr>`; 
                 
                     if (h.user_id === currentUserId) {
                         const d = new Date(h.tanggal);
@@ -2192,20 +2174,40 @@
             const todayDash = new Date().toISOString().split('T')[0]; 
             const { count: totalUserDash } = await supabaseClient.from('workspace_members').select('*', { count: 'exact', head: true }).eq('workspace_id', globalWorkspaceId); 
             const { data: allTodayAbsenDash } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('tanggal', todayDash).is('program_id', null); 
-            const hadirCountDash = allTodayAbsenDash ? allTodayAbsenDash.length : 0; 
             
             if (currentUserRole === 'admin') { 
                 document.getElementById('stat-total-user').innerText = totalUserDash || 0; 
-                document.getElementById('stat-user-hadir').innerText = hadirCountDash; 
-                const belumHadirCount = (totalUserDash || 0) - hadirCountDash; 
+                
+                let hadirBulanIni = 0;
+                if (historyData) {
+                    hadirBulanIni = historyData.filter(h => {
+                        const d = new Date(h.tanggal);
+                        return d.getMonth() === currentMonth && d.getFullYear() === currentYearAbsen && h.kehadiran === 'Hadir';
+                    }).length;
+                }
+                
+                document.getElementById('stat-user-hadir').innerText = hadirBulanIni; 
+                const belumHadirCount = (totalUserDash || 0) - hadirBulanIni; 
+                
+                const totalKehadiranPersen = totalUserDash > 0 ? Math.round((hadirBulanIni / totalUserDash) * 100) : 0;
+                document.getElementById('dash-absen-rate').innerText = totalKehadiranPersen + '%';
+                
                 const ctxPie = document.getElementById('absenChart').getContext('2d'); 
                 if(absenPieChart) absenPieChart.destroy(); 
                 absenPieChart = new Chart(ctxPie, { 
                     type: 'pie', 
-                    data: { labels: ['Sudah Submit', 'Belum Submit'], datasets: [{ data: [hadirCountDash, belumHadirCount], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] }, 
+                    data: { labels: ['Hadir (Bulan Ini)', 'Lainnya'], datasets: [{ data: [hadirBulanIni, belumHadirCount < 0 ? 0 : belumHadirCount], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] }, 
                     options: { maintainAspectRatio: false, plugins: { datalabels: { display:false }, legend: { position: 'right' } } } 
                 }); 
             } 
+        }
+
+        async function deleteAbsenAction(id) {
+            showConfirm("Yakin ingin menghapus data absensi ini?", async () => {
+                await supabaseClient.from('attendances').delete().eq('id', id);
+                await loadAbsensiData();
+                showNotification("Absensi berhasil dihapus", "success");
+            });
         }
 
         async function absenActionSubmit() { 
