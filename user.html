@@ -296,14 +296,14 @@
             
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Manajemen Inti</p>
             <div class="nav-item" onclick="switchTab('program-event')"><i class="fa-solid fa-clipboard-list"></i> Program & Event</div>
-            <div class="nav-item" onclick="switchTab('input-rab')"><i class="fa-solid fa-file-invoice-dollar"></i> Input RAB Detail</div>
+            <div class="nav-item" onclick="switchTab('input-rab')"><i class="fa-solid fa-file-invoice-dollar"></i> Input RAB</div>
             <div class="nav-item" onclick="switchTab('realisasi-anggaran')"><i class="fa-solid fa-hand-holding-dollar"></i> Realisasi Anggaran</div>
-            <div class="nav-item" onclick="switchTab('rekap-rab')"><i class="fa-solid fa-scale-balanced"></i> Rekapitulasi RAB</div>
+            <div class="nav-item" onclick="switchTab('rekap-rab')"><i class="fa-solid fa-scale-balanced"></i> Analitik Anggaran</div>
             
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Operasional</p>
             <div class="nav-item" onclick="switchTab('absensi')"><i class="fa-solid fa-calendar-check"></i> Absensi</div>
             <div class="nav-item" onclick="switchTab('timeline')"><i class="fa-regular fa-calendar-days"></i> Kalender</div>
-            <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi (Docs)</div>
+            <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi</div>
             <div class="nav-item" onclick="switchTab('kpi')"><i class="fa-solid fa-bullseye"></i> Indikator KPI</div>
             <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
             <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
@@ -328,15 +328,15 @@
 
         <div id="view-dashboard" class="view-section active">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <h2 style="font-size: 1.2rem;">Laporan Finansial (RAB)</h2>
+                <h2 style="font-size: 1.2rem;">Laporan Finansial</h2>
                 <span style="font-size: 0.8rem; color: var(--green); background: rgba(46, 204, 113, 0.2); padding: 5px 10px; border-radius: 15px;"><i class="fa-solid fa-bolt"></i> Auto-Synced</span>
             </div>
 
             <div class="grid-4">
                 <div class="card finance-card"><h3>Total RAB</h3><div class="amount" id="val-total-rab">Rp 0</div><div class="badge bg-blue">Anggaran Utama</div></div>
-                <div class="card finance-card"><h3>Realisasi RAB</h3><div class="amount" id="val-realisasi-rab">Rp 0</div><div class="badge bg-green"><i class="fa-solid fa-arrow-trend-up"></i> Terpakai</div></div>
+                <div class="card finance-card"><h3>Realisasi Anggaran</h3><div class="amount" id="val-realisasi-rab">Rp 0</div><div class="badge bg-green"><i class="fa-solid fa-arrow-trend-up"></i> Terpakai</div></div>
                 <div class="card finance-card"><h3>Sisa Saldo</h3><div class="amount" id="val-sisa-rab">Rp 0</div><div class="badge bg-red"><i class="fa-solid fa-wallet"></i> Tersedia</div></div>
-                <div class="card finance-card"><h3>Penyerapan</h3><div class="amount" id="val-penyerapan">0%</div><div class="badge bg-green">Sesuai Target</div></div>
+                <div class="card finance-card"><h3>Penyerapan</h3><div class="amount" id="val-penyerapan">0%</div><div class="badge bg-green">Pencapaian Target</div></div>
             </div>
 
             <h2 style="font-size: 1.2rem; margin-bottom: 15px; margin-top: 20px;">Overview Kinerja & Kehadiran</h2>
@@ -353,7 +353,7 @@
                 </div>
             </div>
 
-            <h2 style="font-size: 1.2rem; margin-bottom: 15px; margin-top: 20px;">Status Program & Kemitraan</h2>
+            <h2 style="font-size: 1.2rem; margin-bottom: 15px; margin-top: 20px;">Status Program & Event</h2>
             <div class="grid-2">
                 <div class="card">
                     <h3 style="margin-bottom: 20px; color: var(--primary);">Program Berjalan</h3>
@@ -371,7 +371,7 @@
                 </div>
 
                 <div class="card">
-                    <h3 style="margin-bottom: 5px; color: var(--primary);">Distribusi Dana Terserap (Realisasi)</h3>
+                    <h3 style="margin-bottom: 5px; color: var(--primary);">Distribusi Sumber Dana</h3>
                     <p style="font-size: 0.75rem; color: #777; margin-bottom: 15px;">Total Terserap: <b id="chart-total-serapan" style="color:var(--green);">Rp 0</b></p>
                     <canvas id="danaChart"></canvas>
                 </div>
@@ -407,8 +407,8 @@
         <div id="view-input-rab" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h2>Sistem Input RAB Detail (Rencana)</h2>
-                    <p style="color: #666;">Masukkan detail rencana anggaran & Tentukan Sumber Dana-nya.</p>
+                    <h2 style="font-size: 1.5rem;">Sistem Input RAB</h2>
+                    <p style="color: #666; font-size: 0.95rem;">Masukkan detail rencana anggaran & Tentukan Sumber Dana-nya.</p>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button class="btn-action" style="background: var(--blue); color: white;" onclick="downloadExcelTemplate()"><i class="fa-solid fa-file-arrow-down"></i> Download Template</button>
@@ -498,7 +498,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2>Realisasi Anggaran</h2>
-                    <p style="color: #666;">Input seluruh pengeluaran uang secara aktual beserta sumber dana yang digunakan di sini.</p>
+                    <p style="color: #666;">Input seluruh pengeluaran uang secara aktual berdasarkan RAB yang direncanakan.</p>
                 </div>
                 <button class="btn-action" onclick="exportTableToExcel('tabel-realisasi-asli', 'Data_Realisasi_RAB')"><i class="fa-solid fa-download"></i> Export Excel</button>
             </div>
@@ -524,7 +524,10 @@
 
             <div class="card" style="margin-bottom: 20px; background: #e9f7ef; border: 1px solid #2ecc71;">
                 <form onsubmit="saveRealisasiDetail(event)" id="form-realisasi">
-                    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--green);"><i class="fa-solid fa-money-bill-transfer"></i> Input Bukti Pengeluaran (Realisasi)</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="font-size: 1.1rem; color: var(--green);"><i class="fa-solid fa-money-bill-transfer"></i> <span id="real-form-title">Input Bukti Pengeluaran (Realisasi)</span></h3>
+                        <button type="button" id="btn-cancel-real" style="display: none; background: #eee; border:none; padding: 5px 15px; border-radius: 5px; cursor: pointer;" onclick="cancelEditReal()">Batal Edit</button>
+                    </div>
                     
                     <div class="rab-form-grid">
                         <div class="input-group">
@@ -533,11 +536,17 @@
                         </div>
                         <div class="input-group">
                             <label>Pilih Program / Event</label>
-                            <select id="real-select-prog" required><option value="">-- Pilih Departemen Dulu --</option></select>
+                            <select id="real-select-prog" required onchange="loadRabItemsForRealisasi(this.value)"><option value="">-- Pilih Departemen Dulu --</option></select>
                         </div>
                         <div class="input-group">
-                            <label>Keterangan Pengeluaran</label>
-                            <input type="text" id="real-keterangan" placeholder="Contoh: Pembayaran Lunas Cetak Banner" required>
+                            <label>Nama Barang / Keterangan</label>
+                            <div style="display: flex; gap: 5px; flex-direction: column;">
+                                <select id="real-item-select" onchange="toggleRealManualInput(this.value)">
+                                    <option value="">-- Pilih Barang dari RAB --</option>
+                                    <option value="manual">-- Opsi Lainnya (Ketik Manual) --</option>
+                                </select>
+                                <input type="text" id="real-keterangan" placeholder="Contoh: Pembayaran Lunas Cetak Banner" style="display:none; margin-top: 5px;">
+                            </div>
                         </div>
                     </div>
                     <div class="rab-form-grid" style="grid-template-columns: repeat(3, 1fr);">
@@ -584,7 +593,7 @@
         <div id="view-rekap-rab" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h2>Rekapitulasi RAB (Departemen & Program)</h2>
+                    <h2>Analitik Anggaran</h2>
                     <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan struktur departemen.</p>
                 </div>
                 <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Excel Keseluruhan</button>
@@ -610,7 +619,7 @@
             </div>
 
             <div class="card" style="overflow-x: auto;">
-                <h3 style="margin-bottom: 15px; color: var(--primary);">Detail Rekapitulasi Hierarki</h3>
+                <h3 style="margin-bottom: 15px; color: var(--primary);">Detail Analitik Hierarki</h3>
                 <table class="table-custom" style="font-size: 0.85rem;" id="tabel-rekap-asli">
                     <thead>
                         <tr>
@@ -638,7 +647,7 @@
             
             <div class="card" style="text-align: center; padding: 40px 20px;" id="panel-absen-user">
                 <i class="fa-solid fa-fingerprint" style="font-size: 4rem; color: var(--secondary); margin-bottom: 15px;"></i>
-                <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang, Pengurus!</h3>
+                <h3 style="font-size: 1.5rem; color: var(--primary);" id="absen-greeting">Selamat Datang!</h3>
                 <p style="color: #666; margin-bottom: 20px;">Silakan catat kehadiran Anda untuk hari ini beserta keterangannya.</p>
                 
                 <div style="max-width: 400px; margin: 0 auto 20px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #eee;">
@@ -676,12 +685,11 @@
                 <div class="absen-btn-group">
                     <button class="btn-absen btn-masuk" id="btn-submit-absen" onclick="absenActionSubmit()" style="max-width: 100%;"><i class="fa-solid fa-paper-plane"></i> SUBMIT ABSENSI</button>
                 </div>
-                <p id="absen-status-msg" style="font-weight: bold; color: var(--primary);"></p>
             </div>
 
             <div id="panel-absen-admin" style="display: none;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; margin-top: 20px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="color: var(--primary);">Panel Admin Absensi</h3>
+                    <h3 style="color: var(--primary);">Rekapitulasi Kehadiran Organisasi</h3>
                     <button class="btn-action" style="background: #27ae60; color: white; padding: 8px 15px; font-size: 0.9rem;" onclick="exportAbsensiCSV()"><i class="fa-solid fa-file-csv"></i> Tarik Data Keseluruhan (Excel)</button>
                 </div>
                 <div class="grid-2">
@@ -735,7 +743,7 @@
             </div>
 
             <div class="card" style="margin-top: 20px; overflow-x: auto;">
-                <h3 style="margin-bottom: 15px; color: var(--primary);" id="tabel-absen-title">Riwayat Absensi Anda</h3>
+                <h3 style="margin-bottom: 15px; color: var(--primary);" id="tabel-absen-title">Riwayat Absensi</h3>
                 <table class="table-custom" id="tabel-absen-individu">
                     <thead>
                         <tr>
@@ -1266,6 +1274,7 @@
         let editingRabId = null; let editingProgramId = null; 
         let editingScheduleId = null; 
         let editingKPIId = null; 
+        let editingRealisasiId = null; 
         
         let activeActionSuratId = null; 
         let activeActionFileUrl = null;
@@ -1310,7 +1319,17 @@
         function switchTab(tabId) { 
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
-            event.currentTarget.classList.add('active'); 
+            
+            // Handle if tab trigger has an event target
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('active'); 
+            } else {
+                // Find matching sidebar item manually if triggered programmatically
+                document.querySelectorAll('.nav-item').forEach(el => {
+                    if (el.getAttribute('onclick')?.includes(tabId)) el.classList.add('active');
+                });
+            }
+
             document.getElementById('view-' + tabId).classList.add('active'); 
             
             if(window.innerWidth <= 768) {
@@ -1883,7 +1902,23 @@
         function filterProgramByDept(deptElemId, progElemId) { fetchProgByDept(document.getElementById(deptElemId).value, document.getElementById(progElemId)); }
         async function fetchProgByDept(deptId, selectEl) { 
             const { data } = await supabaseClient.from('programs').select('id, nama_program').eq('department_id', deptId); 
-            selectEl.innerHTML = data && data.length > 0 ? data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('') : '<option value="">-- Kosong --</option>'; 
+            selectEl.innerHTML = data && data.length > 0 ? '<option value="">-- Pilih Program --</option>' + data.map(p => `<option value="${p.id}">${p.nama_program}</option>`).join('') : '<option value="">-- Kosong --</option>'; 
+        }
+
+        async function loadRabItemsForRealisasi(progId) {
+            const selectEl = document.getElementById('real-item-select');
+            if(!progId) { selectEl.innerHTML = '<option value="">-- Pilih Program Dulu --</option>'; return; }
+            const { data } = await supabaseClient.from('rab_items').select('id, nama_barang').eq('program_id', progId);
+            let options = '<option value="">-- Pilih Barang dari RAB --</option>';
+            if(data && data.length > 0) data.forEach(i => options += `<option value="${i.nama_barang}">${i.nama_barang}</option>`);
+            options += '<option value="manual">-- Opsi Lainnya (Ketik Manual) --</option>';
+            selectEl.innerHTML = options;
+        }
+
+        function toggleRealManualInput(val) {
+            const input = document.getElementById('real-keterangan');
+            if(val === 'manual') { input.style.display = 'block'; input.required = true; }
+            else { input.style.display = 'none'; input.required = false; input.value = val; }
         }
         
         function getBadgeStyle(sumberDana) {
@@ -1941,11 +1976,24 @@
         async function saveRealisasiDetail(e) { 
             e.preventDefault(); 
             const nom = parseFloat(document.getElementById('real-nominal').value || 0);
-            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('real-select-dept').value, program_id: document.getElementById('real-select-prog').value, keterangan: document.getElementById('real-keterangan').value, rincian: document.getElementById('real-rincian').value, nominal: nom, sumber_dana: document.getElementById('real-sumber-dana').value || 'Lainnya', created_by: currentUserId }; 
-            await supabaseClient.from('realisasi_items').insert([payload]); 
+            const ket = document.getElementById('real-item-select').value === 'manual' ? document.getElementById('real-keterangan').value : document.getElementById('real-item-select').value;
+
+            const payload = { workspace_id: globalWorkspaceId, department_id: document.getElementById('real-select-dept').value, program_id: document.getElementById('real-select-prog').value, keterangan: ket, rincian: document.getElementById('real-rincian').value, nominal: nom, sumber_dana: document.getElementById('real-sumber-dana').value || 'Lainnya' }; 
+            
+            if(editingRealisasiId) {
+                await supabaseClient.from('realisasi_items').update(payload).eq('id', editingRealisasiId);
+                editingRealisasiId = null; document.getElementById('btn-cancel-real').style.display = 'none';
+                document.getElementById('real-form-title').innerText = "Input Bukti Pengeluaran (Realisasi)";
+                showNotification("Realisasi Diupdate", "success");
+            } else {
+                payload.created_by = currentUserId;
+                await supabaseClient.from('realisasi_items').insert([payload]); 
+                showNotification("Realisasi Disimpan", "success");
+            }
+            
             document.getElementById('form-realisasi').reset(); 
+            document.getElementById('real-keterangan').style.display = 'none';
             await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); 
-            showNotification("Realisasi Disimpan", "success");
         }
         
         async function loadRealisasiTable() { 
@@ -1955,13 +2003,43 @@
             
             data.forEach((item, index) => { 
                 const tgl = new Date(item.created_at).toLocaleDateString('id-ID'); 
-                let actionButtons = '<span style="color:#aaa;"><i class="fa-solid fa-lock"></i></span>'; 
-                if (currentUserRole === 'admin') { actionButtons = `<button class="btn-table-del" onclick="deleteRealisasiAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; } 
+                let actionButtons = ''; 
+                if (currentUserRole === 'admin' || item.created_by === currentUserId) { 
+                    actionButtons = `<button class="btn-table-edit" onclick="editRealisasiAction('${item.id}', '${item.department_id}', '${item.program_id}', '${item.keterangan}', '${item.rincian||''}', ${item.nominal}, '${item.sumber_dana||''}')"><i class="fa-solid fa-pen"></i></button>`;
+                    if(currentUserRole === 'admin') actionButtons += `<button class="btn-table-del" onclick="deleteRealisasiAction('${item.id}')"><i class="fa-solid fa-trash"></i></button>`; 
+                } 
                 
                 let badgeDana = `<span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:8px; font-size:0.7rem;">${item.sumber_dana}</span>`; 
                 tbody.innerHTML += `<tr><td>${index + 1}</td><td>${tgl}</td><td>${item.departments?.nama_departemen||'-'}</td><td>${item.programs?.nama_program||'-'}</td><td><strong>${item.keterangan}</strong></td><td>${item.rincian || '-'}</td><td>${badgeDana}</td><td style="color:var(--green); font-weight:bold;">${formatRp(item.nominal)}</td><td style="text-align: center;" class="no-export">${actionButtons}</td></tr>`; 
             }); 
         }
+
+        async function editRealisasiAction(id, deptId, progId, ket, rincian, nominal, sumber) {
+            editingRealisasiId = id;
+            document.getElementById('btn-cancel-real').style.display = 'block';
+            document.getElementById('real-form-title').innerText = "Edit Realisasi Pengeluaran";
+            document.getElementById('real-select-dept').value = deptId;
+            await fetchProgByDept(deptId, document.getElementById('real-select-prog'));
+            document.getElementById('real-select-prog').value = progId;
+            await loadRabItemsForRealisasi(progId);
+            
+            const itemSelect = document.getElementById('real-item-select');
+            let found = false;
+            for(let i=0; i<itemSelect.options.length; i++) {
+                if(itemSelect.options[i].value === ket) { itemSelect.selectedIndex = i; found = true; break; }
+            }
+            if(!found) {
+                itemSelect.value = 'manual';
+                document.getElementById('real-keterangan').style.display = 'block';
+                document.getElementById('real-keterangan').value = ket;
+            }
+            
+            document.getElementById('real-rincian').value = rincian;
+            document.getElementById('real-nominal').value = nominal;
+            document.getElementById('real-sumber-dana').value = sumber;
+            window.scrollTo({ top: document.getElementById('view-realisasi-anggaran').offsetTop, behavior: 'smooth' });
+        }
+        function cancelEditReal() { editingRealisasiId = null; document.getElementById('form-realisasi').reset(); document.getElementById('btn-cancel-real').style.display = 'none'; document.getElementById('real-form-title').innerText = "Input Bukti Pengeluaran (Realisasi)"; }
         
         async function deleteRealisasiAction(id) { showConfirm("Hapus catatan realisasi ini?", async () => { await supabaseClient.from('realisasi_items').delete().eq('id', id); await loadRealisasiTable(); await recalculateGlobalRAB(); await loadRekapitulasiData(); showNotification("Dihapus", "success"); }); }
 
@@ -2035,14 +2113,19 @@
                     `;
 
                     progRabs.forEach(item => {
+                        // Calculate specific realization for this RAB Item by name (logic matching point 4)
+                        let itemRealisasi = progReals.filter(r => r.keterangan === item.nama_barang).reduce((a, c) => a + parseFloat(c.nominal || 0), 0);
+                        let itemSelisih = item.total_harga - itemRealisasi;
+                        let itemSelisihStr = itemSelisih < 0 ? `<span style="color:var(--red); font-size:0.75rem;">${formatRp(Math.abs(itemSelisih))}</span>` : `<span style="color:var(--green); font-size:0.75rem;">${formatRp(Math.abs(itemSelisih))}</span>`;
+
                         progHtml += `
                             <tr class="export-row-dept-${dept.id}" data-type="rab_item" data-nama="${item.nama_barang}" data-rincian="${item.rincian || ''}" data-volsat="${item.volume} ${item.satuan}" data-harga="${item.harga_satuan}" data-total="${item.total_harga}" data-dana="${item.sumber_dana}">
                                 <td></td>
                                 <td></td>
                                 <td style="padding-left: 40px; color: #555;">- ${item.nama_barang} <span style="font-size:0.75rem;">(${item.volume} ${item.satuan})</span></td>
                                 <td style="color:#777;">${formatRp(item.total_harga)}</td>
-                                <td style="color:#777;">-</td>
-                                <td style="color:#777;">-</td>
+                                <td style="color:var(--green);">${itemRealisasi > 0 ? formatRp(itemRealisasi) : '-'}</td>
+                                <td>${itemRealisasi > 0 ? itemSelisihStr : '-'}</td>
                                 <td class="no-export"><span style="${getBadgeStyle(item.sumber_dana)} padding:2px 8px; border-radius:5px; font-size:0.75rem;">${item.sumber_dana}</span></td>
                             </tr>
                         `;
@@ -2154,9 +2237,11 @@
             document.getElementById('absen-greeting').innerText = `Selamat Datang, ${currentUserName}!`; 
             if (currentUserRole === 'admin') { 
                 document.getElementById('panel-absen-admin').style.display = 'block'; 
+                document.getElementById('panel-absen-user').style.display = 'none'; // Admin cannot submit here (point 5)
                 document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Pengurus"; 
             } else { 
                 document.getElementById('panel-absen-admin').style.display = 'none'; 
+                document.getElementById('panel-absen-user').style.display = 'block';
                 document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Anda"; 
             } 
         }
@@ -2209,7 +2294,6 @@
 
             const todayDash = new Date().toISOString().split('T')[0]; 
             const { count: totalUserDash } = await supabaseClient.from('workspace_members').select('*', { count: 'exact', head: true }).eq('workspace_id', globalWorkspaceId); 
-            const { data: allTodayAbsenDash } = await supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('tanggal', todayDash).is('program_id', null); 
             
             if (currentUserRole === 'admin') { 
                 document.getElementById('stat-total-user').innerText = totalUserDash || 0; 
@@ -2809,7 +2893,7 @@
             };
             const draw = (e) => {
                 if (!isDrawingPad) return; e.preventDefault();
-                const rect = padCanvas.getBoundingClientRect(); let x = e.clientX ? e.clientX : e.touches[0].clientX; let y = e.clientY ? e.clientY : e.touches[0].clientY;
+                const rect = padCanvas.getBoundingClientRect(); let x = e.clientX ? e.clientX : e.touches[0].clientX; let y = e.clientY ? e.touches[0].clientY;
                 padCtx.lineTo(x - rect.left, y - rect.top); padCtx.stroke();
             };
             const endDraw = () => { isDrawingPad = false; padCtx.closePath(); };
