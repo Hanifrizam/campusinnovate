@@ -7,12 +7,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --theme-color: #0A3055; --bg-body: #f8fafc; --text: #1e293b; --secondary: #F6B23B;}
+        :root { --theme-color: #0A3055; --bg-body: #f8fafc; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body { background: var(--bg-body); color: var(--text); overflow-x: hidden; }
+
+        /* BANNER PENGUMUMAN */
+        #global-announcement { display: none; background: #e67e22; color: white; padding: 12px 20px; text-align: center; position: relative; z-index: 1001; animation: slideDown 0.5s ease; }
+        #global-announcement strong { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 2px;}
+        #global-announcement p { font-size: 0.85rem; margin: 0; opacity: 0.9;}
+        #close-ann { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
 
         /* NAVBAR PUBLIK */
         .public-navbar { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid #eee; box-shadow: 0 4px 20px rgba(0,0,0,0.03);}
@@ -36,6 +43,27 @@
         .section-heading { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 30px; display: flex; align-items: center; gap: 15px;}
         .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.1; border-radius: 3px;}
 
+        /* STRUKTUR ORGANISASI */
+        .struktur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; text-align: center;}
+        .member-card { background: white; padding: 30px 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border-top: 4px solid var(--theme-color); position: relative;}
+        .member-avatar { width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8;}
+        .member-name { font-weight: 800; font-size: 1.1rem; color: var(--text); margin-bottom: 5px;}
+        .member-role { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;}
+        .member-parent { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.65rem; padding: 2px 10px; border-radius: 10px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none;}
+
+        /* WIDGETS */
+        .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
+        .stat-card { background: white; padding: 30px; border-radius: inherit; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;}
+        .stat-card .amount { font-size: 2.5rem; font-weight: 800; color: var(--theme-color); }
+        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;}
+        .prog-item { background: white; padding: 25px; border-radius: inherit; border-left: 5px solid var(--secondary); box-shadow: 0 5px 15px rgba(0,0,0,0.03);}
+        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-top: 10px;}
+        
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
+        .kpi-card { background: white; padding: 25px; border-radius: inherit; box-shadow: 0 8px 25px rgba(0,0,0,0.03); }
+        .kpi-bar-bg { width: 100%; background: #e2e8f0; height: 12px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
+        .kpi-bar-fill { height: 100%; background: var(--theme-color); border-radius: 10px; transition: width 1s ease-in-out;}
+
         /* GRID NEWS */
         .news-grid { display: grid; gap: 25px; }
         .news-card { background: white; border-radius: inherit; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; height: 100%; display: flex; flex-direction: column;}
@@ -43,29 +71,25 @@
         .news-image { height: 220px; background-color: #e2e8f0; background-size: cover; background-position: center; }
         .news-body { padding: 25px; display: flex; flex-direction: column; flex-grow: 1;}
         .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.05); padding: 5px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start;}
-        .news-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; line-height: 1.4; color: var(--text);}
-        .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1;}
+        .news-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+        .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;}
 
-        /* STRUKTUR ORGANISASI */
-        .struktur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; text-align: center;}
-        .member-card { background: white; padding: 30px 20px; border-radius: inherit; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border-top: 4px solid var(--theme-color);}
-        .member-avatar { width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8;}
-        .member-name { font-weight: 800; font-size: 1.1rem; color: var(--text); margin-bottom: 5px;}
-        .member-role { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;}
-
-        /* WIDGETS */
-        .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-        .stat-card { background: white; padding: 30px; border-radius: inherit; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;}
-        .stat-card .amount { font-size: 2.5rem; font-weight: 800; color: var(--theme-color); }
-        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;}
-        .prog-item { background: white; padding: 25px; border-radius: inherit; border-left: 5px solid var(--secondary); box-shadow: 0 5px 15px rgba(0,0,0,0.03);}
-        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-top: 10px;}
+        /* NEWS MODAL (POPUP) */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background: white; width: 95%; max-width: 800px; max-height: 90vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
+        .modal-overlay.active .modal-content { transform: scale(1); }
         
-        .kpi-card { background: white; padding: 25px; border-radius: inherit; box-shadow: 0 8px 25px rgba(0,0,0,0.03); margin-bottom: 20px; }
-        .kpi-bar-bg { width: 100%; background: #e2e8f0; height: 12px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        .kpi-bar-fill { height: 100%; background: var(--theme-color); border-radius: 10px; transition: width 1s ease-in-out;}
-
-        .widget-newsletter { background: white; padding: 30px; border-left: 6px solid #e67e22; border-radius: inherit; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .modal-header { position: relative; width: 100%; height: 250px; background: #e2e8f0; background-size: cover; background-position: center; display: flex; align-items: flex-end;}
+        .modal-header::before { content: ''; position: absolute; inset:0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); }
+        .modal-header-content { position: relative; z-index: 1; padding: 30px; color: white;}
+        .modal-header-content .badge { background: var(--secondary); color: var(--theme-color); font-size: 0.75rem; padding: 4px 12px; border-radius: 15px; font-weight: bold; margin-bottom: 10px; display: inline-block;}
+        .modal-header-content h2 { font-size: 1.8rem; font-weight: 800; line-height: 1.3;}
+        
+        .modal-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.2s; z-index: 2; display: flex; align-items: center; justify-content: center;}
+        .modal-close:hover { background: var(--red); transform: rotate(90deg);}
+        
+        .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-wrap;}
 
         /* LOADING & FOOTER */
         .loader-screen { position: fixed; inset:0; background:white; z-index: 9999; display:flex; flex-direction:column; align-items:center; justify-content:center; }
@@ -73,12 +97,15 @@
         footer { background: #0f172a; color: #94a3b8; padding: 60px 20px; text-align: center; margin-top: 80px;}
         
         @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 2.2rem; }
             .data-grid-2 { grid-template-columns: 1fr; }
-            .public-nav-links { display: none; } /* Hide full nav on mobile for cleaner look */
+            .public-nav-links { display: none; }
+            .modal-header { height: 200px; }
+            .modal-header-content h2 { font-size: 1.4rem; }
         }
     </style>
 </head>
@@ -89,15 +116,36 @@
         <h3 style="color: var(--theme-color);">Menyiapkan Ruang Publik...</h3>
     </div>
 
+    <div id="global-announcement">
+        <strong id="ann-title">Pengumuman</strong>
+        <p id="ann-desc">Deskripsi pengumuman.</p>
+        <button id="close-ann" onclick="document.getElementById('global-announcement').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
     <div id="main-content"></div>
 
     <footer id="footer" style="display:none;">
         <div class="page-container">
-            <h3 style="color: white; margin-bottom: 15px; font-weight: 800;">Campus Innovate</h3>
+            <h3 style="color: white; margin-bottom: 15px; font-weight: 800;" id="footer-org-name">Campus Innovate</h3>
             <p>Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus.</p>
             <p style="margin-top: 30px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi.</p>
         </div>
     </footer>
+
+    <div class="modal-overlay" id="newsModal" onclick="closeNewsModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeNewsModal(event)"><i class="fa-solid fa-xmark"></i></button>
+            <div class="modal-header" id="modal-img">
+                <div class="modal-header-content">
+                    <div class="badge" id="modal-date">Date</div>
+                    <h2 id="modal-title">Judul Berita</h2>
+                </div>
+            </div>
+            <div class="modal-body" id="modal-desc">
+                Isi berita akan dimuat di sini...
+            </div>
+        </div>
+    </div>
 
     <script>
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
@@ -117,6 +165,29 @@
                  .replace(/'/g, "&#039;");
         };
 
+        // Variable global untuk menampung data
+        let globalNewsData = [];
+
+        function openNewsModal(index) {
+            const news = globalNewsData[index];
+            if(!news) return;
+
+            document.getElementById('modal-img').style.backgroundImage = `url('${escapeHtml(news.img)}')`;
+            document.getElementById('modal-date').innerText = news.date;
+            document.getElementById('modal-title').innerText = news.title;
+            // Menjaga format baris baru (enter)
+            document.getElementById('modal-desc').innerHTML = escapeHtml(news.desc).replace(/\n/g, '<br>');
+            
+            document.getElementById('newsModal').classList.add('active');
+            document.body.style.overflow = 'hidden'; // cegah scroll background
+        }
+
+        function closeNewsModal(e) {
+            if(e) e.stopPropagation();
+            document.getElementById('newsModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const workspaceId = urlParams.get('workspace');
@@ -130,6 +201,7 @@
                 // Fetch Data Organisasi
                 const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', workspaceId).single();
                 const orgName = wsData ? wsData.nama_organisasi : 'Campus Innovate';
+                document.getElementById('footer-org-name').innerText = orgName;
 
                 // Fetch Layout Data
                 const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', workspaceId).single();
@@ -142,13 +214,33 @@
                 const containerHtml = document.getElementById('main-content');
                 let rawBlocks = config.layout_data || [];
                 
-                let blocks = rawBlocks.map(b => {
+                // EXTRACT GLOBAL CONFIG DATA
+                let orgStructureData = [];
+                let announcementData = null;
+
+                const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
+                if (configBlock) {
+                    orgStructureData = configBlock.orgStructure || [];
+                    globalNewsData = configBlock.newsData || []; // Simpan berita secara global
+                    announcementData = configBlock.announcementData;
+                }
+
+                // Filter out the config block, we only want to render UI blocks
+                let blocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
                     if (!b.styles) b.styles = { bg: 'transparent', padding: '40px', borderRadius: '15px' };
                     if (!b.data) b.data = {};
                     return b;
                 });
                 
-                // 1. GENERATE NAV HEADER
+                // 1. GENERATE BANNER DARURAT
+                if (announcementData && announcementData.active === 'true' && announcementData.title) {
+                    const annBanner = document.getElementById('global-announcement');
+                    document.getElementById('ann-title').innerText = announcementData.title;
+                    document.getElementById('ann-desc').innerText = announcementData.content;
+                    annBanner.style.display = 'block';
+                }
+
+                // 2. GENERATE NAV HEADER
                 let navLinks = '';
                 blocks.forEach(b => {
                     let linkTitle = b.data?.title || '';
@@ -157,8 +249,9 @@
                     else if(b.type === 'finance') linkTitle = 'Keuangan';
                     else if(b.type === 'kpi') linkTitle = 'Target KPI';
                     else if(b.type === 'program') linkTitle = 'Program';
+                    else if(b.type === 'grid-news') linkTitle = 'Berita';
                     
-                    if(linkTitle && b.type !== 'divider' && b.type !== 'image' && b.type !== 'video' && b.type !== 'text') {
+                    if(linkTitle && b.type !== 'divider' && b.type !== 'image' && b.type !== 'video' && b.type !== 'text' && b.type !== 'newsletter') {
                         navLinks += `<a href="#section-${b.id}">${escapeHtml(linkTitle)}</a>`;
                     }
                 });
@@ -170,7 +263,7 @@
                     </div>
                 `;
 
-                // 2. GENERATE BLOCKS
+                // 3. GENERATE UI BLOCKS
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
                     let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
@@ -205,57 +298,67 @@
                             <iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:400px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1);"></iframe>
                         </div>`;
                     }
-                    else if (b.type === 'newsletter') {
-                        htmlChunk += `
-                        <div class="widget-newsletter" style="border-radius:${b.styles.borderRadius};">
-                            <h3 style="margin-bottom:15px; color:#e67e22; font-size:1.5rem; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> ${escapeHtml(b.data.title)}</h3>
-                            <p style="color:#475569; font-size:1.1rem; line-height: 1.6;">${escapeHtml(b.data.content)}</p>
-                        </div>`;
-                    }
                     else if (b.type === 'divider') {
                         htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #cbd5e1; margin: 10px 0;">`;
                     }
+                    
+                    // ==========================================
+                    // WIDGETS DATA DRIVEN
+                    // ==========================================
                     else if (b.type === 'grid-news') {
                         let cols = b.data.columns || '3';
                         htmlChunk += `
-                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Kabar Terbaru'}</h2>
+                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Berita Terkini'}</h2>
                         <div class="news-grid" style="grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'230px':'300px'}, 1fr));">`;
                         
-                        (b.data.items || []).forEach(it => {
-                            htmlChunk += `
-                            <div class="news-card" style="border-radius: ${b.styles.borderRadius};">
-                                <div class="news-image" style="background-image: url('${escapeHtml(it.img)}');"></div>
-                                <div class="news-body">
-                                    <div class="news-meta"><i class="fa-solid fa-clock"></i> ${escapeHtml(it.date)}</div>
-                                    <h3 class="news-title">${escapeHtml(it.title)}</h3>
-                                    <p class="news-desc">${escapeHtml(it.desc)}</p>
-                                </div>
-                            </div>`;
-                        });
+                        if (globalNewsData.length > 0) {
+                            globalNewsData.forEach((it, index) => {
+                                htmlChunk += `
+                                <div class="news-card" style="border-radius: ${b.styles.borderRadius};" onclick="openNewsModal(${index})">
+                                    <div class="news-image" style="background-image: url('${escapeHtml(it.img)}');"></div>
+                                    <div class="news-body">
+                                        <div class="news-meta"><i class="fa-solid fa-clock"></i> ${escapeHtml(it.date)}</div>
+                                        <h3 class="news-title">${escapeHtml(it.title)}</h3>
+                                        <p class="news-desc">${escapeHtml(it.desc)}</p>
+                                    </div>
+                                </div>`;
+                            });
+                        } else {
+                            htmlChunk += `<p style="color: #aaa;">Belum ada berita diterbitkan.</p>`;
+                        }
                         htmlChunk += `</div>`;
                     }
                     else if (b.type === 'struktur') {
                         htmlChunk += `
-                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Kabinet'}</h2>
-                        <div class="struktur-grid" id="struktur-container-${i}">Memuat anggota...</div>`;
+                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Organisasi'}</h2>
+                        <div class="struktur-grid" id="struktur-container-${i}">`;
                         
-                        supabaseClient.from('workspace_members').select('*').eq('workspace_id', workspaceId).then(({data: members}) => {
-                            let sHtml = '';
-                            if(members && members.length > 0) {
-                                members.forEach(m => { 
-                                    sHtml += `
-                                    <div class="member-card" style="border-radius: ${b.styles.borderRadius};">
-                                        <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
-                                        <div class="member-name">${escapeHtml(m.nama_user) || 'Anggota'}</div>
-                                        <div class="member-role">${escapeHtml(m.role)}</div>
-                                    </div>`; 
-                                });
-                            } else { 
-                                sHtml = `<p style="color:#777;">Data kepengurusan belum tersedia di dashboard internal.</p>`; 
-                            }
-                            let sc = document.getElementById(`struktur-container-${i}`);
-                            if(sc) sc.innerHTML = sHtml;
-                        });
+                        if (orgStructureData.length > 0) {
+                            orgStructureData.forEach(m => { 
+                                // Cek apakah posisi ini adalah pimpinan tertinggi (tidak punya atasan)
+                                let leaderStyle = !m.parentId ? 'border-top: 6px solid var(--secondary);' : '';
+                                let parentBadge = '';
+                                
+                                if (m.parentId) {
+                                    // Cari nama atasan
+                                    let parentNode = orgStructureData.find(x => x.id === m.parentId);
+                                    if(parentNode) parentBadge = `<div class="member-parent">Dibawah: ${escapeHtml(parentNode.role)}</div>`;
+                                } else {
+                                    parentBadge = `<div class="member-parent" style="display:block; background:var(--primary); color:white;"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Pimpinan Tertinggi</div>`;
+                                }
+
+                                htmlChunk += `
+                                <div class="member-card" style="border-radius: ${b.styles.borderRadius}; ${leaderStyle}">
+                                    ${parentBadge}
+                                    <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
+                                    <div class="member-name">${escapeHtml(m.name)}</div>
+                                    <div class="member-role">${escapeHtml(m.role)}</div>
+                                </div>`; 
+                            });
+                        } else {
+                            htmlChunk += `<p style="color:#777; grid-column: 1 / -1;">Data struktur belum diatur oleh admin.</p>`;
+                        }
+                        htmlChunk += `</div>`;
                     }
                     else if (b.type === 'finance') {
                         htmlChunk += `
@@ -280,6 +383,7 @@
                                 </div>
                             </div>`;
                         
+                        // Fetch data directly from internal DB to keep it auto-syncing
                         supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single().then(({data: fData}) => {
                             let total = fData ? parseFloat(fData.total_rab) : 0; 
                             let real = fData ? parseFloat(fData.realisasi_rab) : 0;
@@ -302,13 +406,13 @@
                     }
                     else if (b.type === 'kpi') {
                         htmlChunk += `
-                        <h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2>
-                        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;" id="kpi-container-${i}">Memuat KPI...</div>`;
+                            <h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2>
+                            <div class="kpi-grid" id="kpi-container-${i}">Memuat KPI...</div>`;
                         
                         supabaseClient.from('kpi_items').select('*').eq('workspace_id', workspaceId).then(({data: kData}) => {
                             let kpiHtml = '';
                             if(!kData || kData.length === 0) {
-                                kpiHtml = '<p style="color:#aaa;">Belum ada target KPI yang ditetapkan.</p>';
+                                kpiHtml = '<p style="color:#aaa; grid-column: 1 / -1;">Belum ada target KPI yang ditetapkan.</p>';
                             } else {
                                 kData.forEach(kpi => {
                                     let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
@@ -334,8 +438,8 @@
                     }
                     else if (b.type === 'program') {
                         htmlChunk += `
-                        <h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
-                        <div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>`;
+                            <h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
+                            <div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>`;
                         
                         supabaseClient.from('programs').select('*').eq('workspace_id', workspaceId).then(({data: pData}) => {
                             let pHtml = '';
@@ -351,7 +455,7 @@
                                     </div>`;
                                 });
                             } else { 
-                                pHtml = `<p style="color:#777;">Belum ada rekapitulasi data program kerja.</p>`; 
+                                pHtml = `<p style="color:#777; grid-column: 1 / -1;">Belum ada rekapitulasi data program kerja.</p>`; 
                             }
                             let pc = document.getElementById(`prog-container-${i}`); 
                             if(pc) pc.innerHTML = pHtml;
