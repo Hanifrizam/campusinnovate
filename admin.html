@@ -146,9 +146,13 @@
         <div class="sidebar-subtitle">Ruang Kerja:<br><strong id="sidebar-workspace-name" style="color: white; font-size: 1rem;">Memuat...</strong></div>
         
         <div class="nav-item active" onclick="switchMenu('setup')"><i class="fa-solid fa-sliders"></i> Konfigurasi Utama</div>
-        <div class="nav-item" onclick="switchMenu('builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Advanced Builder</div>
+        <div class="nav-item" onclick="switchMenu('builder')"><i class="fa-solid fa-wand-magic-sparkles"></i> Web Builder Studio</div>
+        <div class="nav-item" onclick="switchMenu('struktur')"><i class="fa-solid fa-sitemap"></i> Struktur Organisasi</div>
+        <div class="nav-item" onclick="switchMenu('berita')"><i class="fa-solid fa-newspaper"></i> Berita & Pengumuman</div>
         <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users"></i> Tracking Pengurus</div>
+        <div class="nav-item" onclick="switchMenu('transparansi')"><i class="fa-solid fa-scale-balanced"></i> Transparansi & KPI</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-chart-line"></i> Analitik Interaksi</div>
+        
         <div class="nav-item" onclick="switchMenu('premium')" style="background: rgba(246, 178, 59, 0.1); color: var(--secondary); border: 1px solid var(--secondary); margin-top: 15px;">
             <i class="fa-solid fa-crown"></i> Domain & Pro <span class="premium-badge">NEW</span>
         </div>
@@ -214,8 +218,8 @@
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'divider')"><i class="fa-solid fa-minus"></i> Garis Pembatas</div>
                         
                         <div class="tool-category">Modul Informasi</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'grid-news')"><i class="fa-solid fa-table-cells-large"></i> Grid Berita (Custom)</div>
-                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'newsletter')"><i class="fa-regular fa-newspaper"></i> Pengumuman</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'grid-news')"><i class="fa-solid fa-table-cells-large"></i> Grid Berita (Live)</div>
+                        <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'newsletter')"><i class="fa-regular fa-newspaper"></i> Pengumuman (Live)</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'struktur')"><i class="fa-solid fa-sitemap"></i> Struktur Anggota</div>
                         
                         <div class="tool-category">Widget Otomatis</div>
@@ -243,6 +247,153 @@
                             Klik komponen di area preview (tengah) untuk mengedit isinya secara langsung.
                         </div>
                         <div id="prop-form" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="menu-struktur" class="menu-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 style="margin: 0; color: var(--primary); font-weight: 800;"><i class="fa-solid fa-sitemap"></i> Manajemen Struktur Organisasi</h2>
+                        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Susun hierarki organisasi. Data ini akan ditampilkan otomatis di website publik.</p>
+                    </div>
+                    <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Ke Publik</button>
+                </div>
+
+                <div class="analytics-grid" style="align-items: start;">
+                    <div class="card">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);">Tambah Jabatan & Posisi</h3>
+                        <form id="form-org" onsubmit="addOrgMember(event)">
+                            <div class="prop-group">
+                                <label>Pilih Pengurus Aktif</label>
+                                <select id="org-user-select" required>
+                                    <option value="">-- Menunggu Data Member --</option>
+                                </select>
+                            </div>
+                            <div class="prop-group">
+                                <label>Nama Jabatan / Peran</label>
+                                <input type="text" id="org-role-input" placeholder="Contoh: Ketua Umum / Kadep Humas" required>
+                            </div>
+                            <div class="prop-group">
+                                <label>Pilih Atasan Langsung (Garis Komando)</label>
+                                <select id="org-parent-select">
+                                    <option value="">-- Tanpa Atasan (Posisi Tertinggi) --</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-plus"></i> Tambah Posisi</button>
+                        </form>
+                    </div>
+
+                    <div class="card" style="overflow-x: auto;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);">Hierarki Saat Ini</h3>
+                        <table style="width:100%; text-align:left;">
+                            <thead><tr><th>Nama</th><th>Jabatan</th><th>Atasan</th><th>Aksi</th></tr></thead>
+                            <tbody id="org-table-body">
+                                <tr><td colspan="4" style="text-align: center; padding: 20px; color: #aaa;">Belum ada hierarki.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="menu-berita" class="menu-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 style="margin: 0; color: var(--primary); font-weight: 800;"><i class="fa-solid fa-newspaper"></i> Konten Berita & Pengumuman</h2>
+                        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Update informasi dan artikel berita langsung ke website publik tanpa batas.</p>
+                    </div>
+                    <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Ke Publik</button>
+                </div>
+
+                <div class="card" style="border-left: 4px solid var(--secondary);">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);"><i class="fa-solid fa-bullhorn"></i> Setup Pengumuman Darurat (Banner)</h3>
+                    <div style="display: flex; gap: 15px; align-items: center; margin-bottom: 15px;">
+                        <label style="font-weight: bold; font-size: 0.9rem;">Status Banner:</label>
+                        <select id="ann-status" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none;">
+                            <option value="false">Tidak Aktif (Sembunyikan)</option>
+                            <option value="true">Aktif (Tampilkan)</option>
+                        </select>
+                    </div>
+                    <div class="prop-group">
+                        <label>Judul Pengumuman</label>
+                        <input type="text" id="ann-title" placeholder="Contoh: Pendaftaran Kepanitiaan Telah Dibuka!">
+                    </div>
+                    <div class="prop-group">
+                        <label>Isi Detail Pengumuman</label>
+                        <textarea id="ann-content" rows="3" placeholder="Tuliskan instruksi atau informasi penting di sini..."></textarea>
+                    </div>
+                </div>
+
+                <div class="analytics-grid" style="align-items: start;">
+                    <div class="card">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);"><i class="fa-solid fa-pen-to-square"></i> Tulis Berita/Agenda Baru</h3>
+                        <form id="form-news" onsubmit="addNewsItem(event)">
+                            <div class="prop-group">
+                                <label>URL Gambar Thumbnail</label>
+                                <input type="url" id="news-img" placeholder="https://..." required>
+                            </div>
+                            <div class="prop-group">
+                                <label>Tag Waktu / Kategori</label>
+                                <input type="text" id="news-date" placeholder="Contoh: Hari Ini / Workshop" required>
+                            </div>
+                            <div class="prop-group">
+                                <label>Judul Berita</label>
+                                <input type="text" id="news-title" placeholder="Judul artikel yang menarik..." required>
+                            </div>
+                            <div class="prop-group">
+                                <label>Ringkasan / Paragraf Singkat</label>
+                                <textarea id="news-desc" rows="4" required placeholder="Tulis sedikit cuplikan isi berita di sini..."></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary" style="background: var(--blue); color: white; width: 100%;"><i class="fa-solid fa-plus"></i> Terbitkan Berita</button>
+                        </form>
+                    </div>
+
+                    <div class="card" style="overflow-x: auto; max-height: 600px;">
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);"><i class="fa-solid fa-list"></i> Daftar Berita Tersimpan</h3>
+                        <div id="news-list-container" style="display: flex; flex-direction: column; gap: 15px;">
+                            <p style="color: #aaa; text-align: center;">Belum ada berita.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="menu-transparansi" class="menu-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2 style="margin: 0; color: var(--primary); font-weight: 800;"><i class="fa-solid fa-scale-balanced"></i> Transparansi & Pencapaian KPI</h2>
+                        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Review singkat data yang ditarik dari dashboard internal pengurus untuk disajikan ke publik.</p>
+                    </div>
+                    <button class="btn-sm" style="background: var(--blue); color: white;" onclick="loadAdminTransparansi()"><i class="fa-solid fa-rotate-right"></i> Refresh Data</button>
+                </div>
+
+                <div class="analytics-grid" style="align-items: start;">
+                    <div class="card" style="border-top: 4px solid var(--secondary);">
+                        <h3 style="font-size: 1.2rem; margin-bottom: 20px; color: var(--primary);"><i class="fa-solid fa-wallet"></i> Rekapitulasi Keuangan Organisasi</h3>
+                        <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 15px;">
+                            <div style="font-size: 0.85rem; color: #64748b;">Total Rencana Anggaran (RAB)</div>
+                            <div style="font-size: 1.8rem; font-weight: 800; color: var(--primary);" id="adm-fin-rab">Rp 0</div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="background: rgba(46, 204, 113, 0.1); padding: 15px; border-radius: 10px;">
+                                <div style="font-size: 0.8rem; color: #27ae60; font-weight: bold;">Telah Terealisasi</div>
+                                <div style="font-size: 1.3rem; font-weight: 800; color: var(--green);" id="adm-fin-real">Rp 0</div>
+                            </div>
+                            <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 10px;">
+                                <div style="font-size: 0.8rem; color: var(--blue); font-weight: bold;">Sisa / Saldo</div>
+                                <div style="font-size: 1.3rem; font-weight: 800; color: var(--blue);" id="adm-fin-sisa">Rp 0</div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 20px; text-align: center;">
+                            <span style="font-size: 0.85rem; color: #666;">Persentase Serapan Dana:</span>
+                            <span style="font-size: 1.2rem; font-weight: bold; color: var(--primary); margin-left: 5px;" id="adm-fin-persen">0%</span>
+                        </div>
+                    </div>
+
+                    <div class="card" style="border-top: 4px solid var(--green);">
+                        <h3 style="font-size: 1.2rem; margin-bottom: 20px; color: var(--primary);"><i class="fa-solid fa-bullseye"></i> Indikator Pencapaian (KPI) Detail</h3>
+                        <div id="adm-kpi-list" style="max-height: 400px; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 10px;">
+                            <p style="color: #aaa; font-style: italic;">Memuat data KPI internal...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -326,6 +477,11 @@
         let allMembersData = [];
         let chartTraffic = null; let chartActivity = null;
 
+        // GLOBAL CONFIG DATA FOR PUBLIC WEB
+        let globalOrgStructure = [];
+        let globalNewsList = [];
+        let globalAnnouncement = { title: '', content: '', active: 'false' };
+
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
 
         const escapeHtml = (unsafe) => {
@@ -351,8 +507,10 @@
             document.getElementById(`menu-${menu}`).classList.add('active');
             event.currentTarget.classList.add('active');
             if(window.innerWidth <= 768) toggleSidebar();
+            
             if (menu === 'analytics') initChartsSafe();
             if (menu === 'builder') renderCanvas();
+            if (menu === 'transparansi') loadAdminTransparansi();
         }
         
         function goToUserDashboard() { if (currentWorkspaceId) window.open(`user.html?workspace=${currentWorkspaceId}`, '_blank'); }
@@ -375,32 +533,51 @@
         }
 
         async function saveLandingPage() {
-            if(layoutBlocks.length === 0) return showToast("Kanvas Kosong! Tambahkan setidaknya 1 blok desain.", "error");
+            if(layoutBlocks.length === 0 && globalOrgStructure.length === 0 && globalNewsList.length === 0) {
+                return showToast("Data Kosong! Tambahkan setidaknya 1 blok desain/data.", "error");
+            }
             
-            const btnPublish = document.querySelector('button[onclick="saveLandingPage()"]');
-            btnPublish.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mempublish...';
-            btnPublish.disabled = true;
+            const btns = document.querySelectorAll('button[onclick="saveLandingPage()"]');
+            btns.forEach(btn => {
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+                btn.disabled = true;
+            });
 
-            const payload = { workspace_id: currentWorkspaceId, layout_data: layoutBlocks, is_published: true, updated_at: new Date().toISOString() };
+            // Bundle Global Config Data into Layout Blocks payload safely
+            const configBlock = {
+                id: 'global_config_data',
+                type: 'global_data_config',
+                orgStructure: globalOrgStructure,
+                newsData: globalNewsList,
+                announcementData: {
+                    title: document.getElementById('ann-title').value,
+                    content: document.getElementById('ann-content').value,
+                    active: document.getElementById('ann-status').value
+                }
+            };
+            
+            let cleanLayout = layoutBlocks.filter(b => b.type !== 'global_data_config');
+            cleanLayout.push(configBlock);
+
+            const payload = { workspace_id: currentWorkspaceId, layout_data: cleanLayout, is_published: true, updated_at: new Date().toISOString() };
             const { error } = await supabaseClient.from('landing_pages').upsert(payload, { onConflict: 'workspace_id' });
             
             if (error) { 
                 showToast("Gagal menyimpan: " + error.message, 'error'); 
             } else { 
-                showToast("Berhasil! Website publik diperbarui.", 'success'); 
+                showToast("Berhasil! Konfigurasi tersimpan & sinkron ke Publik.", 'success'); 
                 loadLandingPageData(); 
             }
             
-            btnPublish.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Publish Update';
-            btnPublish.disabled = false;
+            btns.forEach(btn => {
+                btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Simpan Ke Publik';
+                btn.disabled = false;
+            });
         }
 
-        // FULLSCREEN BUILDER FEATURE + TOGGLE
         function toggleFullscreenBuilder() {
             const wrapper = document.getElementById('builder-main-wrapper');
-            
             wrapper.classList.toggle('builder-fullscreen');
-            
             if(wrapper.classList.contains('builder-fullscreen')) {
                 document.body.style.overflow = 'hidden'; 
             } else {
@@ -408,23 +585,19 @@
             }
         }
 
-        // SIMULASI SEARCH ENGINE DOMAIN (Maks harga promo ~Rp 50.000)
         function checkDomainAvailability() {
             let inputName = document.getElementById('domain-input').value.toLowerCase().replace(/[^a-z0-9-]/g, '');
             const ext = document.getElementById('domain-ext').value;
             const resultContainer = document.getElementById('domain-result');
 
             if(inputName.length < 3) {
-                showToast("Nama domain minimal 3 karakter!", "error");
-                return;
+                showToast("Nama domain minimal 3 karakter!", "error"); return;
             }
 
             const btn = document.getElementById('btn-check-domain');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true;
 
             setTimeout(() => {
-                // Simulasi harga dasar per ekstensi domain
                 let basePrice = 0;
                 if(ext === '.com') basePrice = 30000;
                 else if(ext === '.id') basePrice = 40000;
@@ -432,40 +605,22 @@
                 else if(ext === '.ac.id') basePrice = 20000;
                 else if(ext === '.my.id') basePrice = 10000;
 
-                // Logika panjang karakter: Semakin pendek namanya, semakin langka/mahal.
-                // Maksimal tambahan harga adalah (15 - 3) * 1200 = Rp 14.400
-                // Base harga tertinggi (.id) = 40.000 + 14.400 = 54.400 (Mendekati ekspektasi 50k user)
                 let lengthModifier = Math.max(0, 15 - inputName.length) * 1200;
                 let finalPrice = basePrice + lengthModifier;
 
-                // Simulasi acak apakah domain tersebut sudah dipakai (biasanya nama umum)
                 const commonNames = ['bem', 'dema', 'kampus', 'univ', 'organisasi'];
                 const isTaken = commonNames.includes(inputName) && (ext === '.com' || ext === '.id');
 
                 if(isTaken) {
-                    resultContainer.innerHTML = `
-                        <div style="background: #fef2f2; border: 1px solid #f87171; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
-                            <div>
-                                <strong style="color: #b91c1c; font-size: 1.1rem;">${inputName}${ext}</strong>
-                                <div style="font-size: 0.85rem; color: #7f1d1d; margin-top: 5px;">Domain sudah tidak tersedia (Digunakan).</div>
-                            </div>
-                            <i class="fa-solid fa-circle-xmark" style="color: #ef4444; font-size: 1.5rem;"></i>
-                        </div>
-                    `;
+                    resultContainer.innerHTML = `<div style="background: #fef2f2; border: 1px solid #f87171; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
+                        <div><strong style="color: #b91c1c; font-size: 1.1rem;">${inputName}${ext}</strong><div style="font-size: 0.85rem; color: #7f1d1d; margin-top: 5px;">Domain sudah tidak tersedia (Digunakan).</div></div>
+                        <i class="fa-solid fa-circle-xmark" style="color: #ef4444; font-size: 1.5rem;"></i></div>`;
                 } else {
-                    resultContainer.innerHTML = `
-                        <div style="background: #f0fdf4; border: 1px solid #4ade80; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
-                            <div>
-                                <strong style="color: #166534; font-size: 1.1rem;">${inputName}${ext}</strong>
-                                <div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">Tersedia! Est. Harga Promo: <b>${formatRp(finalPrice)}</b> / thn</div>
-                            </div>
-                            <button class="btn-primary" style="padding: 8px 15px; font-size: 0.85rem;" onclick="showToast('Permintaan klaim domain dikirim ke Tim Support.', 'success')"><i class="fa-solid fa-cart-shopping"></i> Klaim</button>
-                        </div>
-                    `;
+                    resultContainer.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #4ade80; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
+                        <div><strong style="color: #166534; font-size: 1.1rem;">${inputName}${ext}</strong><div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">Tersedia! Est. Harga Promo: <b>${formatRp(finalPrice)}</b> / thn</div></div>
+                        <button class="btn-primary" style="padding: 8px 15px; font-size: 0.85rem;" onclick="showToast('Permintaan klaim domain dikirim ke Tim Support.', 'success')"><i class="fa-solid fa-cart-shopping"></i> Klaim</button></div>`;
                 }
-
-                btn.innerHTML = 'Periksa';
-                btn.disabled = false;
+                btn.innerHTML = 'Periksa'; btn.disabled = false;
             }, 800);
         }
 
@@ -503,7 +658,6 @@
             }
         }
 
-        // Tracking & Realtime (Last Seen Bug Fix)
         async function loadMembers() {
             const { data, error } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', currentWorkspaceId);
             const tbody = document.getElementById('member-list'); tbody.innerHTML = '';
@@ -512,6 +666,15 @@
             }
             allMembersData = data; 
             renderMembersTable();
+            populateOrgUserDropdown();
+        }
+
+        function populateOrgUserDropdown() {
+            const selectEl = document.getElementById('org-user-select');
+            selectEl.innerHTML = '<option value="">-- Pilih Anggota Pengurus --</option>';
+            allMembersData.forEach(user => {
+                selectEl.innerHTML += `<option value="${user.user_id}">${user.nama_user || 'User Tanpa Nama'}</option>`;
+            });
         }
 
         function renderMembersTable() {
@@ -560,7 +723,7 @@
         }
 
         // ==========================================
-        // ADVANCED BUILDER & LIVE PREVIEW LOGIC
+        // ADVANCED BUILDER & DATA SYNC LOGIC
         // ==========================================
         async function loadLandingPageData() {
             const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
@@ -568,24 +731,192 @@
             const linkBtn = document.getElementById('link-public');
             const delBtn = document.getElementById('btn-hapus-web');
 
-            if (data && data.is_published) {
+            if (data) {
                 let rawBlocks = data.layout_data || [];
-                layoutBlocks = rawBlocks.map(b => {
+                
+                // Extract Global Configs
+                const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
+                if (configBlock) {
+                    globalOrgStructure = configBlock.orgStructure || [];
+                    globalNewsList = configBlock.newsData || [];
+                    globalAnnouncement = configBlock.announcementData || { title: '', content: '', active: 'false' };
+                    
+                    document.getElementById('ann-title').value = globalAnnouncement.title;
+                    document.getElementById('ann-content').value = globalAnnouncement.content;
+                    document.getElementById('ann-status').value = globalAnnouncement.active;
+                }
+                
+                // Keep purely UI blocks
+                layoutBlocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
                     if (!b.styles) b.styles = { bg: '#ffffff', padding: '40px', borderRadius: '15px' };
                     if (!b.data) b.data = {};
                     return b;
                 });
-                statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check"></i> Website Telah Terpublikasi</span>`;
-                linkBtn.href = `public.html?workspace=${currentWorkspaceId}`;
-                linkBtn.style.display = 'inline-flex'; delBtn.style.display = 'inline-flex';
+                
+                if(data.is_published) {
+                    statusTxt.innerHTML = `<span style="color:var(--green); font-weight:bold;"><i class="fa-solid fa-check"></i> Website Telah Terpublikasi</span>`;
+                    linkBtn.href = `public.html?workspace=${currentWorkspaceId}`;
+                    linkBtn.style.display = 'inline-flex'; delBtn.style.display = 'inline-flex';
+                }
             } else {
-                layoutBlocks = [];
+                layoutBlocks = []; globalOrgStructure = []; globalNewsList = [];
                 statusTxt.innerHTML = `<span style="color:#aaa;"><i class="fa-solid fa-circle-exclamation"></i> Belum ada website yang dibuat.</span>`;
                 linkBtn.style.display = 'none'; delBtn.style.display = 'none';
             }
             renderCanvas();
+            renderOrgTable();
+            renderNewsList();
         }
 
+        // --- ORG STRUCTURE LOGIC ---
+        function addOrgMember(e) {
+            e.preventDefault();
+            const uId = document.getElementById('org-user-select').value;
+            const userObj = allMembersData.find(u => u.user_id === uId);
+            if(!userObj) return showToast("Pilih anggota yang valid", "error");
+            
+            const newItem = {
+                id: 'org_' + Date.now(),
+                userId: uId,
+                name: userObj.nama_user || 'Tanpa Nama',
+                role: document.getElementById('org-role-input').value,
+                parentId: document.getElementById('org-parent-select').value || null
+            };
+            
+            globalOrgStructure.push(newItem);
+            document.getElementById('form-org').reset();
+            renderOrgTable();
+            showToast("Berhasil ditambahkan ke hierarki (Belum tersimpan ke Publik)", "success");
+        }
+
+        function deleteOrgMember(id) {
+            if(confirm("Hapus jabatan ini dari hierarki?")) {
+                globalOrgStructure = globalOrgStructure.filter(o => o.id !== id);
+                // remove references if parent deleted
+                globalOrgStructure.forEach(o => { if(o.parentId === id) o.parentId = null; });
+                renderOrgTable();
+            }
+        }
+
+        function renderOrgTable() {
+            const tbody = document.getElementById('org-table-body');
+            const pSelect = document.getElementById('org-parent-select');
+            
+            tbody.innerHTML = '';
+            pSelect.innerHTML = '<option value="">-- Tanpa Atasan (Posisi Tertinggi) --</option>';
+
+            if(globalOrgStructure.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #aaa;">Belum ada hierarki yang disusun.</td></tr>';
+                return;
+            }
+
+            globalOrgStructure.forEach(item => {
+                pSelect.innerHTML += `<option value="${item.id}">${item.name} (${item.role})</option>`;
+                const pName = item.parentId ? (globalOrgStructure.find(x => x.id === item.parentId)?.name || '-') : '<span style="color:var(--secondary); font-weight:bold;">Tertinggi</span>';
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${escapeHtml(item.name)}</strong></td>
+                        <td>${escapeHtml(item.role)}</td>
+                        <td>${pName}</td>
+                        <td><button class="btn-danger btn-sm" onclick="deleteOrgMember('${item.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- NEWS LOGIC ---
+        function addNewsItem(e) {
+            e.preventDefault();
+            const newItem = {
+                id: 'news_' + Date.now(),
+                img: document.getElementById('news-img').value,
+                date: document.getElementById('news-date').value,
+                title: document.getElementById('news-title').value,
+                desc: document.getElementById('news-desc').value
+            };
+            globalNewsList.unshift(newItem); // put at top
+            document.getElementById('form-news').reset();
+            renderNewsList();
+            showToast("Berita ditambahkan! (Klik Simpan Publik untuk memperbarui web)", "success");
+        }
+
+        function deleteNewsItem(id) {
+            if(confirm("Hapus berita ini?")) {
+                globalNewsList = globalNewsList.filter(n => n.id !== id);
+                renderNewsList();
+            }
+        }
+
+        function renderNewsList() {
+            const container = document.getElementById('news-list-container');
+            container.innerHTML = '';
+            if(globalNewsList.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center;">Belum ada berita diterbitkan.</p>';
+                return;
+            }
+            
+            globalNewsList.forEach(news => {
+                container.innerHTML += `
+                    <div style="display:flex; gap:15px; border:1px solid #eee; padding:15px; border-radius:10px; background:#f8fafc; align-items:center;">
+                        <img src="${escapeHtml(news.img)}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;">
+                        <div style="flex:1;">
+                            <div style="font-size:0.7rem; color:var(--secondary); font-weight:bold;">${escapeHtml(news.date)}</div>
+                            <h4 style="margin:5px 0; color:var(--primary); font-size:1rem;">${escapeHtml(news.title)}</h4>
+                            <p style="font-size:0.8rem; color:#666; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">${escapeHtml(news.desc)}</p>
+                        </div>
+                        <button class="btn-danger btn-sm" onclick="deleteNewsItem('${news.id}')"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+            });
+        }
+
+        // --- TRANSPARANSI & KPI ADMIN DASHBOARD LOGIC ---
+        async function loadAdminTransparansi() {
+            // Fetch Keuangan
+            const { data: finData } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single(); 
+            let t = 0; let r = 0; 
+            if (finData) { t = parseFloat(finData.total_rab); r = parseFloat(finData.realisasi_rab); } 
+            const sisa = t - r; const persentase = t > 0 ? Math.round((r/t)*100) : 0; 
+            
+            document.getElementById('adm-fin-rab').innerText = formatRp(t);
+            document.getElementById('adm-fin-real').innerText = formatRp(r);
+            document.getElementById('adm-fin-sisa').innerText = formatRp(sisa);
+            document.getElementById('adm-fin-persen').innerText = persentase + '%';
+
+            // Fetch KPI Detail
+            const { data: kpis } = await supabaseClient.from('kpi_items').select('*, departments(nama_departemen), programs(nama_program)').eq('workspace_id', currentWorkspaceId);
+            const kpiListContainer = document.getElementById('adm-kpi-list');
+            kpiListContainer.innerHTML = '';
+            
+            if(kpis && kpis.length > 0) {
+                kpis.forEach(k => {
+                    let persen = k.target > 0 ? (k.capaian / k.target) * 100 : 0;
+                    let colorCode = persen >= 100 ? 'var(--green)' : (persen > 0 ? 'var(--secondary)' : 'var(--red)');
+                    
+                    kpiListContainer.innerHTML += `
+                        <div style="border: 1px solid #eee; padding: 15px; border-radius:10px; background:white; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                                <strong style="color:var(--primary); font-size:0.95rem;">${escapeHtml(k.nama_kpi)}</strong>
+                                <span style="color: white; background: ${colorCode}; font-weight:bold; font-size:0.75rem; padding: 3px 8px; border-radius:10px;">${persen.toFixed(1)}%</span>
+                            </div>
+                            <div style="font-size:0.8rem; color:#666; margin-bottom: 8px;">
+                                <i class="fa-solid fa-sitemap"></i> ${escapeHtml(k.departments?.nama_departemen || 'Umum')} | 
+                                <i class="fa-solid fa-star"></i> ${escapeHtml(k.programs?.nama_program || '-')}
+                            </div>
+                            <div style="font-size:0.8rem; display:flex; justify-content:space-between; background:#f8fafc; padding:8px; border-radius:5px;">
+                                <span>Target: <b>${k.target} ${k.satuan}</b></span>
+                                <span style="color:var(--primary);">Capaian: <b>${k.capaian} ${k.satuan}</b></span>
+                            </div>
+                        </div>`;
+                });
+            } else {
+                kpiListContainer.innerHTML = '<p style="color:#aaa; text-align:center;">Belum ada data indikator KPI.</p>';
+            }
+        }
+
+
+        // --- UI BUILDER CANVAS ---
         function dragStartTool(e, type) { e.dataTransfer.setData('blockType', type); }
         function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
         function dropToCanvas(e) {
@@ -602,16 +933,12 @@
             else if(type === 'text') { newBlock.data = { content: "Tulis narasi atau informasi Anda di sini. Berikan deskripsi yang jelas dan menarik untuk pengunjung." }; }
             else if(type === 'image') { newBlock.data = { url: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=800&q=80", width: "100%", align: "center" }; }
             else if(type === 'video') { newBlock.data = { url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }; }
-            else if(type === 'newsletter') { newBlock.data = { title: "Pengumuman Penting", content: "Informasi mendesak atau update terbaru mengenai kegiatan organisasi." }; }
+            else if(type === 'newsletter') { newBlock.data = { title: "Pengumuman Live Terhubung", content: "Widget ini akan otomatis membaca Pengumuman dari Tab Berita." }; }
             else if(type === 'divider') { newBlock.data = { style: "solid" }; newBlock.styles.padding = '20px'; }
             else if(type === 'grid-news') { 
                 newBlock.data = { 
-                    title: "Berita & Agenda", columns: "3", 
-                    items: [
-                        { img: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&q=80", date: "Baru Saja", title: "Kegiatan Sosialisasi", desc: "Penjelasan ringkas agenda..." },
-                        { img: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?w=500&q=80", date: "Kemarin", title: "Rapat Kerja Terbuka", desc: "Pembahasan RKAT..." },
-                        { img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=500&q=80", date: "Minggu Lalu", title: "Pelatihan Softskill", desc: "Peningkatan mutu..." }
-                    ] 
+                    title: "Berita & Agenda Terkini", columns: "3", 
+                    items: [] // Akan dioverride oleh globalNewsList di public.html
                 }; 
             }
             else if(type === 'struktur') { newBlock.data = { title: "Struktur Organisasi" }; }
@@ -625,8 +952,6 @@
 
         function renderCanvas() {
             const previewWindow = document.getElementById('preview-window');
-            
-            // [BUG FIX]: Simpan posisi Scroll saat ini sebelum merender ulang HTML
             const currentScroll = previewWindow.scrollTop;
             
             if(layoutBlocks.length === 0) {
@@ -645,6 +970,7 @@
                 else if(b.type === 'finance') linkTitle = 'Keuangan';
                 else if(b.type === 'kpi') linkTitle = 'KPI Target';
                 else if(b.type === 'program') linkTitle = 'Program Kerja';
+                else if(b.type === 'grid-news') linkTitle = 'Berita';
                 
                 if(linkTitle) {
                     navLinks += `<a href="#section-${b.id}" onclick="event.preventDefault()">${escapeHtml(linkTitle)}</a>`;
@@ -688,54 +1014,30 @@
                     blockContent = `<div><iframe src="${escapeHtml(block.data.url)}" style="width:100%; height:300px; border-radius:${block.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1); pointer-events:none;"></iframe></div>`;
                 }
                 else if (block.type === 'newsletter') {
-                    blockContent = `<div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> ${escapeHtml(block.data.title)}</h3><p style="color:#64748b; font-size:0.9rem;">${escapeHtml(block.data.content)}</p></div>`;
+                    blockContent = `<div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> WIDGET: Pengumuman Langsung</h3><p style="color:#64748b; font-size:0.9rem;">(Akan di-override dengan data dari Menu Berita & Pengumuman)</p></div>`;
                 }
                 else if (block.type === 'divider') {
                     blockContent = `<hr style="border:0; border-top: 3px ${escapeHtml(block.data.style) || 'solid'} #cbd5e1; margin: 0;">`;
                 }
                 else if (block.type === 'grid-news') {
-                    let cols = block.data.columns || '3';
-                    let itemsHtml = '';
-                    (block.data.items || []).forEach(it => {
-                        itemsHtml += `
-                        <div style="background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-                            <div style="height: 150px; background-image: url('${escapeHtml(it.img)}'); background-size: cover; background-position: center; background-color: #eee;"></div>
-                            <div style="padding: 15px; display: flex; flex-direction: column; flex-grow: 1;">
-                                <div style="font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">${escapeHtml(it.date)}</div>
-                                <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; color: var(--text);">${escapeHtml(it.title)}</h3>
-                                <p style="font-size: 0.85rem; color: #475569; line-height: 1.5;">${escapeHtml(it.desc)}</p>
-                            </div>
-                        </div>`;
-                    });
                     blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid rgba(10,48,85,0.1); padding-bottom: 10px;">${escapeHtml(block.data.title)}</h2>
-                                    <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'180px':'220px'}, 1fr));">${itemsHtml}</div>`;
+                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-newspaper" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Berita Terhubung Live</b><br>Jumlah dan isi berita akan langsung mengambil dari database Menu Berita di Admin HTML.</div>`;
                 }
                 else if (block.type === 'struktur') {
                     blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; text-align: center;">${escapeHtml(block.data.title)}</h2>
-                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; text-align: center;">
-                                        <div style="background:white; padding:20px; border-radius:10px; border-top: 3px solid var(--primary); box-shadow:0 4px 10px rgba(0,0,0,0.05);"><div style="width:60px; height:60px; background:#e2e8f0; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:#aaa;"><i class="fa-solid fa-user"></i></div><div style="font-weight:700; font-size:0.9rem;">John Doe</div><div style="font-size:0.75rem; color:#64748b;">Ketua Umum</div></div>
-                                        <div style="background:white; padding:20px; border-radius:10px; border-top: 3px solid var(--primary); box-shadow:0 4px 10px rgba(0,0,0,0.05);"><div style="width:60px; height:60px; background:#e2e8f0; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; color:#aaa;"><i class="fa-solid fa-user"></i></div><div style="font-weight:700; font-size:0.9rem;">Jane Smith</div><div style="font-size:0.75rem; color:#64748b;">Sekretaris</div></div>
-                                    </div><p style="text-align:center; font-size:0.75rem; color:#aaa; margin-top:10px;">(Data asli akan ditarik dari sistem)</p>`;
+                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-sitemap" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Struktur Org Live</b><br>Bagan organisasi ditarik dari hierarki yang dibuat di Menu Struktur Organisasi.</div>`;
                 }
                 else if (block.type === 'finance') {
                     blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
-                                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); display:flex; gap: 20px; align-items:center;">
-                                        <div style="flex:1;"><div style="color:#64748b; font-size:0.85rem;">Rencana Anggaran</div><div style="font-size:1.5rem; font-weight:800; color:var(--primary);">Rp 10.000.000</div></div>
-                                        <div style="flex:1;"><div style="color:#64748b; font-size:0.85rem;">Terserap</div><div style="font-size:1.5rem; font-weight:800; color:var(--green);">Rp 4.500.000</div></div>
-                                    </div><p style="font-size:0.75rem; color:#aaa; margin-top:10px;">(Data asli ditarik otomatis)</p>`;
+                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Transparansi Keuangan Auto-Sync)</div>`;
                 }
                 else if (block.type === 'kpi') {
                     blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-bullseye"></i> Capaian KPI Target</h2>
-                                    <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                        <strong style="font-size:1rem;">Target Peserta Sosialisasi</strong><div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-top:10px;"><span>Target: 100 Org</span><span style="color:var(--green); font-weight:bold;">80 Org (80%)</span></div>
-                                        <div style="width:100%; background:#e2e8f0; height:8px; border-radius:5px; margin-top:5px;"><div style="width:80%; background:var(--green); height:100%; border-radius:5px;"></div></div>
-                                    </div>`;
+                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget KPI Organisasi Auto-Sync)</div>`;
                 }
                 else if (block.type === 'program') {
                     blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
-                                    <div style="background: white; padding: 20px; border-radius: 10px; border-left: 4px solid var(--secondary); box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                                        <h3 style="font-size:1rem;">Bakti Sosial Desa</h3><p style="font-size:0.8rem; color:#64748b;">12 Des 2026</p><span style="display:inline-block; margin-top:5px; padding:3px 10px; background:#fef3c7; color:#92400e; font-size:0.75rem; border-radius:10px; font-weight:bold;">On Progress</span>
-                                    </div>`;
+                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Update Jadwal/Timeline Auto-Sync)</div>`;
                 }
 
                 htmlString += `
@@ -751,8 +1053,6 @@
             });
 
             previewWindow.innerHTML = `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
-            
-            // [BUG FIX]: Mengembalikan posisi Scroll ke semula secara presisi
             previewWindow.scrollTop = currentScroll;
         }
 
@@ -784,24 +1084,13 @@
             else if (block.type === 'text') { html += `<div class="prop-group"><label>Teks Paragraf Panjang</label><textarea rows="8" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`; } 
             else if (block.type === 'image') { html += `<div class="prop-group"><label>URL Link Gambar</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div><div class="prop-group"><label>Lebar Gambar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.data.width) || 100}" onchange="updateBlockData('${id}', 'width', this.value + '%')"></div><div class="prop-group"><label>Posisi Peletakan</label><select onchange="updateBlockData('${id}', 'align', this.value)"><option value="left" ${block.data.align==='left'?'selected':''}>Kiri</option><option value="center" ${block.data.align==='center'?'selected':''}>Tengah</option><option value="right" ${block.data.align==='right'?'selected':''}>Kanan</option></select></div>`; }
             else if (block.type === 'video') { html += `<div class="prop-group"><label>Link Embed YouTube Khusus</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`; }
-            else if (block.type === 'newsletter') { html += `<div class="prop-group"><label>Judul Pengumuman</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Isi Pesan/Pengumuman</label><textarea rows="3" oninput="updateBlockData('${id}', 'content', this.value)">${block.data.content || ''}</textarea></div>`; }
+            else if (block.type === 'newsletter') { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Widget Sinkronisasi:</b> Untuk mengubah teks/isi pengumuman, silakan tuju Menu "Berita & Pengumuman".</div>`; }
             else if (block.type === 'divider') { html += `<div class="prop-group"><label>Tipe Pola Garis</label><select onchange="updateBlockData('${id}', 'style', this.value)"><option value="solid" ${block.data.style==='solid'?'selected':''}>Garis Lurus Penuh</option><option value="dashed" ${block.data.style==='dashed'?'selected':''}>Garis Putus-putus</option><option value="dotted" ${block.data.style==='dotted'?'selected':''}>Titik-titik</option></select></div>`; }
             else if (block.type === 'grid-news') { 
-                html += `<div class="prop-group"><label>Judul Section Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Jumlah Kolom (Untuk Layar Lebar)</label><select onchange="updateBlockData('${id}', 'columns', this.value); updateGridItemsLength('${id}', this.value);"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Grid Kolom</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Grid Kolom</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Grid Kolom</option></select></div><hr style="margin:20px 0; border:1px solid #eee;">`; 
-                
-                (block.data.items || []).forEach((it, idx) => {
-                    html += `
-                    <div class="grid-item-editor">
-                        <h5>Isi Grid Kotak Ke-${idx + 1}</h5>
-                        <div class="prop-group"><label>URL Gambar Thumbnail</label><input type="text" value="${it.img || ''}" oninput="updateGridItem('${id}', ${idx}, 'img', this.value)"></div>
-                        <div class="prop-group"><label>Tag Waktu/Kategori</label><input type="text" value="${it.date || ''}" oninput="updateGridItem('${id}', ${idx}, 'date', this.value)"></div>
-                        <div class="prop-group"><label>Judul Topik Berita</label><input type="text" value="${it.title || ''}" oninput="updateGridItem('${id}', ${idx}, 'title', this.value)"></div>
-                        <div class="prop-group"><label>Deskripsi Paragraf</label><textarea rows="2" oninput="updateGridItem('${id}', ${idx}, 'desc', this.value)">${it.desc || ''}</textarea></div>
-                    </div>`;
-                });
+                html += `<div class="prop-group"><label>Judul Section Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Jumlah Kolom (Grid Display)</label><select onchange="updateBlockData('${id}', 'columns', this.value)"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom</option></select></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Widget Live:</b> Jumlah item berita akan ditarik secara otomatis dari daftar Menu "Berita & Pengumuman" tanpa batasan.</div>`; 
             } 
-            else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik secara otomatis dari tabel menu "Tracking Pengurus". Desain di atas hanya preview ilustrasi.</div>`; } 
-            else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal.</div>`; }
+            else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik otomatis dari konfigurasi di menu "Struktur Organisasi".</div>`; } 
+            else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal Workspace.</div>`; }
 
             propForm.innerHTML = html;
         }
@@ -810,31 +1099,9 @@
         function updateBlockData(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) { b.data[key] = val; renderCanvas(); } }
         function moveBlock(idx, dir) { if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return; const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; renderCanvas(); }
         function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; activeBlockId = null; } renderCanvas(); }
-        
-        function updateGridItem(blockId, itemIndex, key, val) {
-            const b = layoutBlocks.find(x => x.id === blockId);
-            if(b && b.data.items && b.data.items[itemIndex]) {
-                b.data.items[itemIndex][key] = val;
-                renderCanvas();
-            }
-        }
-
-        function updateGridItemsLength(blockId, colsString) {
-            const cols = parseInt(colsString);
-            const b = layoutBlocks.find(x => x.id === blockId);
-            if(b && b.data.items) {
-                while(b.data.items.length < cols) {
-                    b.data.items.push({ img: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?w=500&q=80", date: "Baru Saja", title: "Agenda Baru", desc: "Deskripsi agenda..." });
-                }
-                if(b.data.items.length > cols) {
-                    b.data.items.splice(cols);
-                }
-                selectBlock(blockId); 
-            }
-        }
 
         // ==========================================
-        // ANALYTICS DATA FETCH & CHARTS (Real DB Data)
+        // ANALYTICS DATA FETCH & CHARTS
         // ==========================================
         async function initChartsSafe() {
             const ctx1 = document.getElementById('publicTrafficChart');
@@ -844,7 +1111,6 @@
                 if (chartTraffic) chartTraffic.destroy();
                 if (chartActivity) chartActivity.destroy();
 
-                // 1. Fetch data login/kehadiran 7 hari terakhir
                 const today = new Date();
                 const past7Days = new Date(today);
                 past7Days.setDate(today.getDate() - 6);
@@ -855,7 +1121,6 @@
                     .eq('workspace_id', currentWorkspaceId)
                     .gte('tanggal', startDateStr);
 
-                // Buat template object tanggal 7 hari terakhir
                 const dateCountsMap = {};
                 for(let i=6; i>=0; i--) {
                     let d = new Date(today);
@@ -863,7 +1128,6 @@
                     dateCountsMap[d.toISOString().split('T')[0]] = new Set();
                 }
 
-                // Masukkan data jika ada
                 if(trafficData) {
                     trafficData.forEach(row => {
                         if(dateCountsMap[row.tanggal]) {
@@ -880,7 +1144,7 @@
                     data: { 
                         labels: labelsTraffic, 
                         datasets: [{ 
-                            label: 'Pengurus Aktif', 
+                            label: 'Pengurus Aktif (Unik)', 
                             data: dataTraffic, 
                             borderColor: '#F6B23B', 
                             backgroundColor: 'rgba(246, 178, 59, 0.15)',
@@ -891,7 +1155,6 @@
                     options: { maintainAspectRatio: false }
                 });
 
-                // 2. Fetch Volume Data Tiap Modul
                 const { count: countKpi } = await supabaseClient.from('kpi_items').select('*', {count: 'exact', head: true}).eq('workspace_id', currentWorkspaceId);
                 const { count: countProg } = await supabaseClient.from('programs').select('*', {count: 'exact', head: true}).eq('workspace_id', currentWorkspaceId);
                 const { count: countRab } = await supabaseClient.from('rab_items').select('*', {count: 'exact', head: true}).eq('workspace_id', currentWorkspaceId);
@@ -900,9 +1163,9 @@
                 chartActivity = new Chart(ctx2.getContext('2d'), { 
                     type: 'bar', 
                     data: { 
-                        labels: ['KPI', 'Keuangan (RAB)', 'Program', 'Surat (DO)'], 
+                        labels: ['KPI Target', 'Keuangan (RAB)', 'Program Kerja', 'Surat Digital'], 
                         datasets: [{ 
-                            label: 'Total Dokumen Dibuat', 
+                            label: 'Total Dokumen Tersimpan', 
                             data: [countKpi||0, countRab||0, countProg||0, countDO||0], 
                             backgroundColor: '#0A3055',
                             borderRadius: 6

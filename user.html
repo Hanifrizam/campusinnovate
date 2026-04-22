@@ -2476,22 +2476,22 @@
 
         function openKPIModal() { editingKPIId = null; document.getElementById('form-kpi').reset(); document.getElementById('kpi-modal-title').innerText = "Tambah KPI Baru"; openModal('kpiModal'); }
 
-        async function openEditKPI(id) { 
+        async function openEditKPI(id) { 
             const k = globalKPIs.find(kpi => kpi.id === id); if(!k) return;
-            editingKPIId = id; document.getElementById('kpi-modal-title').innerText = "Update / Edit KPI"; 
-            document.getElementById('kpi-dept').value = k.department_id; 
+            editingKPIId = id; document.getElementById('kpi-modal-title').innerText = "Update / Edit KPI"; 
+            document.getElementById('kpi-dept').value = k.department_id; 
             await fetchProgByDept(k.department_id, document.getElementById('kpi-prog'));
-            document.getElementById('kpi-prog').value = k.program_id; 
-            document.getElementById('kpi-nama').value = k.nama_kpi; document.getElementById('kpi-target').value = k.target; 
-            document.getElementById('kpi-satuan').value = k.satuan; document.getElementById('kpi-capaian').value = k.capaian; 
-            openModal('kpiModal'); 
+            document.getElementById('kpi-prog').value = k.program_id; 
+            document.getElementById('kpi-nama').value = k.nama_kpi; document.getElementById('kpi-target').value = k.target; 
+            document.getElementById('kpi-satuan').value = k.satuan; document.getElementById('kpi-capaian').value = k.capaian; 
+            openModal('kpiModal'); 
         }
 
         async function saveKPI(e) {
-            e.preventDefault(); 
-            const payload = { 
+            e.preventDefault(); 
+            const payload = { 
                 department_id: document.getElementById('kpi-dept').value, program_id: document.getElementById('kpi-prog').value,
-                nama_kpi: document.getElementById('kpi-nama').value, target: parseFloat(document.getElementById('kpi-target').value), 
+                nama_kpi: document.getElementById('kpi-nama').value, target: parseFloat(document.getElementById('kpi-target').value), 
                 satuan: document.getElementById('kpi-satuan').value, capaian: parseFloat(document.getElementById('kpi-capaian').value || 0)
             };
             
@@ -2500,7 +2500,7 @@
             
             document.getElementById('btn-save-kpi').innerText = "Menyimpan..."; document.getElementById('btn-save-kpi').disabled = true;
 
-            if (editingKPIId) { await supabaseClient.from('kpi_items').update(payload).eq('id', editingKPIId); } 
+            if (editingKPIId) { await supabaseClient.from('kpi_items').update(payload).eq('id', editingKPIId); } 
             else { payload.workspace_id = globalWorkspaceId; payload.created_by = currentUserId; await supabaseClient.from('kpi_items').insert([payload]); }
             
             closeModal('kpiModal'); await loadKPIData(); showNotification("KPI Disimpan", "success");
@@ -2886,20 +2886,40 @@
 
         function initSignaturePad() {
             padCanvas = document.getElementById('signature-pad-container');
+            if(!padCanvas) return;
+            
             const startDraw = (e) => {
-                isDrawingPad = true; const rect = padCanvas.getBoundingClientRect();
-                padCtx.beginPath(); let x = e.clientX ? e.clientX : e.touches[0].clientX; let y = e.clientY ? e.clientY : e.touches[0].clientY;
+                isDrawingPad = true; 
+                const rect = padCanvas.getBoundingClientRect();
+                padCtx.beginPath(); 
+                let x = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX; 
+                let y = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
                 padCtx.moveTo(x - rect.left, y - rect.top);
             };
+            
             const draw = (e) => {
-                if (!isDrawingPad) return; e.preventDefault();
-                const rect = padCanvas.getBoundingClientRect(); let x = e.clientX ? e.clientX : e.touches[0].clientX; let y = e.clientY ? e.touches[0].clientY;
-                padCtx.lineTo(x - rect.left, y - rect.top); padCtx.stroke();
+                if (!isDrawingPad) return;
+                e.preventDefault();
+                const rect = padCanvas.getBoundingClientRect();
+                let x = (e.touches && e.touches.length > 0) ? e.touches[0].clientX : e.clientX;
+                let y = (e.touches && e.touches.length > 0) ? e.touches[0].clientY : e.clientY;
+                padCtx.lineTo(x - rect.left, y - rect.top);
+                padCtx.stroke();
             };
-            const endDraw = () => { isDrawingPad = false; padCtx.closePath(); };
+            
+            const endDraw = () => { 
+                isDrawingPad = false; 
+                padCtx.closePath(); 
+            };
 
-            padCanvas.addEventListener('mousedown', startDraw); padCanvas.addEventListener('mousemove', draw); padCanvas.addEventListener('mouseup', endDraw);
-            padCanvas.addEventListener('touchstart', startDraw, {passive:false}); padCanvas.addEventListener('touchmove', draw, {passive:false}); padCanvas.addEventListener('touchend', endDraw);
+            padCanvas.addEventListener('mousedown', startDraw); 
+            padCanvas.addEventListener('mousemove', draw); 
+            padCanvas.addEventListener('mouseup', endDraw);
+            padCanvas.addEventListener('mouseout', endDraw);
+
+            padCanvas.addEventListener('touchstart', startDraw, {passive:false}); 
+            padCanvas.addEventListener('touchmove', draw, {passive:false}); 
+            padCanvas.addEventListener('touchend', endDraw);
         }
 
         function clearSignaturePad() { if(padCtx) padCtx.clearRect(0, 0, padCanvas.width, padCanvas.height); }
