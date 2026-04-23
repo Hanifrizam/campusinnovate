@@ -4,116 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Website Publik - Campus Innovate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --theme-color: #0A3055; --bg-body: #f8fafc; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71;}
+        :root { --theme-color: #0A3055; --bg-body: #f4f7fa; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71; --red: #e74c3c;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body { background: var(--bg-body); color: var(--text); overflow-x: hidden; }
 
+        /* CUSTOM TOAST NOTIFICATION */
+        #toast-container { position: fixed; top: 90px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 0.95rem; border-left: 5px solid var(--theme-color); transform: translateX(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .toast.show { transform: translateX(0); }
+        .toast i { font-size: 1.3rem; }
+        .toast.success { border-color: var(--green); color: #166534; }
+        .toast.success i { color: var(--green); }
+        .toast.error { border-color: var(--red); color: #991b1b; }
+        .toast.error i { color: var(--red); }
+        .toast.info { border-color: var(--theme-color); color: var(--theme-color); }
+        .toast.info i { color: var(--theme-color); }
+
         /* BANNER PENGUMUMAN */
-        #global-announcement { display: none; background: #e67e22; color: white; padding: 12px 20px; text-align: center; position: relative; z-index: 1001; animation: slideDown 0.5s ease; }
-        #global-announcement strong { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 2px;}
-        #global-announcement p { font-size: 0.85rem; margin: 0; opacity: 0.9;}
-        #close-ann { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; }
+        #global-announcement { display: none; background: linear-gradient(90deg, #e67e22, #d35400); color: white; padding: 12px 40px; text-align: center; position: relative; z-index: 1001; animation: slideDown 0.5s ease; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);}
+        #global-announcement strong { font-weight: 800; font-size: 1.05rem; display: block; margin-bottom: 2px;}
+        #global-announcement p { font-size: 0.9rem; margin: 0; opacity: 0.95;}
+        #close-ann { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        #close-ann:hover { background: rgba(255,255,255,0.4); transform: translateY(-50%) rotate(90deg); }
 
         /* NAVBAR PUBLIK */
-        .public-navbar { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid #eee; box-shadow: 0 4px 20px rgba(0,0,0,0.03);}
-        .public-navbar .brand { font-weight: 800; color: var(--theme-color); font-size: 1.4rem; display: flex; align-items: center; gap: 10px;}
-        .public-nav-links { display: flex; gap: 25px; flex-wrap: wrap; }
-        .public-nav-links a { text-decoration: none; color: #64748b; font-size: 0.9rem; font-weight: 700; transition: 0.3s; padding: 5px 0;}
-        .public-nav-links a:hover { color: var(--secondary); }
+        .public-navbar { position: sticky; top: 0; background: rgba(255,255,255,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); box-shadow: 0 4px 30px rgba(0,0,0,0.03); transition: all 0.3s ease;}
+        .public-navbar .brand { font-weight: 800; color: var(--theme-color); font-size: 1.5rem; display: flex; align-items: center; gap: 12px;}
+        .public-nav-links { display: flex; gap: 30px; align-items: center; }
+        .public-nav-links a { text-decoration: none; color: #475569; font-size: 0.95rem; font-weight: 700; transition: 0.3s; position: relative; padding: 5px 0;}
+        .public-nav-links a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 3px; background: var(--secondary); transition: 0.3s; border-radius: 5px;}
+        .public-nav-links a:hover { color: var(--theme-color); }
+        .public-nav-links a:hover::after { width: 100%; }
+        
+        .mobile-menu-btn { display: none; font-size: 1.8rem; background: none; border: none; color: var(--theme-color); cursor: pointer; transition: 0.2s;}
 
         /* LAYOUT & UTILITIES */
-        .page-container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
-        .dynamic-block { margin: 20px auto; overflow: hidden; position: relative; animation: fadeUp 0.8s ease-out forwards; opacity: 0; transform: translateY(30px);}
+        .page-container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
+        .dynamic-block { margin: 30px auto; overflow: hidden; position: relative; }
         
+        /* SCROLL ANIMATION CLASS */
+        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
         /* HERO SECTION */
-        .hero-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; position: relative; background-size: cover; background-position: center; min-height: 450px; margin-top: 0;}
-        .hero-layout::before { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(135deg, rgba(10,48,85,0.9), rgba(0,0,0,0.6)); z-index: 1;}
-        .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 20px;}
-        .hero-content h1 { font-size: 3.5rem; font-weight: 800; margin-bottom: 20px; line-height: 1.2; text-shadow: 0 4px 15px rgba(0,0,0,0.3);}
-        .hero-content p { font-size: 1.2rem; opacity: 0.9; }
+        .hero-layout { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: white; position: relative; background-size: cover; background-position: center; min-height: 550px; margin-top: 0; }
+        .hero-layout::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(10,48,85,0.92), rgba(0,0,0,0.7)); z-index: 1;}
+        .hero-content { position: relative; z-index: 2; max-width: 850px; padding: 20px; animation: scaleIn 1s ease-out forwards;}
+        .hero-content h1 { font-size: 4rem; font-weight: 800; margin-bottom: 25px; line-height: 1.15; text-shadow: 0 10px 25px rgba(0,0,0,0.4); letter-spacing: -1px;}
+        .hero-content p { font-size: 1.3rem; opacity: 0.9; line-height: 1.6; }
 
         /* TYPOGRAPHY */
-        .section-heading { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 30px; display: flex; align-items: center; gap: 15px;}
-        .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.1; border-radius: 3px;}
+        .section-heading { font-size: 2.2rem; font-weight: 800; color: var(--theme-color); margin-bottom: 40px; display: flex; align-items: center; gap: 15px; text-transform: capitalize; letter-spacing: -0.5px;}
+        .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.15; border-radius: 5px;}
 
         /* STRUKTUR ORGANISASI */
-        .struktur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; text-align: center;}
-        .member-card { background: white; padding: 30px 20px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.03); border-top: 4px solid var(--theme-color); position: relative;}
-        .member-avatar { width: 80px; height: 80px; background: #e2e8f0; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8;}
-        .member-name { font-weight: 800; font-size: 1.1rem; color: var(--text); margin-bottom: 5px;}
-        .member-role { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase;}
-        .member-parent { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.65rem; padding: 2px 10px; border-radius: 10px; font-weight: bold; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: none;}
+        .struktur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; text-align: center;}
+        .member-card { background: white; padding: 40px 20px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border-top: 5px solid var(--theme-color); position: relative; transition: 0.3s; }
+        .member-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
+        .member-avatar { width: 90px; height: 90px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #cbd5e1; border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
+        .member-name { font-weight: 800; font-size: 1.2rem; color: var(--theme-color); margin-bottom: 5px; line-height: 1.3;}
+        .member-role { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        .member-parent { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.7rem; padding: 4px 15px; border-radius: 20px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 10px rgba(246, 178, 59, 0.4); display: none;}
 
         /* WIDGETS */
         .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
-        .stat-card { background: white; padding: 30px; border-radius: inherit; box-shadow: 0 10px 30px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;}
-        .stat-card .amount { font-size: 2.5rem; font-weight: 800; color: var(--theme-color); }
-        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;}
-        .prog-item { background: white; padding: 25px; border-radius: inherit; border-left: 5px solid var(--secondary); box-shadow: 0 5px 15px rgba(0,0,0,0.03);}
-        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-top: 10px;}
+        .stat-card { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;}
+        .stat-card:hover { transform: scale(1.02); }
+        .stat-card .amount { font-size: 2.8rem; font-weight: 800; color: var(--theme-color); letter-spacing: -1px; }
+        
+        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;}
+        .prog-item { background: white; padding: 30px; border-radius: 20px; border-left: 6px solid var(--secondary); box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s;}
+        .prog-item:hover { transform: translateX(10px); }
+        .badge-status { padding: 6px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; display: inline-block; margin-top: 15px; text-transform: uppercase;}
         
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        .kpi-card { background: white; padding: 25px; border-radius: inherit; box-shadow: 0 8px 25px rgba(0,0,0,0.03); }
-        .kpi-bar-bg { width: 100%; background: #e2e8f0; height: 12px; border-radius: 10px; margin-top: 15px; overflow: hidden; }
-        .kpi-bar-fill { height: 100%; background: var(--theme-color); border-radius: 10px; transition: width 1s ease-in-out;}
+        .kpi-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s; }
+        .kpi-card:hover { transform: translateY(-5px); }
+        .kpi-bar-bg { width: 100%; background: #f1f5f9; height: 14px; border-radius: 10px; margin-top: 15px; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
+        .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--theme-color), var(--secondary)); border-radius: 10px; transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;}
+        .kpi-bar-fill::after { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 2s infinite; }
+
+        .widget-newsletter { background: white; padding: 35px; border-left: 6px solid #e67e22; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden;}
+        .widget-newsletter::after { content: '\f0a1'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: -20px; bottom: -20px; font-size: 8rem; color: #e67e22; opacity: 0.05; pointer-events: none;}
 
         /* GRID NEWS */
-        .news-grid { display: grid; gap: 25px; }
-        .news-card { background: white; border-radius: inherit; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.05); transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; height: 100%; display: flex; flex-direction: column;}
-        .news-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-bottom: 4px solid var(--secondary); }
-        .news-image { height: 220px; background-color: #e2e8f0; background-size: cover; background-position: center; }
-        .news-body { padding: 25px; display: flex; flex-direction: column; flex-grow: 1;}
-        .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.05); padding: 5px 12px; border-radius: 20px; font-weight: 700; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start;}
-        .news-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; line-height: 1.4; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+        .news-grid { display: grid; gap: 30px; }
+        .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; height: 100%; display: flex; flex-direction: column; border: 1px solid transparent;}
+        .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-color: var(--secondary); }
+        .news-image { height: 240px; background-color: #e2e8f0; background-size: cover; background-position: center; transition: 0.5s; }
+        .news-card:hover .news-image { transform: scale(1.05); }
+        .news-img-wrapper { overflow: hidden; }
+        .news-body { padding: 30px; display: flex; flex-direction: column; flex-grow: 1; background: white; position: relative; z-index: 2;}
+        .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.08); padding: 6px 15px; border-radius: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start; letter-spacing: 0.5px;}
+        .news-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; line-height: 1.4; color: var(--theme-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: 0.3s;}
+        .news-card:hover .news-title { color: var(--secondary); }
         .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;}
 
         /* NEWS MODAL (POPUP) */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: white; width: 95%; max-width: 800px; max-height: 90vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.95); transition: 0.3s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-        .modal-overlay.active .modal-content { transform: scale(1); }
+        .modal-content { background: white; width: 95%; max-width: 850px; max-height: 90vh; border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+        .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         
-        .modal-header { position: relative; width: 100%; height: 250px; background: #e2e8f0; background-size: cover; background-position: center; display: flex; align-items: flex-end;}
-        .modal-header::before { content: ''; position: absolute; inset:0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); }
-        .modal-header-content { position: relative; z-index: 1; padding: 30px; color: white;}
-        .modal-header-content .badge { background: var(--secondary); color: var(--theme-color); font-size: 0.75rem; padding: 4px 12px; border-radius: 15px; font-weight: bold; margin-bottom: 10px; display: inline-block;}
-        .modal-header-content h2 { font-size: 1.8rem; font-weight: 800; line-height: 1.3;}
+        .modal-header { position: relative; width: 100%; height: 350px; background: #e2e8f0; background-size: cover; background-position: center; display: flex; align-items: flex-end;}
+        .modal-header::before { content: ''; position: absolute; inset:0; background: linear-gradient(0deg, rgba(10,48,85,0.9), transparent); }
+        .modal-header-content { position: relative; z-index: 1; padding: 40px; color: white;}
+        .modal-header-content .badge { background: var(--secondary); color: var(--theme-color); font-size: 0.8rem; padding: 6px 15px; border-radius: 20px; font-weight: 800; margin-bottom: 15px; display: inline-block; letter-spacing: 0.5px;}
+        .modal-header-content h2 { font-size: 2.2rem; font-weight: 800; line-height: 1.3; text-shadow: 0 4px 10px rgba(0,0,0,0.3);}
         
-        .modal-close { position: absolute; top: 15px; right: 15px; width: 35px; height: 35px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.2s; z-index: 2; display: flex; align-items: center; justify-content: center;}
-        .modal-close:hover { background: var(--red); transform: rotate(90deg);}
+        .modal-close { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s; z-index: 2; display: flex; align-items: center; justify-content: center;}
+        .modal-close:hover { background: var(--red); transform: rotate(90deg) scale(1.1);}
         
-        .modal-body { padding: 30px; overflow-y: auto; flex-grow: 1; font-size: 1.05rem; line-height: 1.8; color: #334155; white-space: pre-wrap;}
+        .modal-body { padding: 40px; overflow-y: auto; flex-grow: 1; font-size: 1.1rem; line-height: 1.9; color: #334155;}
+        .modal-body p { margin-bottom: 15px; }
 
         /* LOADING & FOOTER */
-        .loader-screen { position: fixed; inset:0; background:white; z-index: 9999; display:flex; flex-direction:column; align-items:center; justify-content:center; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--theme-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px;}
-        footer { background: #0f172a; color: #94a3b8; padding: 60px 20px; text-align: center; margin-top: 80px;}
+        .loader-screen { position: fixed; inset:0; background:var(--bg-body); z-index: 99999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: 0.5s ease; }
+        .spinner { border: 4px solid rgba(10,48,85,0.1); border-top: 4px solid var(--theme-color); border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-bottom: 25px;}
+        footer { background: var(--theme-color); color: #cbd5e1; padding: 70px 20px 40px; text-align: center; margin-top: 80px; position: relative;}
+        footer::before { content:''; position:absolute; top:0; left:0; width:100%; height:5px; background:var(--secondary); }
         
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        /* MOBILE RESPONSIF */
+        @media (max-width: 992px) {
+            .hero-content h1 { font-size: 2.8rem; }
+            .data-grid-2 { grid-template-columns: 1fr; }
+        }
 
         @media (max-width: 768px) {
             .hero-content h1 { font-size: 2.2rem; }
-            .data-grid-2 { grid-template-columns: 1fr; }
-            .public-nav-links { display: none; }
-            .modal-header { height: 200px; }
-            .modal-header-content h2 { font-size: 1.4rem; }
+            .section-heading { font-size: 1.6rem; }
+            .stat-card { flex-direction: column; text-align: center; gap: 15px; padding: 25px; }
+            .modal-header { height: 250px; }
+            .modal-header-content h2 { font-size: 1.5rem; }
+            .modal-body { padding: 25px; font-size: 1rem; }
+            
+            /* Navbar Mobile Style */
+            .public-navbar { padding: 15px 20px; }
+            .mobile-menu-btn { display: block; }
+            .public-nav-links { 
+                position: absolute; top: 70px; left: 0; width: 100%; 
+                background: white; flex-direction: column; align-items: flex-start;
+                padding: 0; box-shadow: 0 15px 30px rgba(0,0,0,0.1); 
+                clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+                transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                opacity: 0; pointer-events: none;
+            }
+            .public-nav-links.active { 
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); 
+                opacity: 1; pointer-events: all; padding: 20px;
+            }
+            .public-nav-links a { width: 100%; border-bottom: 1px solid #f1f5f9; padding: 15px 5px; }
+            .public-nav-links a::after { display: none; }
         }
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <div id="loader" class="loader-screen">
         <div class="spinner"></div>
-        <h3 style="color: var(--theme-color);">Menyiapkan Ruang Publik...</h3>
+        <h3 style="color: var(--theme-color); font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px;">Menyiapkan Ruang Publik...</h3>
+        <p style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Mengambil data langsung dari Dashboard Internal</p>
     </div>
 
     <div id="global-announcement">
@@ -126,9 +190,14 @@
 
     <footer id="footer" style="display:none;">
         <div class="page-container">
-            <h3 style="color: white; margin-bottom: 15px; font-weight: 800;" id="footer-org-name">Campus Innovate</h3>
-            <p>Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus.</p>
-            <p style="margin-top: 30px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi.</p>
+            <h3 style="color: white; margin-bottom: 15px; font-weight: 800; font-size: 1.8rem;" id="footer-org-name">Campus Innovate</h3>
+            <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus secara real-time.</p>
+            <div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
+                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-youtube"></i></a>
+                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-solid fa-envelope"></i></a>
+            </div>
+            <p style="margin-top: 40px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi. Powered by Campus Innovate Workspace.</p>
         </div>
     </footer>
 
@@ -165,9 +234,66 @@
                  .replace(/'/g, "&#039;");
         };
 
-        // Variable global untuk menampung data
+        // Variable global
         let globalNewsData = [];
 
+        // TOAST ALERT SYSTEM
+        function showToast(msg, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let iconClass = 'fa-circle-info';
+            if(type === 'success') iconClass = 'fa-circle-check';
+            if(type === 'error') iconClass = 'fa-circle-xmark';
+
+            toast.innerHTML = `<i class="fa-solid ${iconClass}"></i> <span>${msg}</span>`;
+            container.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => toast.classList.add('show'), 10);
+            
+            // Remove after 4s
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        }
+
+        // MOBILE NAV TOGGLE
+        function toggleMobileNav() {
+            const nav = document.getElementById('public-nav-links');
+            const btnIcon = document.querySelector('.mobile-menu-btn i');
+            
+            if(nav) {
+                nav.classList.toggle('active');
+                if(nav.classList.contains('active')) {
+                    btnIcon.classList.remove('fa-bars');
+                    btnIcon.classList.add('fa-xmark');
+                } else {
+                    btnIcon.classList.remove('fa-xmark');
+                    btnIcon.classList.add('fa-bars');
+                }
+            }
+        }
+
+        // SCROLL ANIMATION (INTERSECTION OBSERVER)
+        function initScrollAnimations() {
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Optional: stop observing once revealed
+                        // observer.unobserve(entry.target); 
+                    }
+                });
+            }, { threshold: 0.15 });
+            
+            reveals.forEach(el => observer.observe(el));
+        }
+
+        // NEWS MODAL LOGIC
         function openNewsModal(index) {
             const news = globalNewsData[index];
             if(!news) return;
@@ -175,11 +301,10 @@
             document.getElementById('modal-img').style.backgroundImage = `url('${escapeHtml(news.img)}')`;
             document.getElementById('modal-date').innerText = news.date;
             document.getElementById('modal-title').innerText = news.title;
-            // Menjaga format baris baru (enter)
             document.getElementById('modal-desc').innerHTML = escapeHtml(news.desc).replace(/\n/g, '<br>');
             
             document.getElementById('newsModal').classList.add('active');
-            document.body.style.overflow = 'hidden'; // cegah scroll background
+            document.body.style.overflow = 'hidden';
         }
 
         function closeNewsModal(e) {
@@ -188,21 +313,21 @@
             document.body.style.overflow = 'auto';
         }
 
+        // MAIN INIT
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const workspaceId = urlParams.get('workspace');
             
             if (!workspaceId) {
-                document.getElementById('loader').innerHTML = `<h2 style="color:red;">Akses Ditolak: Parameter Workspace ID Hilang!</h2>`; 
+                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: ID Workspace Tidak Ditemukan!</h2>`; 
                 return;
             }
 
             try {
                 // Fetch Data Organisasi
                 const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', workspaceId).single();
-                const orgName = wsData ? wsData.nama_organisasi : 'Campus Innovate';
-                document.getElementById('footer-org-name').innerText = orgName;
-
+                let orgName = wsData ? wsData.nama_organisasi : 'Campus Innovate';
+                
                 // Fetch Layout Data
                 const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', workspaceId).single();
                 
@@ -214,18 +339,23 @@
                 const containerHtml = document.getElementById('main-content');
                 let rawBlocks = config.layout_data || [];
                 
-                // EXTRACT GLOBAL CONFIG DATA
                 let orgStructureData = [];
                 let announcementData = null;
+                let logoUrl = '';
 
+                // EXTRACT GLOBAL CONFIG DATA
                 const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
                 if (configBlock) {
+                    orgName = configBlock.orgName || orgName;
+                    logoUrl = configBlock.logoUrl || '';
                     orgStructureData = configBlock.orgStructure || [];
-                    globalNewsData = configBlock.newsData || []; // Simpan berita secara global
+                    globalNewsData = configBlock.newsData || [];
                     announcementData = configBlock.announcementData;
                 }
 
-                // Filter out the config block, we only want to render UI blocks
+                document.getElementById('footer-org-name').innerText = orgName;
+
+                // Filter UI blocks
                 let blocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
                     if (!b.styles) b.styles = { bg: 'transparent', padding: '40px', borderRadius: '15px' };
                     if (!b.data) b.data = {};
@@ -236,7 +366,7 @@
                 if (announcementData && announcementData.active === 'true' && announcementData.title) {
                     const annBanner = document.getElementById('global-announcement');
                     document.getElementById('ann-title').innerText = announcementData.title;
-                    document.getElementById('ann-desc').innerText = announcementData.content;
+                    document.getElementById('ann-desc').innerHTML = announcementData.content; // Render rich text
                     annBanner.style.display = 'block';
                 }
 
@@ -252,30 +382,33 @@
                     else if(b.type === 'grid-news') linkTitle = 'Berita';
                     
                     if(linkTitle && b.type !== 'divider' && b.type !== 'image' && b.type !== 'video' && b.type !== 'text' && b.type !== 'newsletter') {
-                        navLinks += `<a href="#section-${b.id}">${escapeHtml(linkTitle)}</a>`;
+                        navLinks += `<a href="#section-${b.id}" onclick="toggleMobileNav()">${escapeHtml(linkTitle)}</a>`;
                     }
                 });
 
+                let navBrandContent = logoUrl ? `<img src="${escapeHtml(logoUrl)}" style="height:35px; object-fit:contain;"> ${escapeHtml(orgName)}` : `<i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> ${escapeHtml(orgName)}`;
+
                 let blocksHTMLString = `
                     <div class="public-navbar">
-                        <div class="brand"><i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> ${escapeHtml(orgName)}</div>
-                        <div class="public-nav-links">${navLinks}</div>
+                        <div class="brand">${navBrandContent}</div>
+                        <button class="mobile-menu-btn" onclick="toggleMobileNav()"><i class="fa-solid fa-bars"></i></button>
+                        <div class="public-nav-links" id="public-nav-links">${navLinks}</div>
                     </div>
                 `;
 
-                // 3. GENERATE UI BLOCKS
+                // 3. GENERATE UI BLOCKS (Added .reveal class for scroll animations)
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
                     let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
                     let inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
                     
-                    // Pembungkus Section
-                    let htmlChunk = `<section id="section-${b.id}" class="dynamic-block" style="${inlineStyle}"><div class="page-container">`;
+                    // Pembungkus Section with Reveal
+                    let htmlChunk = `<section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}"><div class="page-container">`;
 
                     if (b.type === 'hero') {
                         let bgImg = b.data.url ? `background-image: url('${escapeHtml(b.data.url)}');` : `background-color: var(--theme-color);`;
                         htmlChunk = `
-                        <section id="section-${b.id}" class="dynamic-block hero-layout" style="border-radius: ${b.styles.borderRadius}; ${bgImg}">
+                        <section id="section-${b.id}" class="dynamic-block hero-layout reveal" style="border-radius: ${b.styles.borderRadius}; ${bgImg}">
                             <div class="hero-content">
                                 <h1>${escapeHtml(b.data.title) || 'Judul Organisasi'}</h1>
                                 <p>${escapeHtml(b.data.subtitle) || ''}</p>
@@ -283,28 +416,26 @@
                         </section>`;
                     } 
                     else if (b.type === 'text') {
-                        let textContent = (b.data.content || '').replace(/\n/g, '<br>');
-                        htmlChunk += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${textContent}</div>`;
+                        // Render rich text directly
+                        htmlChunk += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${b.data.content || ''}</div>`;
                     }
                     else if (b.type === 'image') {
                         htmlChunk += `
                         <div style="text-align:${escapeHtml(b.data.align) || 'center'};">
-                            <img src="${escapeHtml(b.data.url)}" style="width:${escapeHtml(b.data.width) || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:500px; object-fit:cover;">
+                            <img src="${escapeHtml(b.data.url)}" style="width:${escapeHtml(b.data.width) || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 15px 40px rgba(0,0,0,0.1); max-height:600px; object-fit:cover; transition: transform 0.5s ease;">
                         </div>`;
                     }
                     else if (b.type === 'video') {
                         htmlChunk += `
                         <div>
-                            <iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:400px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1);"></iframe>
+                            <iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:450px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);"></iframe>
                         </div>`;
                     }
                     else if (b.type === 'divider') {
-                        htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #cbd5e1; margin: 10px 0;">`;
+                        htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #e2e8f0; margin: 10px 0;">`;
                     }
                     
-                    // ==========================================
                     // WIDGETS DATA DRIVEN
-                    // ==========================================
                     else if (b.type === 'grid-news') {
                         let cols = b.data.columns || '3';
                         htmlChunk += `
@@ -315,11 +446,13 @@
                             globalNewsData.forEach((it, index) => {
                                 htmlChunk += `
                                 <div class="news-card" style="border-radius: ${b.styles.borderRadius};" onclick="openNewsModal(${index})">
-                                    <div class="news-image" style="background-image: url('${escapeHtml(it.img)}');"></div>
+                                    <div class="news-img-wrapper">
+                                        <div class="news-image" style="background-image: url('${escapeHtml(it.img)}');"></div>
+                                    </div>
                                     <div class="news-body">
                                         <div class="news-meta"><i class="fa-solid fa-clock"></i> ${escapeHtml(it.date)}</div>
                                         <h3 class="news-title">${escapeHtml(it.title)}</h3>
-                                        <p class="news-desc">${escapeHtml(it.desc)}</p>
+                                        <div class="news-desc">${it.desc}</div>
                                     </div>
                                 </div>`;
                             });
@@ -335,16 +468,14 @@
                         
                         if (orgStructureData.length > 0) {
                             orgStructureData.forEach(m => { 
-                                // Cek apakah posisi ini adalah pimpinan tertinggi (tidak punya atasan)
-                                let leaderStyle = !m.parentId ? 'border-top: 6px solid var(--secondary);' : '';
+                                let leaderStyle = !m.parentId ? 'border-top: 6px solid var(--secondary); background: linear-gradient(180deg, #fff, #fffdf8);' : '';
                                 let parentBadge = '';
                                 
                                 if (m.parentId) {
-                                    // Cari nama atasan
                                     let parentNode = orgStructureData.find(x => x.id === m.parentId);
-                                    if(parentNode) parentBadge = `<div class="member-parent">Dibawah: ${escapeHtml(parentNode.role)}</div>`;
+                                    if(parentNode) parentBadge = `<div class="member-parent">Atasan: ${escapeHtml(parentNode.role)}</div>`;
                                 } else {
-                                    parentBadge = `<div class="member-parent" style="display:block; background:var(--primary); color:white;"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Pimpinan Tertinggi</div>`;
+                                    parentBadge = `<div class="member-parent" style="display:flex; align-items:center; gap:5px; background:var(--primary); color:white;"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Pimpinan Tertinggi</div>`;
                                 }
 
                                 htmlChunk += `
@@ -367,39 +498,41 @@
                                 <div>
                                     <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #e2e8f0;">
                                         <div>
-                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Rencana Anggaran</h3>
+                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Total Anggaran Induk</h3>
                                             <div class="amount" style="color:#1e293b;" id="fin-rab-${i}">...</div>
                                         </div>
                                     </div>
-                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #2ecc71;">
+                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid var(--green);">
                                         <div>
-                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Realisasi / Terpakai</h3>
-                                            <div class="amount" style="color:#2ecc71;" id="fin-real-${i}">...</div>
+                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Realisasi / Terserap</h3>
+                                            <div class="amount" style="color:var(--green);" id="fin-real-${i}">...</div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius};">
-                                    <canvas id="chart-fin-${i}" style="max-height:240px;"></canvas>
+                                <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius}; flex-direction: column;">
+                                    <h3 style="font-size:1rem; color:#64748b; margin-bottom:15px; text-align:center;">Grafik Serapan Dana</h3>
+                                    <div style="position: relative; height: 220px; width: 100%;">
+                                        <canvas id="chart-fin-${i}"></canvas>
+                                    </div>
                                 </div>
                             </div>`;
                         
-                        // Fetch data directly from internal DB to keep it auto-syncing
                         supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single().then(({data: fData}) => {
                             let total = fData ? parseFloat(fData.total_rab) : 0; 
                             let real = fData ? parseFloat(fData.realisasi_rab) : 0;
                             
                             let v1 = document.getElementById(`fin-rab-${i}`); 
-                            if(v1) v1.innerText = formatRp(total);
+                            if(v1) { v1.innerText = formatRp(total); }
                             
                             let v2 = document.getElementById(`fin-real-${i}`); 
-                            if(v2) v2.innerText = formatRp(real);
+                            if(v2) { v2.innerText = formatRp(real); }
                             
                             let ctx = document.getElementById(`chart-fin-${i}`);
                             if(ctx) {
                                 new Chart(ctx.getContext('2d'), {
                                     type: 'doughnut', 
                                     data: { labels: ['Terpakai', 'Tersisa'], datasets: [{ data: [real, total-real<0?0:total-real], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] },
-                                    options: { cutout: '65%', plugins: { legend: { position: 'bottom'} } }
+                                    options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'}, datalabels: { display: false } } }
                                 });
                             }
                         });
@@ -417,7 +550,7 @@
                                 kData.forEach(kpi => {
                                     let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
                                     if(persen > 100) persen = 100;
-                                    let colorClass = persen >= 100 ? '#2ecc71' : 'var(--theme-color)';
+                                    let colorClass = persen >= 100 ? 'var(--green)' : 'var(--theme-color)';
                                     
                                     kpiHtml += `
                                     <div class="kpi-card" style="border-radius: ${b.styles.borderRadius};">
@@ -445,12 +578,12 @@
                             let pHtml = '';
                             if(pData && pData.length > 0) {
                                 pData.forEach(p => {
-                                    let bg = p.status==='Selesai'?'#dcfce7':(p.status==='Progress'?'#fef3c7':'#f1f5f9');
+                                    let bg = p.status==='Selesai'?'rgba(46, 204, 113, 0.15)':(p.status==='Progress'?'rgba(246, 178, 59, 0.15)':'#f1f5f9');
                                     let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
                                     pHtml += `
                                     <div class="prog-item" style="border-radius: ${b.styles.borderRadius};">
                                         <h3 style="font-size:1.15rem; margin-bottom:10px; color:var(--text);">${escapeHtml(p.nama_program)}</h3>
-                                        <p style="font-size:0.9rem; color:#64748b; margin-bottom: 5px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
+                                        <p style="font-size:0.95rem; color:#64748b; margin-bottom: 5px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
                                         <span class="badge-status" style="background:${bg}; color:${col};">${escapeHtml(p.status)}</span>
                                     </div>`;
                                 });
@@ -468,16 +601,21 @@
 
                 containerHtml.innerHTML = blocksHTMLString;
 
-                // Delay animasi load
-                document.querySelectorAll('.dynamic-block').forEach((el, index) => { 
-                    el.style.animationDelay = `${index * 0.1}s`; 
-                });
-
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('footer').style.display = 'block';
+                // Matikan loading screen
+                document.getElementById('loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('footer').style.display = 'block';
+                    
+                    // Inisiasi trigger scroll reveal
+                    initScrollAnimations();
+                    
+                    // Tampilkan Welcome Toast
+                    showToast(`Selamat datang di portal ${orgName}`, 'success');
+                }, 500);
 
             } catch(e) {
-                document.getElementById('loader').innerHTML = `<h2 style="color:red; text-align:center;">Error saat merender halaman.<br>Terjadi kesalahan pada struktur data.</h2>`;
+                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red); text-align:center;">Error saat merender halaman.<br>Terjadi kesalahan koneksi database.</h2>`;
                 console.error(e);
             }
         });
