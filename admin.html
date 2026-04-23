@@ -39,7 +39,7 @@
         /* -------------------------------------
            ADVANCED BUILDER & LIVE PREVIEW STYLES
            ------------------------------------- */
-        .builder-wrapper { display: flex; gap: 20px; height: calc(100vh - 120px); transition: 0.3s ease; }
+        .builder-wrapper { display: flex; gap: 0; height: calc(100vh - 120px); transition: 0.3s ease; position: relative; }
         
         /* FULLSCREEN MODIFIER */
         .builder-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important; background: var(--bg) !important; padding: 70px 20px 20px 20px !important; box-sizing: border-box; margin: 0 !important; }
@@ -51,10 +51,20 @@
         .builder-fullscreen .btn-exit-fs { display: flex; align-items: center; gap: 8px; animation: slideDownFS 0.3s ease; }
         @keyframes slideDownFS { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
 
-        .builder-tools { width: 250px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
-        .builder-canvas-container { flex: 1; display: flex; flex-direction: column; gap: 15px; position: relative;}
-        .builder-properties { width: 340px; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
+        /* RESIZABLE PANELS */
+        .builder-tools { width: 250px; min-width: 180px; flex-shrink: 0; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
+        .builder-canvas-container { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; position: relative;}
+        .builder-properties { width: 340px; min-width: 250px; flex-shrink: 0; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
         .builder-properties.active { display: block; animation: slideInRight 0.3s ease; }
+        
+        .resizer { width: 15px; cursor: col-resize; display: flex; align-items: center; justify-content: center; z-index: 10; transition: 0.2s;}
+        .resizer::after { content: ''; width: 4px; height: 50px; background: #cbd5e1; border-radius: 5px; transition: 0.2s;}
+        .resizer:hover::after, .resizer.resizing::after { background: var(--secondary); height: 80px; }
+
+        .prop-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
+        .prop-header-flex h3 { font-size: 1.1rem; color: var(--primary); font-weight: 800; margin: 0; }
+        .btn-close-prop { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: #64748b; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .btn-close-prop:hover { background: var(--red); color: white; }
         
         .tool-category { font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;}
         .tool-btn { background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; cursor: grab; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 10px; transition: 0.2s;}
@@ -135,7 +145,8 @@
         @media (max-width: 1024px) {
             .builder-wrapper:not(.builder-fullscreen) { flex-direction: column; height: auto; }
             .builder-wrapper:not(.builder-fullscreen) .builder-tools { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 15px;}
-            .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); }
+            .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); margin-left: 0;}
+            .builder-wrapper:not(.builder-fullscreen) .resizer { display: none; }
             .tree-children { flex-direction: column; align-items: center; }
             .tree-children::before { display: none; }
             .tree-node::before { display: none; }
@@ -232,7 +243,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h2 style="color: var(--primary); margin: 0; font-weight: 800;"><i class="fa-solid fa-pen-ruler"></i> Web Builder Studio</h2>
-                        <p style="font-size: 0.85rem; color: #777;">Drag elemen ke kanvas tengah. Perubahan akan langsung terlihat secara live (Live Preview).</p>
+                        <p style="font-size: 0.85rem; color: #777;">Drag elemen ke kanvas tengah. Geser garis tepi (splitter) untuk menyesuaikan ukuran panel.</p>
                     </div>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                         <button class="btn-sm" style="background: #e2e8f0; color: var(--primary); padding: 10px 15px;" onclick="toggleFullscreenBuilder()" id="btn-fullscreen"><i class="fa-solid fa-expand"></i> Fullscreen</button>
@@ -243,7 +254,7 @@
                 <div class="builder-wrapper" id="builder-main-wrapper">
                     <button class="btn-exit-fs" onclick="toggleFullscreenBuilder()"><i class="fa-solid fa-compress"></i> Keluar Fullscreen</button>
 
-                    <div class="builder-tools">
+                    <div class="builder-tools" id="builder-tools-panel">
                         <div class="tool-category">Struktur Utama</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-image"></i> Hero Banner</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'text')"><i class="fa-solid fa-align-left"></i> Teks Paragraf</div>
@@ -262,7 +273,9 @@
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Status Program</div>
                     </div>
 
-                    <div class="builder-canvas-container">
+                    <div class="resizer" id="resizer-left"></div>
+
+                    <div class="builder-canvas-container" id="builder-canvas-panel">
                         <div class="canvas-area" id="canvas-dropzone" ondragover="allowDrop(event)" ondrop="dropToCanvas(event)">
                             <div class="preview-window" id="preview-window">
                                 <div id="canvas-placeholder" style="text-align: center; color: #aaa; margin-top: 150px;">
@@ -273,10 +286,14 @@
                         </div>
                     </div>
 
+                    <div class="resizer" id="resizer-right" style="display: none;"></div>
+
                     <div class="builder-properties" id="properties-panel">
-                        <h3 style="font-size: 1.1rem; color: var(--primary); border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; font-weight: 800;">
-                            <i class="fa-solid fa-sliders"></i> Detail & Styling
-                        </h3>
+                        <div class="prop-header-flex">
+                            <h3><i class="fa-solid fa-sliders"></i> Detail & Styling</h3>
+                            <button class="btn-close-prop" onclick="closePropertiesPanel()" title="Sembunyikan Panel"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        
                         <div id="prop-empty" style="color: #aaa; font-size: 0.85rem; text-align: center; margin-top: 50px;">
                             Klik komponen di area preview (tengah) untuk mengedit isinya secara langsung.
                         </div>
@@ -692,6 +709,9 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
+            // Setup GUI Resizers
+            initResizers();
+
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
             currentAdminSession = session.user;
@@ -719,6 +739,81 @@
                 document.getElementById('setup-workspace-section').style.display = 'block';
             }
         });
+
+        // INIT RESIZERS LOGIC
+        function initResizers() {
+            const resizerLeft = document.getElementById('resizer-left');
+            const resizerRight = document.getElementById('resizer-right');
+            const toolsPanel = document.getElementById('builder-tools-panel');
+            const propPanel = document.getElementById('properties-panel');
+
+            let x, leftWidth, rightWidth;
+            let currentResizer = null;
+
+            const mouseDownHandler = function(e) {
+                currentResizer = e.target.closest('.resizer');
+                if(!currentResizer) return;
+                
+                x = e.clientX || e.touches[0].clientX;
+                
+                if (currentResizer === resizerLeft) {
+                    leftWidth = toolsPanel.getBoundingClientRect().width;
+                } else if (currentResizer === resizerRight) {
+                    rightWidth = propPanel.getBoundingClientRect().width;
+                }
+                
+                document.addEventListener('mousemove', mouseMoveHandler);
+                document.addEventListener('touchmove', mouseMoveHandler, {passive: false});
+                document.addEventListener('mouseup', mouseUpHandler);
+                document.addEventListener('touchend', mouseUpHandler);
+                
+                currentResizer.classList.add('resizing');
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault();
+            };
+
+            const mouseMoveHandler = function(e) {
+                if (!currentResizer) return;
+                const clientX = e.clientX || e.touches[0].clientX;
+                const dx = clientX - x;
+
+                if (currentResizer === resizerLeft) {
+                    const newLeftWidth = leftWidth + dx;
+                    if (newLeftWidth > 150 && newLeftWidth < 450) {
+                        toolsPanel.style.width = `${newLeftWidth}px`;
+                    }
+                } else if (currentResizer === resizerRight) {
+                    const newRightWidth = rightWidth - dx; // geser ke kiri (dx negatif) artinya panel kanan membesar
+                    if (newRightWidth > 200 && newRightWidth < 600) {
+                        propPanel.style.width = `${newRightWidth}px`;
+                    }
+                }
+            };
+
+            const mouseUpHandler = function() {
+                if(currentResizer) currentResizer.classList.remove('resizing');
+                currentResizer = null;
+                document.removeEventListener('mousemove', mouseMoveHandler);
+                document.removeEventListener('touchmove', mouseMoveHandler);
+                document.removeEventListener('mouseup', mouseUpHandler);
+                document.removeEventListener('touchend', mouseUpHandler);
+                document.body.style.cursor = '';
+            };
+
+            resizerLeft.addEventListener('mousedown', mouseDownHandler);
+            resizerLeft.addEventListener('touchstart', mouseDownHandler, {passive: false});
+            
+            resizerRight.addEventListener('mousedown', mouseDownHandler);
+            resizerRight.addEventListener('touchstart', mouseDownHandler, {passive: false});
+        }
+
+        function closePropertiesPanel() {
+            document.getElementById('properties-panel').classList.remove('active');
+            document.getElementById('resizer-right').style.display = 'none';
+            // Reset active state
+            activeBlockId = null;
+            renderCanvas();
+        }
 
         async function updateAdminPresenceToDB() {
             if (currentAdminSession && currentWorkspaceId) {
@@ -1198,6 +1293,7 @@
             if (!block) return;
             
             document.getElementById('properties-panel').classList.add('active');
+            document.getElementById('resizer-right').style.display = 'flex';
             document.getElementById('prop-empty').style.display = 'none';
             const propForm = document.getElementById('prop-form');
             propForm.style.display = 'block';
@@ -1245,7 +1341,7 @@
         function updateBlockStyle(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) { b.styles[key] = val; renderCanvas(); } }
         function updateBlockData(id, key, val) { const b = layoutBlocks.find(x => x.id === id); if(b) { b.data[key] = val; renderCanvas(); } }
         function moveBlock(idx, dir) { if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return; const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; renderCanvas(); }
-        function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; activeBlockId = null; } renderCanvas(); }
+        function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; activeBlockId = null; document.getElementById('resizer-right').style.display = 'none'; } renderCanvas(); }
 
         // ==========================================
         // ANALYTICS DATA FETCH & CHARTS

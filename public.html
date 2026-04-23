@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --theme-color: #0A3055; --bg-body: #f4f7fa; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71; --red: #e74c3c;}
+        :root { --theme-color: #0A3055; --bg-body: #f8fafc; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71; --red: #e74c3c;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         html { scroll-behavior: smooth; scroll-padding-top: 80px; }
         body { background: var(--bg-body); color: var(--text); overflow-x: hidden; }
@@ -50,7 +50,7 @@
         .dynamic-block { margin: 30px auto; overflow: hidden; position: relative; }
         
         /* SCROLL ANIMATION CLASS */
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
         /* HERO SECTION */
@@ -64,32 +64,41 @@
         .section-heading { font-size: 2.2rem; font-weight: 800; color: var(--theme-color); margin-bottom: 40px; display: flex; align-items: center; gap: 15px; text-transform: capitalize; letter-spacing: -0.5px;}
         .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.15; border-radius: 5px;}
 
-        /* STRUKTUR ORGANISASI */
-        .struktur-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; text-align: center;}
-        .member-card { background: white; padding: 40px 20px 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.04); border-top: 5px solid var(--theme-color); position: relative; transition: 0.3s; }
-        .member-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.08); }
-        .member-avatar { width: 90px; height: 90px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #cbd5e1; border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);}
-        .member-name { font-weight: 800; font-size: 1.2rem; color: var(--theme-color); margin-bottom: 5px; line-height: 1.3;}
-        .member-role { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
-        .member-parent { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.7rem; padding: 4px 15px; border-radius: 20px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 10px rgba(246, 178, 59, 0.4); display: none;}
+        /* STRUKTUR ORGANISASI (HIERARKI TREE) */
+        .tree-wrapper { width: 100%; overflow-x: auto; padding: 20px 0 40px 0; display: flex; justify-content: center; }
+        .tree-node { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: 30px; width: 100%; transition: 0.3s;}
+        .tree-node::before { content: ''; position: absolute; top: -30px; left: 50%; border-left: 3px solid #cbd5e1; width: 0; height: 30px; }
+        .tree-node:first-child::before { display: none; }
+        
+        .tree-card { background: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--theme-color); text-align: center; width: 260px; position: relative; z-index: 2; transition: 0.3s;}
+        .tree-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); border-color: var(--secondary); }
+        .tree-avatar { width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #cbd5e1; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.06);}
+        .tree-name { font-weight: 800; font-size: 1.15rem; color: var(--theme-color); margin-bottom: 5px; line-height: 1.3;}
+        .tree-role { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        .tree-children { display: flex; justify-content: center; gap: 30px; width: 100%; position: relative; padding-top: 30px; }
+        .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 3px solid #cbd5e1; width: calc(100% - 260px); transform: translateX(-50%); }
 
-        /* WIDGETS */
+        /* WIDGETS KEUANGAN & KPI */
         .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
         .stat-card { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;}
-        .stat-card:hover { transform: scale(1.02); }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
         .stat-card .amount { font-size: 2.8rem; font-weight: 800; color: var(--theme-color); letter-spacing: -1px; }
         
-        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px;}
-        .prog-item { background: white; padding: 30px; border-radius: 20px; border-left: 6px solid var(--secondary); box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s;}
-        .prog-item:hover { transform: translateX(10px); }
-        .badge-status { padding: 6px 15px; border-radius: 20px; font-size: 0.8rem; font-weight: 800; display: inline-block; margin-top: 15px; text-transform: uppercase;}
-        
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
-        .kpi-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s; }
-        .kpi-card:hover { transform: translateY(-5px); }
+        .kpi-card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: 0.3s; border: 1px solid transparent;}
+        .kpi-card:hover { transform: translateY(-5px); border-color: var(--secondary); }
         .kpi-bar-bg { width: 100%; background: #f1f5f9; height: 14px; border-radius: 10px; margin-top: 15px; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); }
         .kpi-bar-fill { height: 100%; background: linear-gradient(90deg, var(--theme-color), var(--secondary)); border-radius: 10px; transition: width 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;}
         .kpi-bar-fill::after { content:''; position:absolute; top:0; left:0; right:0; bottom:0; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); animation: shimmer 2s infinite; }
+
+        /* WIDGET STATUS PROGRAM (COMPACT UI) */
+        .prog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px;}
+        .prog-item { background: white; padding: 22px; border-radius: 16px; border-left: 5px solid var(--secondary); box-shadow: 0 8px 25px rgba(0,0,0,0.03); transition: 0.3s; display: flex; flex-direction: column; justify-content: center;}
+        .prog-item:hover { transform: translateX(8px); box-shadow: 0 12px 30px rgba(0,0,0,0.06); }
+        .prog-item h3 { font-size: 1.1rem; margin-bottom: 8px; color: var(--theme-color); line-height: 1.3; font-weight: 800;}
+        .prog-item p { font-size: 0.85rem; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;}
+        .badge-status { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; display: inline-block; text-transform: uppercase; align-self: flex-start;}
 
         .widget-newsletter { background: white; padding: 35px; border-left: 6px solid #e67e22; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.05); position: relative; overflow: hidden;}
         .widget-newsletter::after { content: '\f0a1'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: -20px; bottom: -20px; font-size: 8rem; color: #e67e22; opacity: 0.05; pointer-events: none;}
@@ -98,8 +107,10 @@
         .news-grid { display: grid; gap: 30px; }
         .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; height: 100%; display: flex; flex-direction: column; border: 1px solid transparent;}
         .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-color: var(--secondary); }
-        .news-image { height: 240px; background-color: #e2e8f0; background-size: cover; background-position: center; transition: 0.5s; }
+        .news-image { height: 220px; background-color: #e2e8f0; background-size: cover; background-position: center; transition: 0.5s; position: relative;}
+        .news-image::after { content: '\f06e  Baca Selengkapnya'; font-family: 'Font Awesome 6 Free', 'Plus Jakarta Sans'; font-weight: 900; position: absolute; inset: 0; background: rgba(10,48,85,0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0; transition: 0.3s; }
         .news-card:hover .news-image { transform: scale(1.05); }
+        .news-card:hover .news-image::after { opacity: 1; }
         .news-img-wrapper { overflow: hidden; }
         .news-body { padding: 30px; display: flex; flex-direction: column; flex-grow: 1; background: white; position: relative; z-index: 2;}
         .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.08); padding: 6px 15px; border-radius: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start; letter-spacing: 0.5px;}
@@ -107,22 +118,22 @@
         .news-card:hover .news-title { color: var(--secondary); }
         .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;}
 
-        /* NEWS MODAL (POPUP) */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; }
+        /* NEWS MODAL (POPUP WIDER & NEATER) */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: white; width: 95%; max-width: 850px; max-height: 90vh; border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+        .modal-content { background: white; width: 95%; max-width: 900px; max-height: 90vh; border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         
-        .modal-header { position: relative; width: 100%; height: 350px; background: #e2e8f0; background-size: cover; background-position: center; display: flex; align-items: flex-end;}
+        .modal-header { position: relative; width: 100%; height: 250px; background: #e2e8f0; background-size: cover; background-position: center; display: flex; align-items: flex-end;}
         .modal-header::before { content: ''; position: absolute; inset:0; background: linear-gradient(0deg, rgba(10,48,85,0.9), transparent); }
         .modal-header-content { position: relative; z-index: 1; padding: 40px; color: white;}
         .modal-header-content .badge { background: var(--secondary); color: var(--theme-color); font-size: 0.8rem; padding: 6px 15px; border-radius: 20px; font-weight: 800; margin-bottom: 15px; display: inline-block; letter-spacing: 0.5px;}
-        .modal-header-content h2 { font-size: 2.2rem; font-weight: 800; line-height: 1.3; text-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .modal-header-content h2 { font-size: 2rem; font-weight: 800; line-height: 1.3; text-shadow: 0 4px 10px rgba(0,0,0,0.3);}
         
         .modal-close { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s; z-index: 2; display: flex; align-items: center; justify-content: center;}
         .modal-close:hover { background: var(--red); transform: rotate(90deg) scale(1.1);}
         
-        .modal-body { padding: 40px; overflow-y: auto; flex-grow: 1; font-size: 1.1rem; line-height: 1.9; color: #334155;}
+        .modal-body { padding: 40px 50px; overflow-y: auto; flex-grow: 1; font-size: 1.1rem; line-height: 1.9; color: #334155;}
         .modal-body p { margin-bottom: 15px; }
 
         /* LOADING & FOOTER */
@@ -148,7 +159,7 @@
             .stat-card { flex-direction: column; text-align: center; gap: 15px; padding: 25px; }
             .modal-header { height: 250px; }
             .modal-header-content h2 { font-size: 1.5rem; }
-            .modal-body { padding: 25px; font-size: 1rem; }
+            .modal-body { padding: 25px 20px; font-size: 1rem; }
             
             /* Navbar Mobile Style */
             .public-navbar { padding: 15px 20px; }
@@ -167,6 +178,11 @@
             }
             .public-nav-links a { width: 100%; border-bottom: 1px solid #f1f5f9; padding: 15px 5px; }
             .public-nav-links a::after { display: none; }
+
+            /* Tree Reset on Mobile */
+            .tree-children { flex-direction: column; align-items: center; }
+            .tree-children::before { display: none; }
+            .tree-node::before { display: none; }
         }
     </style>
 </head>
@@ -284,8 +300,6 @@
                 entries.forEach(entry => {
                     if(entry.isIntersecting) {
                         entry.target.classList.add('active');
-                        // Optional: stop observing once revealed
-                        // observer.unobserve(entry.target); 
                     }
                 });
             }, { threshold: 0.15 });
@@ -301,6 +315,7 @@
             document.getElementById('modal-img').style.backgroundImage = `url('${escapeHtml(news.img)}')`;
             document.getElementById('modal-date').innerText = news.date;
             document.getElementById('modal-title').innerText = news.title;
+            // Handle new lines & keep original rich text tags
             document.getElementById('modal-desc').innerHTML = escapeHtml(news.desc).replace(/\n/g, '<br>');
             
             document.getElementById('newsModal').classList.add('active');
@@ -311,6 +326,29 @@
             if(e) e.stopPropagation();
             document.getElementById('newsModal').classList.remove('active');
             document.body.style.overflow = 'auto';
+        }
+
+        // RECURSIVE FUNCTION: ORG STRUCTURE TREE
+        function buildPublicOrgTreeHTML(parentId, orgStructureData, level = 0) {
+            const children = orgStructureData.filter(o => o.parentId === parentId);
+            if(children.length === 0) return '';
+            
+            let html = `<div class="tree-children">`;
+            children.forEach(m => {
+                let badge = level === 0 ? `<div style="position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--secondary); color:var(--theme-color); padding:6px 20px; border-radius:20px; font-weight:800; font-size:0.75rem; white-space:nowrap; box-shadow:0 4px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-crown"></i> BPH / Pimpinan</div>` : '';
+                html += `
+                <div class="tree-node">
+                    <div class="tree-card">
+                        ${badge}
+                        <div class="tree-avatar"><i class="fa-solid fa-user"></i></div>
+                        <div class="tree-name">${escapeHtml(m.name)}</div>
+                        <div class="tree-role">${escapeHtml(m.role)}</div>
+                    </div>
+                    ${buildPublicOrgTreeHTML(m.id, orgStructureData, level + 1)}
+                </div>`;
+            });
+            html += `</div>`;
+            return html;
         }
 
         // MAIN INIT
@@ -462,34 +500,18 @@
                         htmlChunk += `</div>`;
                     }
                     else if (b.type === 'struktur') {
+                        let treeHtml = '';
+                        if (orgStructureData.length > 0) {
+                            treeHtml = buildPublicOrgTreeHTML(null, orgStructureData, 0); // Render Rekursif Root Nodes
+                        } else {
+                            treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`;
+                        }
+                        
                         htmlChunk += `
                         <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Organisasi'}</h2>
-                        <div class="struktur-grid" id="struktur-container-${i}">`;
-                        
-                        if (orgStructureData.length > 0) {
-                            orgStructureData.forEach(m => { 
-                                let leaderStyle = !m.parentId ? 'border-top: 6px solid var(--secondary); background: linear-gradient(180deg, #fff, #fffdf8);' : '';
-                                let parentBadge = '';
-                                
-                                if (m.parentId) {
-                                    let parentNode = orgStructureData.find(x => x.id === m.parentId);
-                                    if(parentNode) parentBadge = `<div class="member-parent">Atasan: ${escapeHtml(parentNode.role)}</div>`;
-                                } else {
-                                    parentBadge = `<div class="member-parent" style="display:flex; align-items:center; gap:5px; background:var(--primary); color:white;"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Pimpinan Tertinggi</div>`;
-                                }
-
-                                htmlChunk += `
-                                <div class="member-card" style="border-radius: ${b.styles.borderRadius}; ${leaderStyle}">
-                                    ${parentBadge}
-                                    <div class="member-avatar"><i class="fa-solid fa-user"></i></div>
-                                    <div class="member-name">${escapeHtml(m.name)}</div>
-                                    <div class="member-role">${escapeHtml(m.role)}</div>
-                                </div>`; 
-                            });
-                        } else {
-                            htmlChunk += `<p style="color:#777; grid-column: 1 / -1;">Data struktur belum diatur oleh admin.</p>`;
-                        }
-                        htmlChunk += `</div>`;
+                        <div class="tree-wrapper">
+                            ${treeHtml}
+                        </div>`;
                     }
                     else if (b.type === 'finance') {
                         htmlChunk += `
@@ -550,7 +572,7 @@
                                 kData.forEach(kpi => {
                                     let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
                                     if(persen > 100) persen = 100;
-                                    let colorClass = persen >= 100 ? 'var(--green)' : 'var(--theme-color)';
+                                    let colorClass = persen >= 100 ? '#2ecc71' : 'var(--theme-color)';
                                     
                                     kpiHtml += `
                                     <div class="kpi-card" style="border-radius: ${b.styles.borderRadius};">
@@ -582,8 +604,8 @@
                                     let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
                                     pHtml += `
                                     <div class="prog-item" style="border-radius: ${b.styles.borderRadius};">
-                                        <h3 style="font-size:1.15rem; margin-bottom:10px; color:var(--text);">${escapeHtml(p.nama_program)}</h3>
-                                        <p style="font-size:0.95rem; color:#64748b; margin-bottom: 5px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
+                                        <h3 style="font-size:1.1rem; margin-bottom:8px; color:var(--theme-color);">${escapeHtml(p.nama_program)}</h3>
+                                        <p style="font-size:0.85rem; color:#64748b; margin-bottom: 12px; display:flex; align-items:center; gap:6px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
                                         <span class="badge-status" style="background:${bg}; color:${col};">${escapeHtml(p.status)}</span>
                                     </div>`;
                                 });
