@@ -308,7 +308,7 @@
             <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
             <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
             
-            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Produktivitas Pribadi</p>
+            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Playbook</p>
             <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Workspace</div>
         </div>
         <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1);" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
@@ -344,7 +344,7 @@
                 <div class="card" style="background: var(--blue); color: white;">
                     <h3 style="color: #eee; font-size: 0.9rem; margin-bottom: 10px;"><i class="fa-solid fa-bullseye"></i> Tingkat Pencapaian KPI (Keseluruhan)</h3>
                     <div id="dash-kpi-rate" style="font-size: 2.5rem; font-weight: bold; color: var(--secondary);">0%</div>
-                    <div style="font-size: 0.85rem; margin-top: 5px;">Berdasarkan total <span id="dash-kpi-total">0</span> Indikator KPI</div>
+                    <div style="font-size: 0.85rem; margin-top: 5px;">Berdasarkan total <span id="dash-kpi-total">0</span>KPI</div>
                 </div>
                 <div class="card" style="background: var(--green); color: white;">
                     <h3 style="color: #eee; font-size: 0.9rem; margin-bottom: 10px;"><i class="fa-solid fa-user-check"></i> Rata-rata Kehadiran Peserta</h3>
@@ -386,7 +386,7 @@
                     <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program Baru</button>
                 </div>
             </div>
-            <p style="color: #666; margin-bottom: 10px;">Pantau seluruh status pelaksanaan program kerja dari tiap departemen.</p>
+            <p style="color: #666; margin-bottom: 10px;">Pantau seluruh status pelaksanaan program kerja dari tiap divisi.</p>
             
             <div class="kanban-board">
                 <div class="kanban-col belum">
@@ -422,7 +422,7 @@
             
             <div class="card" style="margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0;">
                 <div style="background: rgba(52, 152, 219, 0.1); border-left: 4px solid var(--blue); padding: 10px; margin-bottom: 15px; font-size: 0.85rem; border-radius: 4px;">
-                    <i class="fa-solid fa-circle-info"></i> <b>Panduan Import Excel:</b> Header kolom di baris pertama <b>WAJIB</b> mengandung kata: <i>Departemen, Program, Nama Barang, Rincian, Volume, Satuan, Harga Satuan, Sumber Dana</i>. Jika ragu, unduh template yang disediakan.
+                    <i class="fa-solid fa-circle-info"></i> <b>Panduan Import Excel:</b> Header kolom di baris pertama <b>WAJIB</b> mengandung kata: <i>Divisi, Program, Nama Barang, Rincian, Volume, Satuan, Harga Satuan, Sumber Dana</i>. Jika ragu, unduh template yang disediakan.
                 </div>
                 <form onsubmit="saveRabDetail(event)" id="form-rab">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -432,12 +432,12 @@
                     
                     <div class="rab-form-grid">
                         <div class="input-group">
-                            <label>1. Pilih Departemen</label>
-                            <select id="rab-select-dept" required onchange="filterProgramByDept('rab-select-dept', 'rab-select-prog')"><option value="">-- Muat Departemen... --</option></select>
+                            <label>1. Pilih Divisi</label>
+                            <select id="rab-select-dept" required onchange="filterProgramByDept('rab-select-dept', 'rab-select-prog')"><option value="">-- Muat Divisi... --</option></select>
                         </div>
                         <div class="input-group">
                             <label>2. Pilih Program / Event</label>
-                            <select id="rab-select-prog" required><option value="">-- Pilih Departemen Dulu --</option></select>
+                            <select id="rab-select-prog" required><option value="">-- Pilih Divisi Dulu --</option></select>
                         </div>
                         <div class="input-group">
                             <label>3. Nama Barang / Kebutuhan</label>
@@ -476,7 +476,7 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Departemen</th>
+                            <th>Divisi</th>
                             <th>Program</th>
                             <th>Nama Barang</th>
                             <th>Vol</th>
@@ -531,12 +531,12 @@
                     
                     <div class="rab-form-grid">
                         <div class="input-group">
-                            <label>Pilih Departemen</label>
-                            <select id="real-select-dept" required onchange="filterProgramByDept('real-select-dept', 'real-select-prog')"><option value="">-- Muat Departemen... --</option></select>
+                            <label>Pilih Divisi</label>
+                            <select id="real-select-dept" required onchange="filterProgramByDept('real-select-dept', 'real-select-prog')"><option value="">-- Muat Divisi... --</option></select>
                         </div>
                         <div class="input-group">
                             <label>Pilih Program / Event</label>
-                            <select id="real-select-prog" required onchange="loadRabItemsForRealisasi(this.value)"><option value="">-- Pilih Departemen Dulu --</option></select>
+                            <select id="real-select-prog" required onchange="loadRabItemsForRealisasi(this.value)"><option value="">-- Pilih Divisi Dulu --</option></select>
                         </div>
                         <div class="input-group">
                             <label>Nama Barang / Keterangan</label>
@@ -574,7 +574,7 @@
                         <tr>
                             <th>No</th>
                             <th>Tanggal Input</th>
-                            <th>Departemen</th>
+                            <th>Divisi</th>
                             <th>Program</th>
                             <th>Keterangan</th>
                             <th>Rincian</th>
@@ -594,9 +594,9 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <h2>Analitik Anggaran</h2>
-                    <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan struktur departemen.</p>
+                    <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan divisi.</p>
                 </div>
-                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Excel Keseluruhan</button>
+                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Data Keseluruhan</button>
             </div>
 
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -613,7 +613,7 @@
                     <div id="rekap-global-sisa" style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">Rp 0</div>
                 </div>
                 <div class="card" style="background: var(--white); border: 2px solid var(--secondary);">
-                    <h3 style="color: #777; font-size: 0.85rem; margin-bottom: 5px;">Total Departemen</h3>
+                    <h3 style="color: #777; font-size: 0.85rem; margin-bottom: 5px;">Total Divisi</h3>
                     <div id="rekap-global-dept" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">0</div>
                 </div>
             </div>
@@ -624,7 +624,7 @@
                     <thead>
                         <tr>
                             <th style="width: 5%;"></th>
-                            <th style="width: 20%;">Departemen</th>
+                            <th style="width: 20%;">Divisi</th>
                             <th style="width: 25%;">Program / Komponen Item</th>
                             <th>Rencana RAB</th>
                             <th>Realisasi</th>
@@ -769,7 +769,7 @@
                 <h2>Kalender Program & Jadwal Kegiatan</h2>
                 <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
                     <span style="font-size: 0.8rem; background: var(--secondary); color: var(--primary); padding: 5px 15px; border-radius: 15px; font-weight: bold;"><i class="fa-solid fa-bolt"></i> Auto-Sync Program</span>
-                    <button class="btn-action" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Tambah Jadwal Manual</button>
+                    <button class="btn-action" onclick="openScheduleModal()"><i class="fa-solid fa-plus"></i> Tambah Jadwal</button>
                 </div>
             </div>
             
@@ -884,7 +884,7 @@
             
             <div class="grid-4" style="margin-bottom: 20px;">
                 <div class="card" style="background: var(--primary); color: white;">
-                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Total Indikator KPI</h3>
+                    <h3 style="color: #eee; font-size: 0.85rem; margin-bottom: 5px;">Total KPI</h3>
                     <div id="stat-kpi-total" style="font-size: 1.5rem; font-weight: bold; color: var(--secondary);">0</div>
                 </div>
                 <div class="card" style="background: var(--green); color: white;">
@@ -928,7 +928,7 @@
 
             <div class="grid-2" style="grid-template-columns: 1fr 1fr;">
                 <div class="card" style="overflow-x: auto;">
-                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-inbox"></i> Kotak Masuk (Menunggu Tanda Tangan Anda)</h3>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-inbox"></i> Inbox (Menunggu Tanda Tangan Anda)</h3>
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -962,7 +962,7 @@
             </div>
 
             <div class="card" style="margin-top: 20px; overflow-x: auto;">
-                <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-clock-rotate-left"></i> Historis Seluruh Dokumen (Organisasi)</h3>
+                <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-clock-rotate-left"></i> Historis Seluruh Dokumen Organisasi</h3>
                 <table class="table-custom">
                     <thead>
                         <tr>
@@ -1014,7 +1014,7 @@
                             <small style="color: #888; font-size: 0.75rem;">Sistem akan mencari kode ini di dalam PDF untuk mencocokkan surat.</small>
                         </div>
                         <div class="input-group">
-                            <label>Format Penomoran (Panduan Visual)</label>
+                            <label>Format Penomoran</label>
                             <input type="text" id="ctx-format" placeholder="Contoh: [Nomor]/SK-BEM/[Institusi]/[Bulan]/[Tahun]" required>
                         </div>
                         <button type="submit" class="btn-action" style="width: 100%;"><i class="fa-solid fa-save"></i> Simpan Format</button>
@@ -1022,7 +1022,7 @@
                 </div>
 
                 <div class="card" style="overflow-x: auto;">
-                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-list"></i> Library Konteks Tersedia</h3>
+                    <h3 style="color: var(--primary); margin-bottom: 15px;"><i class="fa-solid fa-list"></i> Konteks Surat Tersedia</h3>
                     <table class="table-custom">
                         <thead>
                             <tr>
@@ -1099,7 +1099,7 @@
             <div class="modal-header"><h2 id="schedule-modal-title">Tambah Jadwal Baru</h2><button class="close-btn" onclick="closeModal('scheduleModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <form onsubmit="saveSchedule(event)" id="form-schedule">
                 <div class="input-group"><label>Judul Kegiatan / Agenda</label><input type="text" id="sched-judul" placeholder="Contoh: Rapat Evaluasi Panitia" required></div>
-                <div class="input-group"><label>Keterangan Lengkap</label><input type="text" id="sched-keterangan" placeholder="Contoh: Membahas progress sponsorship"></div>
+                <div class="input-group"><label>Detail</label><input type="text" id="sched-keterangan" placeholder="Contoh: Membahas progress sponsorship"></div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div class="input-group"><label>Tanggal Mulai</label><input type="date" id="sched-tgl-mulai" required></div>
                     <div class="input-group"><label>Tanggal Selesai</label><input type="date" id="sched-tgl-selesai" required></div>
@@ -1128,10 +1128,10 @@
 
     <div class="modal-overlay" id="deptModal">
         <div class="modal-content">
-            <div class="modal-header"><h2>Tambah Departemen/Divisi</h2><button class="close-btn" onclick="closeModal('deptModal')"><i class="fa-solid fa-xmark"></i></button></div>
+            <div class="modal-header"><h2>Tambah Divisi</h2><button class="close-btn" onclick="closeModal('deptModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <form onsubmit="saveDepartment(event)">
-                <div class="input-group"><label>Nama Departemen</label><input type="text" id="input-nama-dept" required></div>
-                <button type="submit" class="btn-action" style="width: 100%;">Simpan Departemen</button>
+                <div class="input-group"><label>Nama Divisi</label><input type="text" id="input-nama-dept" required></div>
+                <button type="submit" class="btn-action" style="width: 100%;">Simpan Divisi</button>
             </form>
         </div>
     </div>
@@ -1140,7 +1140,7 @@
         <div class="modal-content">
             <div class="modal-header"><h2 id="program-modal-title">Tambah Program Kerja</h2><button class="close-btn" onclick="closeModal('programModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <form onsubmit="saveProgram(event)" id="form-program">
-                <div class="input-group"><label>Pilih Departemen</label><select id="input-dept-program" required></select></div>
+                <div class="input-group"><label>Pilih Divisi</label><select id="input-dept-program" required></select></div>
                 <div class="input-group"><label>Nama Program / Event</label><input type="text" id="input-nama-program" required></div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <div class="input-group"><label>Tanggal Pelaksanaan</label><input type="date" id="input-tgl-program" required></div>
@@ -1161,15 +1161,15 @@
             <div class="modal-header"><h2 id="kpi-modal-title">Tambah KPI Baru</h2><button class="close-btn" onclick="closeModal('kpiModal')"><i class="fa-solid fa-xmark"></i></button></div>
             <form onsubmit="saveKPI(event)" id="form-kpi">
                 <div class="input-group">
-                    <label>Pilih Departemen/Divisi</label>
-                    <select id="kpi-dept" required onchange="filterProgramByDept('kpi-dept', 'kpi-prog')"><option value="">-- Muat Departemen... --</option></select>
+                    <label>Pilih Divisi</label>
+                    <select id="kpi-dept" required onchange="filterProgramByDept('kpi-dept', 'kpi-prog')"><option value="">-- Muat Divisi... --</option></select>
                 </div>
                 <div class="input-group">
                     <label>Pilih Program / Event (Wajib)</label>
-                    <select id="kpi-prog" required><option value="">-- Pilih Departemen Dulu --</option></select>
+                    <select id="kpi-prog" required><option value="">-- Pilih Divisi Dulu --</option></select>
                 </div>
                 <div class="input-group">
-                    <label>Nama Indikator (KPI)</label>
+                    <label>Nama KPI (Key Performance Indicator)</label>
                     <input type="text" id="kpi-nama" placeholder="Contoh: Target Jumlah Peserta Hadir" required>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
@@ -1389,8 +1389,8 @@
 
         function exportDeptExcel(deptId, deptName) {
             const rows = document.querySelectorAll(`.export-row-dept-${deptId}`);
-            if(rows.length === 0) { showNotification("Tidak ada data untuk diekspor pada departemen ini", "error"); return; }
-            let exportData = [["Departemen", "Program", "Nama Barang", "Rincian", "Volume/Satuan", "Harga Satuan", "Total Rencana RAB (Rp)", "Total Realisasi (Rp)", "Sisa/Selisih (+/-)", "Sumber Dana"]];
+            if(rows.length === 0) { showNotification("Tidak ada data untuk diekspor pada Divisi ini", "error"); return; }
+            let exportData = [["Divisi", "Program", "Nama Barang", "Rincian", "Volume/Satuan", "Harga Satuan", "Total Rencana RAB (Rp)", "Total Realisasi (Rp)", "Sisa/Selisih (+/-)", "Sumber Dana"]];
             rows.forEach(tr => {
                 const progName = tr.getAttribute('data-prog-name') || '-';
                 const itemType = tr.getAttribute('data-type'); 
@@ -1415,7 +1415,7 @@
 
         function downloadExcelTemplate() {
             const ws_data = [
-                ["Departemen", "Program", "Nama Barang", "Volume", "Satuan", "Harga Satuan", "Rincian", "Sumber Dana"],
+                ["Divisi", "Program", "Nama Barang", "Volume", "Satuan", "Harga Satuan", "Rincian", "Sumber Dana"],
                 ["Humas", "Seminar Nasional", "Konsumsi Peserta", 50, "Box", 25000, "1 kegiatan x 1 hari", "Kas Organisasi"],
                 ["Acara", "Seminar Nasional", "Sewa Sound System", 1, "Paket", 500000, "1 ruangan", "Sponsor"]
             ];
@@ -1429,7 +1429,7 @@
             const file = event.target.files[0];
             if (!file) return;
 
-            showConfirm("Apakah Anda yakin ingin mengimpor data RAB dari Excel?\n\nSistem akan otomatis mencocokkan kolom. Pastikan Header kolom mengandung kata: Departemen, Program, Barang, Rincian, Volume, Satuan, Harga, Dana.", () => {
+            showConfirm("Apakah Anda yakin ingin mengimpor data RAB dari Excel?\n\nSistem akan otomatis mencocokkan kolom. Pastikan Header kolom mengandung kata: Divisi, Program, Barang, Rincian, Volume, Satuan, Harga, Dana.", () => {
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
@@ -1442,7 +1442,7 @@
                         if(jsonArr.length < 2) { showNotification("File Excel kosong atau tidak ada data.", "error"); return; }
 
                         const headers = jsonArr[0];
-                        const idxDept = headers.findIndex(h => String(h).toLowerCase().includes('departemen'));
+                        const idxDept = headers.findIndex(h => String(h).toLowerCase().includes('divisi'));
                         const idxProg = headers.findIndex(h => String(h).toLowerCase().includes('program'));
                         const idxNama = headers.findIndex(h => String(h).toLowerCase().includes('barang') || String(h).toLowerCase().includes('kebutuhan'));
                         const idxRincian = headers.findIndex(h => String(h).toLowerCase().includes('rincian'));
@@ -1662,15 +1662,15 @@
             const selectProgModal = document.getElementById('input-dept-program'); const selectRabDept = document.getElementById('rab-select-dept'); const selectRealDept = document.getElementById('real-select-dept');
             const selectKpiDept = document.getElementById('kpi-dept'); 
             
-            let options = '<option value="">-- Pilih Departemen --</option>';
+            let options = '<option value="">-- Pilih Divisi --</option>';
             if (data && data.length > 0) { data.forEach(d => options += `<option value="${d.id}">${d.nama_departemen}</option>`); } 
-            else { options = '<option value="">-- Buat Departemen Dulu --</option>'; }
+            else { options = '<option value="">-- Buat Divisi Dulu --</option>'; }
             selectProgModal.innerHTML = options; selectRabDept.innerHTML = options; selectRealDept.innerHTML = options; selectKpiDept.innerHTML = options;
         }
 
         async function saveDepartment(e) {
             e.preventDefault(); await supabaseClient.from('departments').insert([{ workspace_id: globalWorkspaceId, nama_departemen: document.getElementById('input-nama-dept').value }]);
-            closeModal('deptModal'); document.getElementById('input-nama-dept').value = ''; loadDepartments(); showNotification('Departemen ditambahkan', 'success');
+            closeModal('deptModal'); document.getElementById('input-nama-dept').value = ''; loadDepartments(); showNotification('Divisi ditambahkan', 'success');
         }
 
         async function loadProgramData() {
@@ -1719,7 +1719,7 @@
         async function saveProgram(e) {
             e.preventDefault(); 
             const payload = { department_id: document.getElementById('input-dept-program').value, nama_program: document.getElementById('input-nama-program').value, status: document.getElementById('input-status-program').value, tanggal_pelaksanaan: document.getElementById('input-tgl-program').value || null, waktu_pelaksanaan: document.getElementById('input-waktu-program').value || null, tempat: document.getElementById('input-tempat-program').value };
-            if (!payload.department_id) { showNotification("Pilih departemen dulu!", "error"); return; }
+            if (!payload.department_id) { showNotification("Pilih divisi dulu!", "error"); return; }
             document.getElementById('btn-save-program').innerText = "Menyimpan..."; document.getElementById('btn-save-program').disabled = true;
 
             if (editingProgramId) { await supabaseClient.from('programs').update(payload).eq('id', editingProgramId); } 
@@ -2076,7 +2076,7 @@
             
             const tbody = document.getElementById('table-rekap-body'); 
             
-            if (!depts || depts.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Silakan buat Departemen terlebih dahulu.</td></tr>'; return; } 
+            if (!depts || depts.length === 0) { tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Silakan buat Divisi terlebih dahulu.</td></tr>'; return; } 
             
             let html = ''; 
             let globalRencana = 0; let globalRealisasi = 0; let totalDepts = 0;
@@ -2141,7 +2141,7 @@
                 html += `
                     <tr style="background-color: #e2e8f0; border-top: 2px solid #cbd5e1;">
                         <td style="text-align:center;"><strong><i class="fa-solid fa-sitemap"></i></strong></td>
-                        <td colspan="2"><strong style="color:var(--primary); font-size:1rem;">DEPARTEMEN: ${dept.nama_departemen.toUpperCase()}</strong></td>
+                        <td colspan="2"><strong style="color:var(--primary); font-size:1rem;">DIVISI: ${dept.nama_departemen.toUpperCase()}</strong></td>
                         <td style="color:var(--primary); font-size:1rem; font-weight:bold;">${formatRp(deptRencana)}</td>
                         <td style="color:var(--primary); font-size:1rem; font-weight:bold;">${formatRp(deptRealisasi)}</td>
                         <td style="font-size:1rem; font-weight:bold;">${strSelisihDept}</td>
@@ -2442,7 +2442,7 @@
                 <div class="dept-kpi-bubble">
                     <div class="dept-kpi-header">
                         <div>
-                            <h3 style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-sitemap"></i> Departemen: ${deptGroup.nama_dept}</h3>
+                            <h3 style="color: var(--primary); font-size: 1.1rem;"><i class="fa-solid fa-sitemap"></i> Divisi: ${deptGroup.nama_dept}</h3>
                             <p style="font-size: 0.8rem; color: #777;">Total ${deptGroup.kpis.length} Indikator Program</p>
                         </div>
                         <div style="text-align: right;">
@@ -2459,7 +2459,7 @@
                 </div>`;
             }
 
-            if (total === 0) { html = '<p style="color: #aaa; font-style: italic;">Belum ada Indikator KPI yang dibuat.</p>'; }
+            if (total === 0) { html = '<p style="color: #aaa; font-style: italic;">Belum ada KPI yang dibuat.</p>'; }
             
             document.getElementById('kpi-container').innerHTML = html;
             document.getElementById('stat-kpi-total').innerText = total;
@@ -2495,7 +2495,7 @@
                 satuan: document.getElementById('kpi-satuan').value, capaian: parseFloat(document.getElementById('kpi-capaian').value || 0)
             };
             
-            if (!payload.department_id) { showNotification("Pilih departemen dulu!", "error"); return; }
+            if (!payload.department_id) { showNotification("Pilih divisi dulu!", "error"); return; }
             if (!payload.program_id) { showNotification("Pilih program dulu!", "error"); return; }
             
             document.getElementById('btn-save-kpi').innerText = "Menyimpan..."; document.getElementById('btn-save-kpi').disabled = true;
@@ -2507,7 +2507,7 @@
             document.getElementById('btn-save-kpi').innerText = "Simpan KPI"; document.getElementById('btn-save-kpi').disabled = false;
         }
 
-        async function deleteKPIAction(id, name) { showConfirm(`Yakin ingin menghapus Indikator KPI "${name}"?`, async () => { await supabaseClient.from('kpi_items').delete().eq('id', id); await loadKPIData(); showNotification("Dihapus", "success"); }); }
+        async function deleteKPIAction(id, name) { showConfirm(`Yakin ingin menghapus KPI "${name}"?`, async () => { await supabaseClient.from('kpi_items').delete().eq('id', id); await loadKPIData(); showNotification("Dihapus", "success"); }); }
 
         async function loadSuratContexts() {
             const { data } = await supabaseClient.from('surat_contexts').select('*').eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });

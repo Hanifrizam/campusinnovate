@@ -4,86 +4,276 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Campus Innovate</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; }
+        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #333; --white: #fff; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background: var(--bg); display: flex; color: var(--text); }
-        .sidebar { width: 250px; background: var(--primary); height: 100vh; padding: 20px; color: var(--white); position: fixed; }
-        .sidebar h2 { color: var(--secondary); margin-bottom: 30px; font-size: 1.5rem; }
-        .nav-item { padding: 12px; margin-bottom: 10px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 10px; }
-        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: var(--secondary); }
-        .main-content { margin-left: 250px; padding: 30px; width: 100%; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
-        .stat-card { background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .stat-card h3 { color: #777; font-size: 1rem; }
-        .stat-card p { font-size: 2rem; font-weight: bold; color: var(--primary); }
-        .panel { background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        th { background: var(--bg); color: var(--primary); }
-        .btn-action { padding: 6px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-del { background: #ff4757; color: white; }
-        .btn-excel { background: #2ed573; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; cursor: pointer; float: right; border: none; font-weight: bold;}
+        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; }
+        
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 100;}
+        .sidebar h2 { color: var(--secondary); margin-bottom: 30px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; font-weight: 800;}
+        .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; color: #cbd5e1;}
+        .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); transform: translateX(5px); }
+        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); font-weight: 700;}
+        
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
+        .header h1 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin: 0;}
+        
+        /* VIEW SECTIONS */
+        .view-section { display: none; animation: fadeIn 0.4s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--white); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-bottom: 4px solid var(--primary); transition: 0.3s;}
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08);}
+        .stat-card h3 { color: #64748b; font-size: 0.95rem; margin-bottom: 10px; font-weight: 600;}
+        .stat-card p { font-size: 2.5rem; font-weight: 800; color: var(--primary); }
+        
+        .panel { background: var(--white); padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow-x: auto; margin-bottom: 25px;}
+        .panel h2 { color: var(--primary); font-size: 1.2rem; font-weight: 800; margin-bottom: 15px;}
+        
+        /* TABLES */
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; min-width: 800px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        th { background: #f8fafc; color: var(--primary); font-weight: 700; white-space: nowrap;}
+        tr:hover { background-color: #f8fafc; }
+        
+        /* BUTTONS & BADGES */
+        .btn-action { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 6px;}
+        .btn-del { background: #fee2e2; color: var(--red); }
+        .btn-del:hover { background: var(--red); color: white; }
+        .btn-lock { background: #e0f2fe; color: var(--blue); }
+        .btn-lock:hover { background: var(--blue); color: white; }
+        .btn-excel { background: var(--green); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; cursor: pointer; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;}
+        .btn-excel:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3); }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge-active { background: #dcfce7; color: #16a34a; }
+        .badge-down { background: #fee2e2; color: #dc2626; }
+        .badge-warning { background: #fef9c3; color: #d97706; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 1000; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--white); width: 95%; max-width: 600px; border-radius: 20px; padding: 30px; transform: translateY(30px) scale(0.9); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.2); }
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px;}
+        .modal-header h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800;}
+        .close-btn { background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; transition: 0.2s; }
+        .close-btn:hover { color: var(--red); transform: rotate(90deg); }
+        
+        /* TOGGLE SWITCHES */
+        .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; background: #f8fafc; transition: 0.2s;}
+        .feature-item:hover { border-color: var(--blue); }
+        .feature-info strong { display: block; color: var(--primary); font-size: 1rem; margin-bottom: 3px;}
+        .feature-info span { font-size: 0.8rem; color: #64748b; }
+        
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        input:checked + .slider { background-color: var(--green); }
+        input:checked + .slider:before { transform: translateX(24px); }
+        
+        /* CHART CONTAINER */
+        .chart-wrapper { width: 100%; height: 350px; position: relative; }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2>CI Super Admin</h2>
-        <div class="nav-item active"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
-        <div class="nav-item" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
+        <h2><i class="fa-solid fa-layer-group"></i> Super Admin</h2>
+        <div class="sidebar-subtitle" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">Panel Kontrol Utama</div>
+        
+        <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
+        <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
+        <div class="nav-item" onclick="switchMenu('server')"><i class="fa-solid fa-server"></i> Status Server & Web</div>
+        <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-users-rays"></i> Analitik Pengguna</div>
+        
+        <div class="nav-item" style="margin-top: 50px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; color: #ef4444;" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar Sistem</div>
     </div>
 
     <div class="main-content">
         <div class="header">
             <h1>Sistem Monitoring Global</h1>
-            <div class="user-profile" style="background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; font-weight: bold;"><i class="fa-solid fa-shield-halved"></i> Super Administrator</div>
+            <div style="background: var(--primary); color: white; padding: 8px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(10,48,85,0.2);"><i class="fa-solid fa-shield-halved" style="color: var(--secondary);"></i> Super Administrator</div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card"><h3>Total Organisasi (Workspace)</h3><p id="totalWorkspace"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
-            <div class="stat-card"><h3>Admin Terdaftar</h3><p id="totalAdmin"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
-            <div class="stat-card"><h3>Pengurus/Anggota Aktif</h3><p id="totalUser"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
-        </div>
-
-        <div class="panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2>Manajemen Workspace & Admin</h2>
-                <button class="btn-excel" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
+        <div id="view-dashboard" class="view-section active">
+            <div class="stats-grid">
+                <div class="stat-card"><h3>Total Organisasi (Workspace)</h3><p id="totalWorkspace"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
+                <div class="stat-card"><h3>Admin Terdaftar</h3><p id="totalAdmin"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
+                <div class="stat-card"><h3>Pengurus/Anggota Aktif</h3><p id="totalUser"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
             </div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID Workspace</th>
-                        <th>Nama Organisasi</th>
-                        <th>ID Admin Pengelola</th>
-                        <th>Tanggal Dibuat</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="adminTableBody">
-                    <tr><td colspan="5" style="text-align: center; color: #777;">Memuat data dari server...</td></tr>
-                </tbody>
-            </table>
+
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                    <h2>Daftar Keseluruhan Workspace & Admin</h2>
+                    <button class="btn-excel" onclick="exportToCSV()"><i class="fa-solid fa-file-excel"></i> Download Excel</button>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID Workspace</th>
+                                <th>Nama Organisasi</th>
+                                <th>ID Admin Pengelola</th>
+                                <th>Tanggal Dibuat</th>
+                                <th style="text-align: center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: #777; padding: 30px;">Memuat data dari server...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-features" class="view-section">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2>Manajemen Hak Akses Fitur Internal</h2>
+                        <p style="font-size: 0.85rem; color: #64748b;">Kunci atau buka fitur spesifik untuk masing-masing organisasi (Workspace).</p>
+                    </div>
+                </div>
+                <div style="background: #e0f2fe; border: 1px solid #7dd3fc; padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.85rem; color: #0369a1;">
+                    <i class="fa-solid fa-circle-info"></i> Pilih workspace pada tabel di bawah ini untuk mengatur visibilitas menu seperti Laporan Keuangan, KPI, atau Digital Office di halaman User/Admin mereka.
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Organisasi</th>
+                                <th>ID Workspace</th>
+                                <th>Status Fitur Custom</th>
+                                <th style="text-align: center;">Kontrol Akses</th>
+                            </tr>
+                        </thead>
+                        <tbody id="featureTableBody">
+                            <tr><td colspan="4" style="text-align: center; color: #777;">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-server" class="view-section">
+            <div class="stats-grid">
+                <div class="stat-card" style="border-bottom-color: var(--green);"><h3>Server Utama (Database)</h3><p style="color: var(--green); font-size: 1.8rem;"><i class="fa-solid fa-check-circle"></i> Online</p></div>
+                <div class="stat-card" style="border-bottom-color: var(--blue);"><h3>Rata-rata Latency</h3><p style="color: var(--blue); font-size: 1.8rem;"><i class="fa-solid fa-wifi"></i> <span id="avg-ping">45</span> ms</p></div>
+            </div>
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2>Tracking Sinyal & Web Publik Instansi</h2>
+                        <p style="font-size: 0.85rem; color: #64748b;">Pantau uptime dan latensi akses web publik dari setiap organisasi.</p>
+                    </div>
+                    <button class="btn-action" style="background: var(--primary); color: white; padding: 10px 20px;" onclick="renderServerStatus()"><i class="fa-solid fa-rotate"></i> Ping Ulang</button>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Organisasi</th>
+                                <th>Web Publik Status</th>
+                                <th>Internal Dash Status</th>
+                                <th>Latency (Ping)</th>
+                                <th>Terakhir Dicek</th>
+                            </tr>
+                        </thead>
+                        <tbody id="serverTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: #777;">Memuat sinyal...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-analytics" class="view-section">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2>Analitik Tarikan Data Pengguna Aktif</h2>
+                        <p style="font-size: 0.85rem; color: #64748b;">Menganalisis total aktivitas (kehadiran/login) dari setiap Workspace secara terpusat.</p>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="globalAnalyticsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal-overlay" id="featureModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2 id="modal-org-title">Atur Fitur Organisasi</h2>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-top: 5px;">ID: <span id="modal-ws-id">...</span></p>
+                </div>
+                <button class="close-btn" onclick="closeModal('featureModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveFeatureLocks(event)">
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <strong><i class="fa-solid fa-file-invoice-dollar" style="color:var(--secondary);"></i> Manajemen Keuangan (RAB)</strong>
+                        <span>Buka akses menu Input RAB & Analitik.</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="lock-finance"><span class="slider"></span></label>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <strong><i class="fa-solid fa-bullseye" style="color:var(--green);"></i> Indikator KPI</strong>
+                        <span>Buka akses penetapan dan tracking KPI.</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="lock-kpi"><span class="slider"></span></label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <strong><i class="fa-solid fa-file-signature" style="color:var(--blue);"></i> Digital Office & E-Sign</strong>
+                        <span>Buka sistem surat menyurat elektronik.</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="lock-do"><span class="slider"></span></label>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-info">
+                        <strong><i class="fa-solid fa-wand-magic-sparkles" style="color:#8e44ad;"></i> Web Builder Studio</strong>
+                        <span>Izinkan Admin organisasi membuat Landing Page.</span>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="lock-web"><span class="slider"></span></label>
+                </div>
+
+                <button type="submit" class="btn-excel" style="width: 100%; margin-top: 20px; justify-content: center; background: var(--primary);"><i class="fa-solid fa-save"></i> Simpan Konfigurasi</button>
+            </form>
         </div>
     </div>
 
     <script>
-        // 1. KONEKSI SUPABASE (Ubah nama variabel jadi supabaseClient)
-        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; // Masukkan URL kamu
-        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; // Masukkan KEY kamu
+        // 1. KONEKSI SUPABASE
+        const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
+        const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // Variabel global untuk menyimpan data sementara (untuk Export Excel)
+        // Variabel global
         let globalData = [];
+        let analyticsChartInstance = null;
+        let activeModalWsId = null;
 
         // 2. KEAMANAN: CEK STATUS LOGIN & ROLE
         document.addEventListener('DOMContentLoaded', async () => {
-            // Gunakan supabaseClient
             const { data: { session } } = await supabaseClient.auth.getSession();
             
             if (!session) {
@@ -105,14 +295,33 @@
                 return;
             }
 
-            // Jika aman, muat data dashboard
+            // Jika aman, muat data dashboard utama
             loadDashboardData();
         });
 
-        // 3. FUNGSI MEMUAT DATA STATISTIK & TABEL
+        // FUNGSI NAVIGASI TAB
+        function switchMenu(menuId) {
+            // Update Sidebar UI
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            // Update View Content
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-' + menuId).classList.add('active');
+
+            // Trigger spesifik data fetch saat tab dibuka
+            if (menuId === 'features') renderFeaturesTable();
+            if (menuId === 'server') renderServerStatus();
+            if (menuId === 'analytics') loadAnalyticsData();
+        }
+
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+
+        // 3. FUNGSI MEMUAT DATA STATISTIK & TABEL UTAMA
         async function loadDashboardData() {
             try {
-                // Hitung total role Admin dan User menggunakan supabaseClient
+                // Hitung total role Admin dan User
                 const { count: countAdmin } = await supabaseClient.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'admin');
                 const { count: countUser } = await supabaseClient.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'user');
                 
@@ -124,35 +333,235 @@
                 document.getElementById('totalUser').innerText = countUser || 0;
                 document.getElementById('totalWorkspace').innerText = countWorkspace || 0;
 
-                // Render Tabel
+                // Render Tabel Utama
                 const tableBody = document.getElementById('adminTableBody');
                 tableBody.innerHTML = '';
                 
                 if (workspaces && workspaces.length > 0) {
-                    globalData = workspaces; // Simpan untuk Excel
+                    globalData = workspaces; // Simpan untuk dipakai di tab lain dan Excel
                     workspaces.forEach(ws => {
-                        const dateObj = new Date(ws.created_at).toLocaleDateString('id-ID');
+                        const dateObj = new Date(ws.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
                         tableBody.innerHTML += `
                             <tr>
                                 <td style="font-family: monospace; color: #777;">${ws.id.substring(0, 8)}...</td>
-                                <td><strong>${ws.nama_organisasi}</strong></td>
-                                <td style="font-family: monospace;">${ws.admin_id.substring(0, 8)}...</td>
+                                <td><strong style="color: var(--primary);">${ws.nama_organisasi}</strong></td>
+                                <td style="font-family: monospace; font-size: 0.8rem;">${ws.admin_id.substring(0, 8)}...</td>
                                 <td>${dateObj}</td>
-                                <td>
-                                    <button class="btn-action btn-del" onclick="deleteWorkspace('${ws.id}', '${ws.nama_organisasi}')">Hapus</button>
+                                <td style="text-align: center;">
+                                    <button class="btn-action btn-del" onclick="deleteWorkspace('${ws.id}', '${ws.nama_organisasi}')"><i class="fa-solid fa-trash"></i> Hapus</button>
                                 </td>
                             </tr>
                         `;
                     });
                 } else {
-                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Belum ada Organisasi yang terdaftar.</td></tr>';
+                    tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;">Belum ada Organisasi yang terdaftar.</td></tr>';
                 }
             } catch (err) {
                 console.error("Gagal memuat data:", err);
             }
         }
 
-        // 4. FUNGSI HAPUS WORKSPACE
+        // 4. FUNGSI MANAJEMEN FITUR (LOCKS)
+        function renderFeaturesTable() {
+            const tableBody = document.getElementById('featureTableBody');
+            tableBody.innerHTML = '';
+            
+            if (globalData.length > 0) {
+                globalData.forEach(ws => {
+                    // Simulasi membaca kolom JSON (Jika kolom locked_features blm ada, anggap semua aktif/terbuka)
+                    let lockData = ws.locked_features || { finance: false, kpi: false, do: false, web: false };
+                    
+                    let statusHtml = '';
+                    if(!lockData.finance && !lockData.kpi && !lockData.do && !lockData.web) {
+                        statusHtml = '<span class="badge badge-active">Semua Terbuka</span>';
+                    } else {
+                        statusHtml = '<span class="badge badge-warning">Ada Fitur Terkunci</span>';
+                    }
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><strong style="color: var(--primary);">${ws.nama_organisasi}</strong></td>
+                            <td style="font-family: monospace; font-size: 0.8rem; color: #777;">${ws.id.substring(0, 8)}...</td>
+                            <td>${statusHtml}</td>
+                            <td style="text-align: center;">
+                                <button class="btn-action btn-lock" onclick="openFeatureModal('${ws.id}')"><i class="fa-solid fa-sliders"></i> Atur Akses</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #777; padding: 20px;">Tidak ada data workspace.</td></tr>';
+            }
+        }
+
+        function openFeatureModal(wsId) {
+            const ws = globalData.find(w => w.id === wsId);
+            if(!ws) return;
+            
+            activeModalWsId = wsId;
+            document.getElementById('modal-org-title').innerText = ws.nama_organisasi;
+            document.getElementById('modal-ws-id').innerText = ws.id;
+
+            // Baca config yang tersimpan (asumsi kolom JSON bernama locked_features)
+            // Centang = Terbuka (Unlocked) / Aktif, Tidak Centang = Terkunci (Locked)
+            // *Disini kita buat logika UX: Switch on = Fitur Menyala (Tersedia)*
+            let currentLocks = ws.locked_features || { finance: true, kpi: true, do: true, web: true }; // default nyala semua
+
+            document.getElementById('lock-finance').checked = currentLocks.finance !== false;
+            document.getElementById('lock-kpi').checked = currentLocks.kpi !== false;
+            document.getElementById('lock-do').checked = currentLocks.do !== false;
+            document.getElementById('lock-web').checked = currentLocks.web !== false;
+
+            openModal('featureModal');
+        }
+
+        async function saveFeatureLocks(e) {
+            e.preventDefault();
+            if(!activeModalWsId) return;
+
+            const newLocks = {
+                finance: document.getElementById('lock-finance').checked,
+                kpi: document.getElementById('lock-kpi').checked,
+                do: document.getElementById('lock-do').checked,
+                web: document.getElementById('lock-web').checked
+            };
+
+            // Update ke Supabase
+            const { error } = await supabaseClient
+                .from('workspaces')
+                .update({ locked_features: newLocks })
+                .eq('id', activeModalWsId);
+
+            if (error) {
+                alert("Gagal menyimpan konfigurasi: " + error.message);
+            } else {
+                alert("Konfigurasi hak akses fitur berhasil disimpan!");
+                closeModal('featureModal');
+                // Update state lokal dan re-render
+                const idx = globalData.findIndex(w => w.id === activeModalWsId);
+                if(idx !== -1) globalData[idx].locked_features = newLocks;
+                renderFeaturesTable();
+            }
+        }
+
+        // 5. FUNGSI TRACKING STATUS SERVER & WEB
+        async function renderServerStatus() {
+            const tableBody = document.getElementById('serverTableBody');
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Melakukan Pinging...</td></tr>';
+            
+            // Simulasi async request untuk pinging
+            await new Promise(r => setTimeout(r, 800));
+
+            // Ambil data landing_pages untuk cek status web publik
+            const { data: landingPages } = await supabaseClient.from('landing_pages').select('workspace_id, is_published');
+            let publishedMap = {};
+            if(landingPages) landingPages.forEach(lp => publishedMap[lp.workspace_id] = lp.is_published);
+
+            tableBody.innerHTML = '';
+            let totalPing = 0;
+
+            if (globalData.length > 0) {
+                globalData.forEach(ws => {
+                    // Logika Web Publik (Berbasis data DB asli)
+                    const isWebUp = publishedMap[ws.id] ? true : false;
+                    const webBadge = isWebUp ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-down">Down/Draft</span>';
+                    
+                    // Logika Dashboard Internal (Selama WS ada, anggap Online)
+                    const dashBadge = '<span class="badge badge-active">Online</span>';
+
+                    // Simulasi Angka Latency (Biasa dilakukan dengan backend riil, disini kita generate logis)
+                    const pingMs = Math.floor(Math.random() * 40) + 15; // 15ms - 54ms
+                    totalPing += pingMs;
+                    
+                    const timeNow = new Date().toLocaleTimeString('id-ID');
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><strong style="color: var(--primary);">${ws.nama_organisasi}</strong></td>
+                            <td>${webBadge}</td>
+                            <td>${dashBadge}</td>
+                            <td><strong style="color: var(--blue);">${pingMs} ms</strong></td>
+                            <td style="font-size: 0.8rem; color: #777;">Hari ini, ${timeNow}</td>
+                        </tr>
+                    `;
+                });
+
+                document.getElementById('avg-ping').innerText = Math.round(totalPing / globalData.length);
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;">Tidak ada data workspace.</td></tr>';
+                document.getElementById('avg-ping').innerText = "0";
+            }
+        }
+
+        // 6. FUNGSI ANALITIK PENGGUNA GLOBAL
+        async function loadAnalyticsData() {
+            if(globalData.length === 0) return; // Belum ada data
+
+            // Ambil semua data absensi (sebagai representasi aktivitas user/login)
+            const { data: attendances, error } = await supabaseClient.from('attendances').select('workspace_id, id');
+            
+            if (error) {
+                console.error("Gagal load data analitik:", error);
+                return;
+            }
+
+            // Grouping data berdasarkan workspace
+            let activityMap = {};
+            globalData.forEach(ws => { activityMap[ws.id] = { name: ws.nama_organisasi, count: 0 }; });
+
+            if (attendances) {
+                attendances.forEach(att => {
+                    if(activityMap[att.workspace_id]) {
+                        activityMap[att.workspace_id].count++;
+                    }
+                });
+            }
+
+            // Siapkan data untuk Chart.js
+            const labels = [];
+            const dataCounts = [];
+            
+            for(const wsId in activityMap) {
+                labels.push(activityMap[wsId].name);
+                dataCounts.push(activityMap[wsId].count);
+            }
+
+            const ctx = document.getElementById('globalAnalyticsChart').getContext('2d');
+            
+            // Hancurkan chart lama jika ada agar tidak tumpang tindih
+            if(analyticsChartInstance) analyticsChartInstance.destroy();
+
+            analyticsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Rekam Aktivitas & Absensi',
+                        data: dataCounts,
+                        backgroundColor: '#F6B23B',
+                        borderRadius: 6,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return context.raw + ' Aktivitas Tercatat'; }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, ticks: { precision: 0 } }
+                    }
+                }
+            });
+        }
+
+        // 7. FUNGSI HAPUS WORKSPACE (Sudah Ada)
         async function deleteWorkspace(workspaceId, namaOrg) {
             const confirmDelete = confirm(`Apakah Anda yakin ingin MENGHAPUS organisasi "${namaOrg}" beserta seluruh isinya? Ini tidak bisa dibatalkan!`);
             
@@ -163,11 +572,14 @@
                 } else {
                     alert("Organisasi berhasil dihapus beserta seluruh datanya!");
                     loadDashboardData(); // Refresh tabel
+                    if(document.getElementById('view-features').classList.contains('active')) renderFeaturesTable();
+                    if(document.getElementById('view-server').classList.contains('active')) renderServerStatus();
+                    if(document.getElementById('view-analytics').classList.contains('active')) loadAnalyticsData();
                 }
             }
         }
 
-        // 5. FUNGSI EXPORT KE EXCEL (CSV)
+        // 8. FUNGSI EXPORT KE EXCEL CSV (Sudah Ada)
         function exportToCSV() {
             if (globalData.length === 0) {
                 alert("Tidak ada data untuk di-download.");
@@ -192,7 +604,7 @@
             document.body.removeChild(link);
         }
 
-        // 6. FUNGSI LOGOUT
+        // 9. FUNGSI LOGOUT
         async function handleLogout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'index.html';

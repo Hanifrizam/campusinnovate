@@ -9,88 +9,558 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { --primary: #0A3055; --secondary: #F6B23B; --bg: #f4f7fa; --text: #1e293b; --white: #fff; --green: #2ecc71; --red: #e74c3c; --blue: #3498db; --border: #e2e8f0;}
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); display: flex; flex-direction: column; color: var(--text); overflow-x: hidden; height: 100vh;}
+        :root { 
+            --primary: #0A3055; 
+            --secondary: #F6B23B; 
+            --bg: #f4f7fa; 
+            --text: #1e293b; 
+            --white: #fff; 
+            --green: #2ecc71; 
+            --red: #e74c3c; 
+            --blue: #3498db; 
+            --border: #e2e8f0;
+        }
         
-        .mobile-header { display: none; background: var(--primary); padding: 15px 20px; color: white; justify-content: space-between; align-items: center; position: fixed; top: 0; left: 0; width: 100%; z-index: 998; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .mobile-header h2 { font-size: 1.2rem; color: var(--secondary); margin: 0;}
-        .menu-toggle { background: transparent; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
-        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; backdrop-filter: blur(3px); opacity: 0; transition: opacity 0.3s; }
-        .sidebar-overlay.active { display: block; opacity: 1; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+        
+        body { 
+            background: var(--bg); 
+            display: flex; 
+            flex-direction: column; 
+            color: var(--text); 
+            overflow-x: hidden; 
+            height: 100vh;
+        }
+        
+        .mobile-header { 
+            display: none; 
+            background: var(--primary); 
+            padding: 15px 20px; 
+            color: white; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            z-index: 998; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
+        
+        .mobile-header h2 { 
+            font-size: 1.2rem; 
+            color: var(--secondary); 
+            margin: 0;
+        }
+        
+        .menu-toggle { 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+        }
+        
+        .sidebar-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 999; 
+            backdrop-filter: blur(3px); 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
+        
+        .sidebar-overlay.active { 
+            display: block; 
+            opacity: 1; 
+        }
 
-        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; top: 0; left: 0; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 1000; overflow-y: auto; transition: transform 0.3s;}
-        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .sidebar-subtitle { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 30px; line-height: 1.5; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; color: #cbd5e1;}
-        .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); transform: translateX(5px); }
-        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); }
-        .premium-badge { background: linear-gradient(45deg, #FFD700, #FFA500); color: #000; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: auto; }
+        .sidebar { 
+            width: 260px; 
+            background: var(--primary); 
+            height: 100vh; 
+            padding: 25px 20px; 
+            color: var(--white); 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1); 
+            z-index: 1000; 
+            overflow-y: auto; 
+            transition: transform 0.3s;
+        }
         
-        .main-content { margin-left: 260px; padding: 30px; width: calc(100% - 260px); height: 100vh; overflow-y: auto; animation: fadeIn 0.5s ease; flex-grow: 1; }
-        .card { background: var(--white); padding: 30px; border-radius: 15px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
-        .btn-primary { background: var(--secondary); color: var(--primary); padding: 12px 25px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.3s; font-size: 1rem; display: inline-flex; align-items: center; gap: 10px; justify-content: center;}
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); }
-        .btn-danger { background: var(--red); color: white; padding: 12px 25px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; gap: 10px;}
-        .btn-sm { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
-        .menu-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
-        .menu-content.active { display: block; }
+        .sidebar h2 { 
+            color: var(--secondary); 
+            margin-bottom: 5px; 
+            font-size: 1.5rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        
+        .sidebar-subtitle { 
+            font-size: 0.8rem; 
+            color: #cbd5e1; 
+            margin-bottom: 30px; 
+            line-height: 1.5; 
+            padding-bottom: 15px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+        }
+        
+        .nav-item { 
+            padding: 12px 15px; 
+            margin-bottom: 8px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            color: #cbd5e1;
+        }
+        
+        .nav-item:hover { 
+            background: rgba(255,255,255,0.08); 
+            color: var(--white); 
+            transform: translateX(5px); 
+        }
+        
+        .nav-item.active { 
+            background: var(--secondary); 
+            color: var(--primary); 
+            box-shadow: 0 4px 10px rgba(246, 178, 59, 0.3); 
+        }
+        
+        .premium-badge { 
+            background: linear-gradient(45deg, #FFD700, #FFA500); 
+            color: #000; 
+            font-size: 0.65rem; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            margin-left: auto; 
+        }
+        
+        .main-content { 
+            margin-left: 260px; 
+            padding: 30px; 
+            width: calc(100% - 260px); 
+            height: 100vh; 
+            overflow-y: auto; 
+            animation: fadeIn 0.5s ease; 
+            flex-grow: 1; 
+        }
+        
+        .card { 
+            background: var(--white); 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin-bottom: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+        }
+        
+        .btn-primary { 
+            background: var(--secondary); 
+            color: var(--primary); 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            font-size: 1rem; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px; 
+            justify-content: center;
+        }
+        
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(246, 178, 59, 0.4); 
+        }
+        
+        .btn-danger { 
+            background: var(--red); 
+            color: white; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        
+        .btn-sm { 
+            padding: 8px 15px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            transition: 0.3s; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+        }
+        
+        .menu-content { 
+            display: none; 
+            animation: fadeIn 0.4s ease; 
+            height: 100%;
+        }
+        
+        .menu-content.active { 
+            display: block; 
+        }
         
         /* -------------------------------------
            ADVANCED BUILDER & LIVE PREVIEW STYLES
            ------------------------------------- */
-        .builder-wrapper { display: flex; gap: 0; height: calc(100vh - 120px); transition: 0.3s ease; position: relative; }
+        .builder-wrapper { 
+            display: flex; 
+            gap: 0; 
+            height: calc(100vh - 120px); 
+            transition: 0.3s ease; 
+            position: relative; 
+        }
         
         /* FULLSCREEN MODIFIER */
-        .builder-fullscreen { position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important; background: var(--bg) !important; padding: 70px 20px 20px 20px !important; box-sizing: border-box; margin: 0 !important; }
-        .builder-fullscreen .builder-tools, .builder-fullscreen .builder-properties { height: calc(100vh - 90px) !important; }
-        .builder-fullscreen .builder-canvas-container { height: calc(100vh - 90px) !important; }
+        .builder-fullscreen { 
+            position: fixed !important; 
+            top: 0 !important; 
+            left: 0 !important; 
+            width: 100vw !important; 
+            height: 100vh !important; 
+            z-index: 99999 !important; 
+            background: var(--bg) !important; 
+            padding: 70px 20px 20px 20px !important; 
+            box-sizing: border-box; 
+            margin: 0 !important; 
+        }
+        .builder-fullscreen .builder-tools, 
+        .builder-fullscreen .builder-properties { 
+            height: calc(100vh - 90px) !important; 
+        }
+        .builder-fullscreen .builder-canvas-container { 
+            height: calc(100vh - 90px) !important; 
+        }
         
         /* TOMBOL KELUAR FULLSCREEN FLOATING */
-        .btn-exit-fs { display: none; position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; background: var(--red); color: white; border: none; padding: 10px 25px; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); }
-        .builder-fullscreen .btn-exit-fs { display: flex; align-items: center; gap: 8px; animation: slideDownFS 0.3s ease; }
-        @keyframes slideDownFS { from { top: -50px; opacity: 0; } to { top: 20px; opacity: 1; } }
+        .btn-exit-fs { 
+            display: none; 
+            position: fixed; 
+            top: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            z-index: 100000; 
+            background: var(--red); 
+            color: white; 
+            border: none; 
+            padding: 10px 25px; 
+            border-radius: 30px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); 
+        }
+        .builder-fullscreen .btn-exit-fs { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            animation: slideDownFS 0.3s ease; 
+        }
+        
+        @keyframes slideDownFS { 
+            from { top: -50px; opacity: 0; } 
+            to { top: 20px; opacity: 1; } 
+        }
 
         /* RESIZABLE PANELS */
-        .builder-tools { width: 250px; min-width: 180px; flex-shrink: 0; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: flex; flex-direction: column; gap: 10px;}
-        .builder-canvas-container { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 15px; position: relative;}
-        .builder-properties { width: 340px; min-width: 250px; flex-shrink: 0; background: white; border-radius: 15px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); overflow-y: auto; display: none; border-left: 4px solid var(--secondary);}
-        .builder-properties.active { display: block; animation: slideInRight 0.3s ease; }
+        .builder-tools { 
+            width: 250px; 
+            min-width: 180px; 
+            flex-shrink: 0; 
+            background: white; 
+            border-radius: 15px; 
+            padding: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px;
+        }
         
-        .resizer { width: 15px; cursor: col-resize; display: flex; align-items: center; justify-content: center; z-index: 10; transition: 0.2s;}
-        .resizer::after { content: ''; width: 4px; height: 50px; background: #cbd5e1; border-radius: 5px; transition: 0.2s;}
-        .resizer:hover::after, .resizer.resizing::after { background: var(--secondary); height: 80px; }
+        .builder-canvas-container { 
+            flex: 1; 
+            min-width: 300px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            position: relative;
+        }
+        
+        .builder-properties { 
+            width: 340px; 
+            min-width: 250px; 
+            flex-shrink: 0; 
+            background: white; 
+            border-radius: 15px; 
+            padding: 20px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03); 
+            overflow-y: auto; 
+            display: none; 
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .builder-properties.active { 
+            display: block; 
+            animation: slideInRight 0.3s ease; 
+        }
+        
+        .resizer { 
+            width: 15px; 
+            cursor: col-resize; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 10; 
+            transition: 0.2s;
+        }
+        
+        .resizer::after { 
+            content: ''; 
+            width: 4px; 
+            height: 50px; 
+            background: #cbd5e1; 
+            border-radius: 5px; 
+            transition: 0.2s;
+        }
+        
+        .resizer:hover::after, .resizer.resizing::after { 
+            background: var(--secondary); 
+            height: 80px; 
+        }
 
-        .prop-header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .prop-header-flex h3 { font-size: 1.1rem; color: var(--primary); font-weight: 800; margin: 0; }
-        .btn-close-prop { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; color: #64748b; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .btn-close-prop:hover { background: var(--red); color: white; }
+        .prop-header-flex { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 1px solid #eee; 
+            padding-bottom: 10px; 
+            margin-bottom: 15px; 
+        }
         
-        .tool-category { font-size: 0.75rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-top: 10px; margin-bottom: 5px; border-bottom: 1px solid #f1f5f9; padding-bottom: 5px;}
-        .tool-btn { background: #f8fafc; border: 1px solid var(--border); padding: 10px 12px; border-radius: 8px; cursor: grab; font-size: 0.85rem; font-weight: 600; color: var(--primary); display: flex; align-items: center; gap: 10px; transition: 0.2s;}
-        .tool-btn:hover { border-color: var(--secondary); background: rgba(246, 178, 59, 0.1); transform: translateX(3px);}
+        .prop-header-flex h3 { 
+            font-size: 1.1rem; 
+            color: var(--primary); 
+            font-weight: 800; 
+            margin: 0; 
+        }
         
-        .canvas-area { flex: 1; background: #e2e8f0; border-radius: 15px; border: 2px dashed #cbd5e1; position: relative; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s;}
-        .canvas-area.drag-over { background: rgba(46, 204, 113, 0.1); border-color: var(--green); }
-        .preview-window { width: 100%; height: 100%; background: #fff; overflow-y: auto; position: relative; scroll-behavior: smooth;}
+        .btn-close-prop { 
+            background: #f1f5f9; 
+            border: none; 
+            width: 32px; 
+            height: 32px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            color: #64748b; 
+            transition: 0.2s; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+        }
         
-        .preview-navbar { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; z-index: 100; border-bottom: 1px solid #eee; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
-        .preview-navbar .brand { font-weight: 800; color: var(--primary); font-size: 1.2rem; display: flex; align-items: center; gap: 10px;}
-        .preview-nav-links { display: flex; gap: 20px; }
-        .preview-nav-links a { text-decoration: none; color: #64748b; font-size: 0.85rem; font-weight: 600; transition: 0.2s; }
-        .preview-nav-links a:hover { color: var(--secondary); }
+        .btn-close-prop:hover { 
+            background: var(--red); 
+            color: white; 
+        }
+        
+        .tool-category { 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            color: #94a3b8; 
+            text-transform: uppercase; 
+            margin-top: 10px; 
+            margin-bottom: 5px; 
+            border-bottom: 1px solid #f1f5f9; 
+            padding-bottom: 5px;
+        }
+        
+        .tool-btn { 
+            background: #f8fafc; 
+            border: 1px solid var(--border); 
+            padding: 10px 12px; 
+            border-radius: 8px; 
+            cursor: grab; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            color: var(--primary); 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            transition: 0.2s;
+        }
+        
+        .tool-btn:hover { 
+            border-color: var(--secondary); 
+            background: rgba(246, 178, 59, 0.1); 
+            transform: translateX(3px);
+        }
+        
+        .canvas-area { 
+            flex: 1; 
+            background: #e2e8f0; 
+            border-radius: 15px; 
+            border: 2px dashed #cbd5e1; 
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            transition: 0.3s;
+        }
+        
+        .canvas-area.drag-over { 
+            background: rgba(46, 204, 113, 0.1); 
+            border-color: var(--green); 
+        }
+        
+        .preview-window { 
+            width: 100%; 
+            height: 100%; 
+            background: #fff; 
+            overflow-y: auto; 
+            position: relative; 
+            scroll-behavior: smooth;
+        }
+        
+        .preview-navbar { 
+            position: sticky; 
+            top: 0; 
+            background: rgba(255,255,255,0.95); 
+            backdrop-filter: blur(10px); 
+            padding: 15px 30px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            z-index: 100; 
+            border-bottom: 1px solid #eee; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        }
+        
+        .preview-navbar .brand { 
+            font-weight: 800; 
+            color: var(--primary); 
+            font-size: 1.2rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
+        
+        .preview-nav-links { 
+            display: flex; 
+            gap: 20px; 
+        }
+        
+        .preview-nav-links a { 
+            text-decoration: none; 
+            color: #64748b; 
+            font-size: 0.85rem; 
+            font-weight: 600; 
+            transition: 0.2s; 
+        }
+        
+        .preview-nav-links a:hover { 
+            color: var(--secondary); 
+        }
 
-        .preview-section { position: relative; transition: 0.3s; border: 2px solid transparent; box-sizing: border-box; }
-        .preview-section::before { content: ''; position: absolute; inset: 0; background: transparent; z-index: 50; transition: 0.2s; pointer-events: none;}
-        .preview-section:hover::before { background: rgba(246, 178, 59, 0.05); }
-        .preview-section:hover { border: 2px dashed var(--secondary); cursor: pointer; }
-        .preview-section.selected { border: 2px solid var(--secondary); z-index: 51; box-shadow: 0 0 15px rgba(246, 178, 59, 0.3);}
+        .preview-section { 
+            position: relative; 
+            transition: 0.3s; 
+            border: 2px solid transparent; 
+            box-sizing: border-box; 
+        }
         
-        .preview-actions { position: absolute; top: 10px; right: 10px; background: white; padding: 5px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: none; z-index: 100; gap: 5px; }
-        .preview-section:hover .preview-actions, .preview-section.selected .preview-actions { display: flex; }
-        .preview-actions button { background: #f1f5f9; border: none; padding: 8px; border-radius: 5px; cursor: pointer; color: var(--primary); transition: 0.2s; font-size: 0.8rem;}
-        .preview-actions button:hover { background: var(--primary); color: white; }
-        .preview-actions button.del-btn:hover { background: var(--red); color: white; }
+        .preview-section::before { 
+            content: ''; 
+            position: absolute; 
+            inset: 0; 
+            background: transparent; 
+            z-index: 50; 
+            transition: 0.2s; 
+            pointer-events: none;
+        }
+        
+        .preview-section:hover::before { 
+            background: rgba(246, 178, 59, 0.05); 
+        }
+        
+        .preview-section:hover { 
+            border: 2px dashed var(--secondary); 
+            cursor: pointer; 
+        }
+        
+        .preview-section.selected { 
+            border: 2px solid var(--secondary); 
+            z-index: 51; 
+            box-shadow: 0 0 15px rgba(246, 178, 59, 0.3);
+        }
+        
+        .preview-actions { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background: white; 
+            padding: 5px; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+            display: none; 
+            z-index: 100; 
+            gap: 5px; 
+        }
+        
+        .preview-section:hover .preview-actions, 
+        .preview-section.selected .preview-actions { 
+            display: flex; 
+        }
+        
+        .preview-actions button { 
+            background: #f1f5f9; 
+            border: none; 
+            padding: 8px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            color: var(--primary); 
+            transition: 0.2s; 
+            font-size: 0.8rem;
+        }
+        
+        .preview-actions button:hover { 
+            background: var(--primary); 
+            color: white; 
+        }
+        
+        .preview-actions button.del-btn:hover { 
+            background: var(--red); 
+            color: white; 
+        }
 
         .prop-group { margin-bottom: 15px; }
         .prop-group label { display: block; font-size: 0.8rem; font-weight: 700; color: #64748b; margin-bottom: 5px;}
@@ -109,14 +579,9 @@
         .mini-rte-editor { padding: 12px; min-height: 120px; max-height: 400px; overflow-y: auto; outline: none; font-size: 0.9rem; line-height: 1.6; color: #334155; }
         .mini-rte-editor ul, .mini-rte-editor ol { padding-left: 20px; margin: 10px 0;}
 
-        /* HIERARCHY TREE ADMIN */
-        .tree-node { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: 20px; width: 100%;}
-        .tree-node::before { content: ''; position: absolute; top: -20px; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; }
-        .tree-node:first-child::before { display: none; }
-        .tree-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--theme-color); text-align: center; width: 220px; position: relative; z-index: 2;}
-        .tree-children { display: flex; justify-content: center; gap: 20px; width: 100%; position: relative; padding-top: 20px; }
-        .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 2px solid #cbd5e1; width: calc(100% - 220px); transform: translateX(-50%); }
-
+        /* DRAG AND DROP ORG TREE ADMIN */
+        .drag-over-org { background-color: #e0f2fe !important; outline: 2px dashed var(--blue); }
+        
         .pricing-card { border: 2px solid var(--secondary); border-radius: 15px; padding: 30px; text-align: center; background: linear-gradient(180deg, #fff, #fffdf8); position: relative; overflow: hidden;}
         .pricing-card .badge { position: absolute; top: 15px; right: -30px; background: var(--secondary); color: var(--primary); padding: 5px 40px; transform: rotate(45deg); font-weight: bold; font-size: 0.8rem;}
         
@@ -147,9 +612,6 @@
             .builder-wrapper:not(.builder-fullscreen) .builder-tools { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 15px;}
             .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); margin-left: 0;}
             .builder-wrapper:not(.builder-fullscreen) .resizer { display: none; }
-            .tree-children { flex-direction: column; align-items: center; }
-            .tree-children::before { display: none; }
-            .tree-node::before { display: none; }
         }
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
@@ -226,16 +688,40 @@
                 </div>
 
                 <div class="card" style="margin-top: 20px;">
-                    <h2 style="font-weight: 800; margin-bottom: 15px;"><i class="fa-solid fa-building"></i> Identitas & Logo Organisasi</h2>
-                    <div class="prop-group">
-                        <label>Nama Organisasi (Tampil di Website Publik)</label>
-                        <input type="text" id="config-org-name" placeholder="Contoh: BEM Universitas Vokasi...">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <h2 style="font-weight: 800; margin: 0;"><i class="fa-solid fa-building"></i> Identitas & Konfigurasi Global</h2>
+                        <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-save"></i> Simpan Konfigurasi</button>
                     </div>
-                    <div class="prop-group">
-                        <label>URL Logo Organisasi (Opsional)</label>
-                        <input type="url" id="config-org-logo" placeholder="https://domain.com/logo-organisasi.png">
+                    
+                    <div class="analytics-grid" style="align-items: start;">
+                        <div>
+                            <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Brand Organisasi</h3>
+                            <div class="prop-group">
+                                <label>Nama Organisasi (Tampil di Website Publik)</label>
+                                <input type="text" id="config-org-name" placeholder="Contoh: BEM Universitas Vokasi...">
+                            </div>
+                            <div class="prop-group">
+                                <label>URL Logo Organisasi (Opsional)</label>
+                                <input type="url" id="config-org-logo" placeholder="https://domain.com/logo-organisasi.png">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Informasi Footer Organisasi</h3>
+                            <div class="prop-group">
+                                <label><i class="fa-brands fa-instagram" style="color:#E1306C;"></i> Link Instagram (Opsional)</label>
+                                <input type="url" id="config-org-ig" placeholder="https://instagram.com/...">
+                            </div>
+                            <div class="prop-group">
+                                <label><i class="fa-brands fa-tiktok" style="color:#000;"></i> Link TikTok (Opsional)</label>
+                                <input type="url" id="config-org-tiktok" placeholder="https://tiktok.com/@...">
+                            </div>
+                            <div class="prop-group">
+                                <label><i class="fa-solid fa-envelope" style="color:#ea4335;"></i> Email Publik Organisasi (Opsional)</label>
+                                <input type="email" id="config-org-email" placeholder="humas@organisasi.com">
+                            </div>
+                        </div>
                     </div>
-                    <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-save"></i> Simpan Konfigurasi</button>
                 </div>
             </div>
 
@@ -306,7 +792,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
                         <h2 style="margin: 0; color: var(--primary); font-weight: 800;"><i class="fa-solid fa-sitemap"></i> Manajemen Struktur Organisasi BEM</h2>
-                        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Susun hierarki organisasi BPH, Menteri, dan Staff. Data ini akan ditampilkan otomatis di website publik.</p>
+                        <p style="font-size: 0.85rem; color: #666; margin: 5px 0 0;">Susun hierarki organisasi BPH, Menteri, dan Staff. Tarik dan lepas (Drag & Drop) baris untuk memindahkan posisi.</p>
                     </div>
                     <button class="btn-primary" onclick="saveLandingPage()"><i class="fa-solid fa-cloud-arrow-up"></i> Simpan Ke Publik</button>
                 </div>
@@ -336,13 +822,19 @@
                     </div>
 
                     <div class="card" style="overflow-x: auto;">
-                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);">Bagan Hierarki Saat Ini</h3>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 15px; color: var(--primary);">Bagan Hierarki Interaktif</h3>
                         <table style="width:100%; text-align:left; background: #f8fafc; border-radius: 8px;">
-                            <thead><tr><th>Nama & Jabatan Tersusun</th><th>Aksi</th></tr></thead>
+                            <thead ondragover="allowDropOrg(event)" ondrop="dropToRoot(event)" ondragenter="this.classList.add('drag-over-org')" ondragleave="this.classList.remove('drag-over-org')" style="transition: 0.2s;">
+                                <tr>
+                                    <th title="Tarik item ke sini untuk menjadikan Pimpinan Tertinggi"><i class="fa-solid fa-arrows-down-to-line"></i> Nama & Jabatan (Drop ke Sini untuk Posisi Tertinggi)</th>
+                                    <th style="width: 100px; text-align: center;">Aksi</th>
+                                </tr>
+                            </thead>
                             <tbody id="org-table-body">
                                 <tr><td colspan="2" style="text-align: center; padding: 20px; color: #aaa;">Belum ada hierarki.</td></tr>
                             </tbody>
                         </table>
+                        <p style="font-size: 0.75rem; color: #aaa; margin-top: 10px;"><i class="fa-solid fa-circle-info"></i> Klik dan tahan pada baris, lalu seret ke atas nama orang lain untuk menjadikannya bawahan orang tersebut.</p>
                     </div>
                 </div>
             </div>
@@ -488,7 +980,6 @@
                         </div>
                         <div id="domain-result"></div>
                     </div>
-                    <button class="btn-primary" style="font-size: 1.1rem; padding: 15px 40px; background: #000; color: #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1);"><i class="fa-brands fa-whatsapp"></i> Hubungi Tim Support Sales</button>
                 </div>
             </div>
 
@@ -548,9 +1039,15 @@
         // GLOBAL CONFIG DATA FOR PUBLIC WEB
         let globalOrgName = 'Campus Innovate';
         let globalLogoUrl = '';
+        let globalIg = '';
+        let globalTiktok = '';
+        let globalEmail = '';
         let globalOrgStructure = [];
         let globalNewsList = [];
         let globalAnnouncement = { title: '', content: '', active: 'false' };
+        
+        // DRAG AND DROP GLOBALS
+        let draggedOrgId = null;
 
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
 
@@ -609,6 +1106,9 @@
             const annStatus = document.getElementById('ann-status').value;
             const orgNameInput = document.getElementById('config-org-name').value || globalOrgName;
             const orgLogoInput = document.getElementById('config-org-logo').value || '';
+            const igInput = document.getElementById('config-org-ig').value || '';
+            const tiktokInput = document.getElementById('config-org-tiktok').value || '';
+            const emailInput = document.getElementById('config-org-email').value || '';
 
             if(layoutBlocks.length === 0 && globalOrgStructure.length === 0 && globalNewsList.length === 0) {
                 return showToast("Data Kosong! Tambahkan setidaknya 1 blok desain/data.", "error");
@@ -628,6 +1128,9 @@
                 document.getElementById('sidebar-workspace-name').innerText = orgNameInput;
             }
             globalLogoUrl = orgLogoInput;
+            globalIg = igInput;
+            globalTiktok = tiktokInput;
+            globalEmail = emailInput;
 
             // Bundle Global Config Data into Layout Blocks payload safely
             const configBlock = {
@@ -637,7 +1140,8 @@
                 logoUrl: globalLogoUrl,
                 orgStructure: globalOrgStructure,
                 newsData: globalNewsList,
-                announcementData: { title: annTitle, content: annContent, active: annStatus }
+                announcementData: { title: annTitle, content: annContent, active: annStatus },
+                footerData: { ig: globalIg, tiktok: globalTiktok, email: globalEmail }
             };
             
             let cleanLayout = layoutBlocks.filter(b => b.type !== 'global_data_config');
@@ -683,13 +1187,14 @@
 
             setTimeout(() => {
                 let basePrice = 0;
-                if(ext === '.com') basePrice = 30000;
-                else if(ext === '.id') basePrice = 40000;
-                else if(ext === '.or.id') basePrice = 25000;
-                else if(ext === '.ac.id') basePrice = 20000;
-                else if(ext === '.my.id') basePrice = 10000;
+                // Pricing Markup requested
+                if(ext === '.com') basePrice = 315000;
+                else if(ext === '.id') basePrice = 350000;
+                else if(ext === '.ac.id') basePrice = 320000;
+                else if(ext === '.or.id') basePrice = 150000;
+                else if(ext === '.my.id') basePrice = 50000;
 
-                let lengthModifier = Math.max(0, 15 - inputName.length) * 1200;
+                let lengthModifier = Math.max(0, 15 - inputName.length) * 5000;
                 let finalPrice = basePrice + lengthModifier;
 
                 const commonNames = ['bem', 'dema', 'kampus', 'univ', 'organisasi'];
@@ -700,9 +1205,9 @@
                         <div><strong style="color: #b91c1c; font-size: 1.1rem;">${inputName}${ext}</strong><div style="font-size: 0.85rem; color: #7f1d1d; margin-top: 5px;">Domain sudah tidak tersedia (Digunakan).</div></div>
                         <i class="fa-solid fa-circle-xmark" style="color: #ef4444; font-size: 1.5rem;"></i></div>`;
                 } else {
-                    resultContainer.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #4ade80; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease;">
-                        <div><strong style="color: #166534; font-size: 1.1rem;">${inputName}${ext}</strong><div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">Tersedia! Est. Harga Promo: <b>${formatRp(finalPrice)}</b> / thn</div></div>
-                        <button class="btn-primary" style="padding: 8px 15px; font-size: 0.85rem;" onclick="showToast('Permintaan klaim domain dikirim ke Tim Support.', 'success')"><i class="fa-solid fa-cart-shopping"></i> Klaim</button></div>`;
+                    resultContainer.innerHTML = `<div style="background: #f0fdf4; border: 1px solid #4ade80; padding: 15px; border-radius: 8px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; animation: fadeIn 0.3s ease; flex-wrap:wrap; gap:10px;">
+                        <div><strong style="color: #166534; font-size: 1.1rem;">${inputName}${ext}</strong><div style="font-size: 0.85rem; color: #15803d; margin-top: 5px;">Tersedia! Est. Harga: <b>${formatRp(finalPrice)}</b> / thn</div></div>
+                        <div style="font-size: 0.85rem; color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 5px; font-weight: bold;"><i class="fa-solid fa-headset"></i> Silakan hubungi Tim Support Sales untuk klaim</div></div>`;
                 }
                 btn.innerHTML = 'Periksa'; btn.disabled = false;
             }, 800);
@@ -871,8 +1376,17 @@
                 document.getElementById('online-count-badge').innerText = count; renderMembersTable();
             }).on('presence', { event: 'join' }, ({ newPresences }) => { 
                 newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); }); 
-            }).on('presence', { event: 'leave' }, () => { 
-                setTimeout(loadMembers, 2000); 
+            }).on('presence', { event: 'leave' }, ({ leftPresences }) => { 
+                // Fix Bug Tracking: Segera update timestamp last_seen secara lokal dan simpan ke DB UI jika memungkinkan
+                const nowIso = new Date().toISOString();
+                leftPresences.forEach(p => {
+                    const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
+                    if(idx !== -1) {
+                        allMembersData[idx].last_seen = nowIso;
+                    }
+                });
+                renderMembersTable();
+                setTimeout(loadMembers, 2500); // Reload untuk memastikan sync dari database 
             })
             .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
 
@@ -907,9 +1421,15 @@
                     globalOrgStructure = configBlock.orgStructure || [];
                     globalNewsList = configBlock.newsData || [];
                     globalAnnouncement = configBlock.announcementData || { title: '', content: '', active: 'false' };
+                    globalIg = configBlock.footerData?.ig || '';
+                    globalTiktok = configBlock.footerData?.tiktok || '';
+                    globalEmail = configBlock.footerData?.email || '';
                     
                     document.getElementById('config-org-name').value = globalOrgName;
                     document.getElementById('config-org-logo').value = globalLogoUrl;
+                    document.getElementById('config-org-ig').value = globalIg;
+                    document.getElementById('config-org-tiktok').value = globalTiktok;
+                    document.getElementById('config-org-email').value = globalEmail;
                     document.getElementById('ann-title').value = globalAnnouncement.title;
                     document.getElementById('ann-content').innerHTML = globalAnnouncement.content;
                     document.getElementById('ann-status').value = globalAnnouncement.active;
@@ -937,7 +1457,51 @@
             renderNewsList();
         }
 
-        // --- ORG STRUCTURE LOGIC (HIERARCHY) ---
+        // --- ORG STRUCTURE LOGIC (HIERARCHY WITH DRAG AND DROP) ---
+        function dragOrg(e, id) {
+            draggedOrgId = id;
+            e.dataTransfer.effectAllowed = "move";
+        }
+        function allowDropOrg(e) {
+            e.preventDefault();
+        }
+        function dropOrg(e, targetId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over-org');
+            if(draggedOrgId === targetId) return;
+
+            const draggedNode = globalOrgStructure.find(o => o.id === draggedOrgId);
+            if(draggedNode) {
+                if (isDescendant(draggedOrgId, targetId)) {
+                    showToast("Tidak bisa memindahkan atasan ke bawahannya sendiri!", "error");
+                    return;
+                }
+                draggedNode.parentId = targetId;
+                renderOrgTable();
+                showToast("Struktur diubah! Klik Simpan Ke Publik untuk menyimpan secara online.", "info");
+            }
+        }
+        function dropToRoot(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over-org');
+            if(!draggedOrgId) return;
+            const draggedNode = globalOrgStructure.find(o => o.id === draggedOrgId);
+            if(draggedNode) {
+                draggedNode.parentId = null;
+                renderOrgTable();
+                showToast("Dipindah ke tingkat Pimpinan Tertinggi.", "info");
+            }
+        }
+        function isDescendant(parentId, childId) {
+            if(!childId) return false;
+            let current = globalOrgStructure.find(o => o.id === childId);
+            while(current && current.parentId) {
+                if(current.parentId === parentId) return true;
+                current = globalOrgStructure.find(o => o.id === current.parentId);
+            }
+            return false;
+        }
+
         function addOrgMember(e) {
             e.preventDefault();
             const uId = document.getElementById('org-user-select').value;
@@ -986,11 +1550,12 @@
             children.forEach(child => {
                 const indent = level * 25;
                 html += `
-                    <tr>
-                        <td style="padding-left: ${15 + indent}px; border-bottom: 1px solid #eee;">
+                    <tr draggable="true" ondragstart="dragOrg(event, '${child.id}')" ondragover="allowDropOrg(event)" ondrop="dropOrg(event, '${child.id}')" ondragenter="this.classList.add('drag-over-org')" ondragleave="this.classList.remove('drag-over-org')" style="transition:0.2s;">
+                        <td style="padding-left: ${15 + indent}px; border-bottom: 1px solid #eee; cursor: grab;">
+                            <i class="fa-solid fa-grip-vertical" style="color:#cbd5e1; margin-right:10px;"></i>
                             ${level > 0 ? '<i class="fa-solid fa-arrow-turn-up fa-rotate-90" style="color:#cbd5e1; margin-right:8px;"></i>' : ''}
                             <strong style="color:var(--primary);">${escapeHtml(child.name)}</strong>
-                            <div style="font-size:0.8rem; color:#666; margin-top:3px; padding-left:${level > 0 ? 20 : 0}px;">${escapeHtml(child.role)}</div>
+                            <div style="font-size:0.8rem; color:#666; margin-top:3px; padding-left:${level > 0 ? 35 : 20}px;">${escapeHtml(child.role)}</div>
                         </td>
                         <td style="text-align: right; border-bottom: 1px solid #eee;">
                             <button class="btn-danger btn-sm" onclick="deleteOrgMember('${child.id}')" title="Hapus"><i class="fa-solid fa-trash"></i></button>
