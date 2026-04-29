@@ -31,6 +31,7 @@
         #global-announcement { display: none; background: linear-gradient(90deg, #e67e22, #d35400); color: white; padding: 12px 40px; text-align: center; position: relative; z-index: 1001; animation: slideDown 0.5s ease; box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);}
         #global-announcement strong { font-weight: 800; font-size: 1.05rem; display: block; margin-bottom: 2px;}
         #global-announcement p { font-size: 0.9rem; margin: 0; opacity: 0.95;}
+        #global-announcement p ul, #global-announcement p ol { text-align: left; padding-left: 20px; margin-top: 5px; }
         #close-ann { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.2); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
         #close-ann:hover { background: rgba(255,255,255,0.4); transform: translateY(-50%) rotate(90deg); }
 
@@ -75,6 +76,7 @@
         .tree-avatar { width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #cbd5e1; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.06);}
         .tree-name { font-weight: 800; font-size: 1.15rem; color: var(--theme-color); margin-bottom: 5px; line-height: 1.3;}
         .tree-role { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+        .member-parent { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.7rem; padding: 4px 15px; border-radius: 20px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 10px rgba(246, 178, 59, 0.4); display: none;}
         
         .tree-children { display: flex; justify-content: center; gap: 30px; width: 100%; position: relative; padding-top: 30px; }
         .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 3px solid #cbd5e1; width: calc(100% - 260px); transform: translateX(-50%); }
@@ -82,7 +84,7 @@
         /* WIDGETS KEUANGAN & KPI */
         .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
         .stat-card { background: white; padding: 35px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; transition: 0.3s;}
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
+        .stat-card:hover { transform: scale(1.02); }
         .stat-card .amount { font-size: 2.8rem; font-weight: 800; color: var(--theme-color); letter-spacing: -1px; }
         
         .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 25px; }
@@ -107,7 +109,7 @@
         .news-grid { display: grid; gap: 30px; }
         .news-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.04); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; height: 100%; display: flex; flex-direction: column; border: 1px solid transparent;}
         .news-card:hover { transform: translateY(-10px); box-shadow: 0 20px 50px rgba(0,0,0,0.1); border-color: var(--secondary); }
-        .news-image { height: 220px; background-color: #e2e8f0; background-size: cover; background-position: center; transition: 0.5s; position: relative;}
+        .news-image { height: 240px; background-color: #e2e8f0; background-size: cover; background-position: center; transition: 0.5s; position: relative;}
         .news-image::after { content: '\f06e  Baca Selengkapnya'; font-family: 'Font Awesome 6 Free', 'Plus Jakarta Sans'; font-weight: 900; position: absolute; inset: 0; background: rgba(10,48,85,0.6); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; opacity: 0; transition: 0.3s; }
         .news-card:hover .news-image { transform: scale(1.05); }
         .news-card:hover .news-image::after { opacity: 1; }
@@ -116,7 +118,9 @@
         .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.08); padding: 6px 15px; border-radius: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start; letter-spacing: 0.5px;}
         .news-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; line-height: 1.4; color: var(--theme-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: 0.3s;}
         .news-card:hover .news-title { color: var(--secondary); }
+        /* RTE Supported News Desc */
         .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;}
+        .news-desc ul, .news-desc ol { padding-left: 20px; margin-top: 5px;}
 
         /* NEWS MODAL (POPUP WIDER & NEATER) */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; }
@@ -133,8 +137,10 @@
         .modal-close { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s; z-index: 2; display: flex; align-items: center; justify-content: center;}
         .modal-close:hover { background: var(--red); transform: rotate(90deg) scale(1.1);}
         
+        /* RTE Supported Modal Body */
         .modal-body { padding: 40px 50px; overflow-y: auto; flex-grow: 1; font-size: 1.1rem; line-height: 1.9; color: #334155;}
         .modal-body p { margin-bottom: 15px; }
+        .modal-body ul, .modal-body ol { padding-left: 20px; margin-bottom: 15px; }
 
         /* LOADING & FOOTER */
         .loader-screen { position: fixed; inset:0; background:var(--bg-body); z-index: 99999; display:flex; flex-direction:column; align-items:center; justify-content:center; transition: 0.5s ease; }
@@ -198,7 +204,7 @@
 
     <div id="global-announcement">
         <strong id="ann-title">Pengumuman</strong>
-        <p id="ann-desc">Deskripsi pengumuman.</p>
+        <div id="ann-desc">Deskripsi pengumuman.</div>
         <button id="close-ann" onclick="document.getElementById('global-announcement').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
@@ -208,11 +214,10 @@
         <div class="page-container">
             <h3 style="color: white; margin-bottom: 15px; font-weight: 800; font-size: 1.8rem;" id="footer-org-name">Campus Innovate</h3>
             <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus secara real-time.</p>
-            <div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
-                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-instagram"></i></a>
-                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-youtube"></i></a>
-                <a href="#" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-solid fa-envelope"></i></a>
-            </div>
+            
+            <div id="footer-social-links" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
+                </div>
+            
             <p style="margin-top: 40px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi. Powered by Campus Innovate Workspace.</p>
         </div>
     </footer>
@@ -315,8 +320,9 @@
             document.getElementById('modal-img').style.backgroundImage = `url('${escapeHtml(news.img)}')`;
             document.getElementById('modal-date').innerText = news.date;
             document.getElementById('modal-title').innerText = news.title;
-            // Handle new lines & keep original rich text tags
-            document.getElementById('modal-desc').innerHTML = escapeHtml(news.desc).replace(/\n/g, '<br>');
+            
+            // Render the raw HTML from the Rich Text Editor
+            document.getElementById('modal-desc').innerHTML = news.desc;
             
             document.getElementById('newsModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -380,6 +386,10 @@
                 let orgStructureData = [];
                 let announcementData = null;
                 let logoUrl = '';
+                
+                let globalIg = '';
+                let globalTiktok = '';
+                let globalEmail = '';
 
                 // EXTRACT GLOBAL CONFIG DATA
                 const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
@@ -389,9 +399,31 @@
                     orgStructureData = configBlock.orgStructure || [];
                     globalNewsData = configBlock.newsData || [];
                     announcementData = configBlock.announcementData;
+                    
+                    // Ekstrak data footer
+                    globalIg = configBlock.footerData?.ig || '';
+                    globalTiktok = configBlock.footerData?.tiktok || '';
+                    globalEmail = configBlock.footerData?.email || '';
                 }
 
+                // Terapkan nama organisasi ke footer
                 document.getElementById('footer-org-name').innerText = orgName;
+                
+                // Terapkan Link Media Sosial ke Footer
+                let socialHtml = '';
+                if (globalIg) socialHtml += `<a href="${escapeHtml(globalIg)}" target="_blank" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-instagram"></i></a>`;
+                if (globalTiktok) socialHtml += `<a href="${escapeHtml(globalTiktok)}" target="_blank" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-tiktok"></i></a>`;
+                if (globalEmail) socialHtml += `<a href="mailto:${escapeHtml(globalEmail)}" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-solid fa-envelope"></i></a>`;
+                
+                const socialContainer = document.getElementById('footer-social-links');
+                if(socialContainer) {
+                    if(socialHtml) {
+                        socialContainer.innerHTML = socialHtml;
+                        socialContainer.style.display = 'flex';
+                    } else {
+                        socialContainer.style.display = 'none';
+                    }
+                }
 
                 // Filter UI blocks
                 let blocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
@@ -539,15 +571,16 @@
                                 </div>
                             </div>`;
                         
+                        // Fetch data directly from internal DB to keep it auto-syncing
                         supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single().then(({data: fData}) => {
                             let total = fData ? parseFloat(fData.total_rab) : 0; 
                             let real = fData ? parseFloat(fData.realisasi_rab) : 0;
                             
                             let v1 = document.getElementById(`fin-rab-${i}`); 
-                            if(v1) { v1.innerText = formatRp(total); }
+                            if(v1) v1.innerText = formatRp(total);
                             
                             let v2 = document.getElementById(`fin-real-${i}`); 
-                            if(v2) { v2.innerText = formatRp(real); }
+                            if(v2) v2.innerText = formatRp(real);
                             
                             let ctx = document.getElementById(`chart-fin-${i}`);
                             if(ctx) {
