@@ -23,26 +23,17 @@
         
         body { 
             background: linear-gradient(135deg, var(--bg) 0%, #d5e1ef 100%);
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            min-height: 100vh; 
-            overflow-x: hidden; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; overflow-x: hidden; 
         }
         
         /* TOAST NOTIFICATION SYSTEM */
         #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 15px; }
         .toast { 
-            background: var(--white); 
-            border-left: 5px solid var(--primary); 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-            padding: 15px 20px; 
-            border-radius: 8px; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            min-width: 300px; 
-            transform: translateX(120%);
+            background: var(--white); border-left: 5px solid var(--primary); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); padding: 15px 20px; 
+            border-radius: 8px; display: flex; align-items: center; gap: 15px; 
+            min-width: 300px; transform: translateX(120%);
             animation: slideInToast 0.4s forwards, fadeOutToast 0.4s forwards 3.6s; 
         }
         .toast.error { border-left-color: var(--error); }
@@ -59,130 +50,55 @@
 
         /* MAIN CONTAINER */
         .auth-container { 
-            display: flex; 
-            width: 90%; 
-            max-width: 1050px; 
-            min-height: 600px; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-radius: 20px; 
-            box-shadow: 0 25px 50px rgba(10, 48, 85, 0.15); 
-            overflow: hidden; 
+            display: flex; width: 90%; max-width: 1050px; min-height: 650px; 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
+            border-radius: 20px; box-shadow: 0 25px 50px rgba(10, 48, 85, 0.15); 
+            overflow: hidden; margin: 40px 0;
         }
         
         /* LEFT PANEL (BRAND) */
         .brand-panel { 
-            flex: 1; 
-            background: linear-gradient(145deg, var(--primary), #1a497d); 
-            color: white; 
-            padding: 50px; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            position: relative; 
-            overflow: hidden;
+            flex: 1; background: linear-gradient(145deg, var(--primary), #1a497d); 
+            color: white; padding: 50px; display: flex; flex-direction: column; 
+            justify-content: center; position: relative; overflow: hidden;
         }
         .brand-panel h1 { font-size: 3.2rem; line-height: 1.2; margin-bottom: 15px; z-index: 2; position: relative;}
         .brand-panel h1 span { color: var(--secondary); }
-        
-        /* Typography untuk Deskripsi ERP */
-        .brand-panel p { 
-            color: rgba(255,255,255,0.9); 
-            z-index: 2; 
-            font-size: 1.05rem; 
-            line-height: 1.7; 
-            position: relative;
-            text-align: justify;
-        }
+        .brand-panel p { color: rgba(255,255,255,0.9); z-index: 2; font-size: 1.05rem; line-height: 1.7; position: relative; text-align: justify;}
         .brand-panel p strong { color: var(--secondary); font-weight: 600; }
         
-        /* Logo Custom & Efek Nyaru */
-        .floating-logo { 
-            max-width: 160px; 
-            height: auto; 
-            margin-bottom: 30px; 
-            z-index: 2; 
-            position: relative; 
-            animation: float 3s ease-in-out infinite; 
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); /* Efek glow/bayangan halus agar menyatu */
-        }
-
-        /* Dekorasi Lingkaran Animasi */
+        .floating-logo { max-width: 160px; height: auto; margin-bottom: 30px; z-index: 2; position: relative; animation: float 3s ease-in-out infinite; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
         .circle { position: absolute; border-radius: 50%; background: linear-gradient(135deg, rgba(246,178,59,0.15), transparent); z-index: 1;}
         .circle-1 { width: 350px; height: 350px; top: -80px; right: -80px; animation: pulse 6s infinite alternate; }
         .circle-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; animation: pulse 4s infinite alternate-reverse; }
 
         /* RIGHT PANEL (FORM) */
-        .form-panel { 
-            flex: 1.2; 
-            padding: 40px; 
-            position: relative; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
+        .form-panel { flex: 1.2; padding: 40px; position: relative; display: flex; align-items: center; justify-content: center; overflow-y: auto;}
         
-        .form-wrapper { 
-            width: 100%; 
-            max-width: 380px; 
-            position: absolute; 
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
-            opacity: 0; 
-            visibility: hidden; 
-            transform: translateX(50px);
-        }
-        .form-wrapper.active { 
-            opacity: 1; 
-            visibility: visible; 
-            z-index: 10; 
-            transform: translateX(0);
-        }
-        .form-wrapper.exit {
-            transform: translateX(-50px);
-        }
+        .form-wrapper { width: 100%; max-width: 400px; position: absolute; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; visibility: hidden; transform: translateX(50px);}
+        .form-wrapper.active { opacity: 1; visibility: visible; z-index: 10; transform: translateX(0); position: relative;}
+        .form-wrapper.exit { transform: translateX(-50px); position: absolute;}
         
         .form-wrapper h2 { color: var(--primary); margin-bottom: 5px; font-size: 1.8rem; }
         .form-wrapper p.subtitle { color: #777; margin-bottom: 30px; font-size: 0.95rem; }
         
-        .input-group { position: relative; margin-bottom: 20px; }
+        .input-group { position: relative; margin-bottom: 15px; }
         .input-group i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: #aaa; transition: 0.3s; }
         .input-group input { width: 100%; padding: 14px 15px 14px 50px; border: 2px solid #e1e8ed; border-radius: 12px; font-size: 0.95rem; outline: none; transition: 0.3s; background: #fafbfc;}
         .input-group input:focus { border-color: var(--secondary); background: white; box-shadow: 0 0 0 4px rgba(246, 178, 59, 0.1);}
         .input-group input:focus + i { color: var(--secondary); }
         
-        /* Role Selection Styling Modern */
-        .role-selection { display: flex; gap: 15px; margin-bottom: 25px; background: #f4f7fa; padding: 5px; border-radius: 12px; }
-        .role-option { flex: 1; position: relative; }
-        .role-option input[type="radio"] { display: none; }
-        .role-option label { 
-            display: block; 
-            text-align: center; 
-            padding: 10px; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-size: 0.85rem; 
-            font-weight: 600; 
-            color: #777; 
-            transition: 0.3s;
-        }
-        .role-option input[type="radio"]:checked + label { background: var(--white); color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .captcha-box { display: flex; align-items: center; gap: 10px; background: #f4f7fa; padding: 10px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #e1e8ed;}
+        .captcha-text { font-weight: bold; font-size: 1.1rem; color: var(--primary); letter-spacing: 2px; background: rgba(246, 178, 59, 0.2); padding: 5px 15px; border-radius: 8px;}
+        .captcha-box input { flex: 1; padding: 10px; border: 2px solid #e1e8ed; border-radius: 8px; outline: none; font-size: 1rem;}
+        .captcha-box input:focus { border-color: var(--primary); }
 
-        .btn-primary { 
-            width: 100%; 
-            padding: 14px; 
-            background: var(--secondary); 
-            color: var(--primary); 
-            border: none; 
-            border-radius: 12px; 
-            font-weight: 700; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            font-size: 1rem; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 10px;
-        }
+        .tc-box { margin-bottom: 25px; font-size: 0.85rem; color: #555; display: flex; align-items: flex-start; gap: 10px;}
+        .tc-box input { margin-top: 3px; cursor: pointer;}
+        .tc-box span { color: var(--primary); font-weight: bold; cursor: pointer; text-decoration: underline;}
+        .tc-box span:hover { color: var(--secondary); }
+
+        .btn-primary { width: 100%; padding: 14px; background: var(--secondary); color: var(--primary); border: none; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 10px;}
         .btn-primary:hover { background: #e0a235; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(246, 178, 59, 0.3); }
         .btn-primary:active { transform: translateY(0); }
         .btn-primary:disabled { background: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
@@ -191,21 +107,24 @@
         .switch-text span { color: var(--primary); font-weight: 700; cursor: pointer; transition: 0.3s; }
         .switch-text span:hover { color: var(--secondary); text-decoration: underline; }
 
+        /* MODAL T&C */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.3s; z-index: 10000; }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--white); width: 90%; max-width: 500px; border-radius: 20px; padding: 30px; transform: translateY(30px) scale(0.9); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 25px 50px rgba(0,0,0,0.2); max-height: 80vh; overflow-y: auto;}
+        .modal-overlay.active .modal-content { transform: translateY(0) scale(1); }
+        .modal-content h3 { color: var(--primary); margin-bottom: 15px; font-size: 1.3rem;}
+        .modal-content p { font-size: 0.9rem; color: #555; line-height: 1.6; margin-bottom: 15px;}
+        
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
         @keyframes pulse { 0% { transform: scale(1); opacity: 0.8;} 100% { transform: scale(1.1); opacity: 0.4;} }
 
-        /* RESPONSIVE MOBILE VIEW */
         @media (max-width: 768px) {
             body { align-items: flex-start; padding: 20px 0; }
-            .auth-container { flex-direction: column; width: 95%; min-height: auto; border-radius: 15px;}
-            
+            .auth-container { flex-direction: column; width: 95%; min-height: auto; border-radius: 15px; margin: 0;}
             .brand-panel { padding: 40px 20px; text-align: center; align-items: center; border-radius: 15px 15px 0 0; }
-            .floating-logo { max-width: 120px; margin-bottom: 20px; }
-            .brand-panel h1 { font-size: 2.4rem; margin-bottom: 10px; }
-            .brand-panel p { font-size: 0.95rem; text-align: center; }
-            
-            .form-panel { padding: 40px 20px; min-height: 480px; }
-            .form-wrapper { padding: 0 10px; max-width: 100%; }
+            .form-panel { padding: 40px 20px; min-height: auto; overflow: visible;}
+            .form-wrapper { position: relative; opacity: 1; visibility: visible; transform: none; display: none;}
+            .form-wrapper.active { display: block; }
         }
     </style>
 </head>
@@ -213,19 +132,27 @@
 
     <div id="toast-container"></div>
 
+    <div class="modal-overlay" id="tcModal">
+        <div class="modal-content">
+            <h3>Syarat & Ketentuan Penggunaan</h3>
+            <p>1. <b>Penggunaan Data:</b> Dengan mengajukan akun, Anda menyetujui bahwa data organisasi Anda akan disimpan dengan aman dalam sistem Campus Innovate.</p>
+            <p>2. <b>Tanggung Jawab:</b> Anda bertanggung jawab penuh atas kebenaran informasi yang diberikan. Pemalsuan identitas organisasi dapat menyebabkan penolakan atau penghapusan akses permanen.</p>
+            <p>3. <b>Persetujuan Admin:</b> Akses ke dalam sistem ERP ini membutuhkan verifikasi manual oleh Super Admin. Proses ini bisa memakan waktu 1x24 Jam.</p>
+            <p>4. <b>Keamanan Akun:</b> Setelah disetujui, link verifikasi akan dikirimkan ke Email Anda. Jangan bagikan link tersebut kepada siapa pun.</p>
+            <button class="btn-primary" style="margin-top: 15px;" onclick="closeTcModal()">Saya Mengerti</button>
+        </div>
+    </div>
+
     <div class="auth-container">
         <div class="brand-panel">
             <div class="circle circle-1"></div>
             <div class="circle circle-2"></div>
-            
             <img src="logo-campus-innovate.webp" alt="Logo Campus Innovate" class="floating-logo" onerror="this.onerror=null; this.outerHTML='<i class=\'fa-solid fa-layer-group floating-icon\' style=\'font-size: 3.5rem; color: var(--secondary); margin-bottom: 25px; z-index: 2; position: relative; animation: float 3s ease-in-out infinite;\'></i>';">
-            
             <h1>Campus <br><span>Innovate</span></h1>
             <p>Platform <strong>Enterprise Resource Planning (ERP)</strong> & Workspace Terpadu. Kelola RAB, operasional, absensi, hingga administrasi digital secara otomatis dalam satu ekosistem cerdas.</p>
         </div>
 
         <div class="form-panel">
-            
             <div class="form-wrapper active" id="login-form">
                 <h2>Selamat Datang 👋</h2>
                 <p class="subtitle">Masuk untuk mengakses ruang kerja Anda.</p>
@@ -243,40 +170,44 @@
                         <i class="fa-solid fa-arrow-right" id="login-icon"></i>
                     </button>
                 </form>
-                <p class="switch-text">Belum punya akun? <span onclick="switchForm('register')">Daftar Akun Baru</span></p>
+                <p class="switch-text">Belum punya akses? <span onclick="switchForm('register')">Ajukan Akun</span></p>
             </div>
 
             <div class="form-wrapper" id="register-form">
-                <h2>Buat Akun Baru 🚀</h2>
-                <p class="subtitle">Daftarkan diri Anda untuk memulai kolaborasi.</p>
-                <form onsubmit="handleRegister(event)">
+                <h2>Pengajuan Akses 🚀</h2>
+                <p class="subtitle">Daftarkan organisasi Anda untuk ditinjau oleh Admin.</p>
+                <form onsubmit="submitRegistrationRequest(event)">
                     
-                    <div class="role-selection">
-                        <div class="role-option" title="Dapat membuat Ruang Kerja (Workspace) baru">
-                            <input type="radio" id="role-admin" name="userRole" value="admin" checked>
-                            <label for="role-admin"><i class="fa-solid fa-building-user"></i> Admin</label>
-                        </div>
-                        <div class="role-option" title="Dapat bergabung ke Ruang Kerja yang sudah ada">
-                            <input type="radio" id="role-user" name="userRole" value="user">
-                            <label for="role-user"><i class="fa-solid fa-users"></i> Anggota</label>
-                        </div>
-                    </div>
-
                     <div class="input-group">
                         <i class="fa-solid fa-user"></i>
-                        <input type="text" id="reg-name" placeholder="Nama Lengkap" required autocomplete="name">
+                        <input type="text" id="req-name" placeholder="Nama Lengkap Penanggung Jawab" required autocomplete="name">
+                    </div>
+                    <div class="input-group">
+                        <i class="fa-solid fa-calendar-day"></i>
+                        <input type="text" id="req-dob" placeholder="Tempat, Tanggal Lahir (Contoh: Bogor, 12 Mei 2001)" required>
                     </div>
                     <div class="input-group">
                         <i class="fa-solid fa-envelope"></i>
-                        <input type="email" id="reg-email" placeholder="Alamat Email" required autocomplete="email">
+                        <input type="email" id="req-email" placeholder="Alamat Email Instansi/Pribadi" required autocomplete="email">
                     </div>
                     <div class="input-group">
-                        <i class="fa-solid fa-lock"></i>
-                        <input type="password" id="reg-password" placeholder="Buat Kata Sandi (Min. 6 Karakter)" required autocomplete="new-password" minlength="6">
+                        <i class="fa-solid fa-building"></i>
+                        <input type="text" id="req-org" placeholder="Nama Organisasi (BEM/DEMA/UKM...)" required>
                     </div>
+
+                    <div class="captcha-box">
+                        <div class="captcha-text" id="captcha-question">5 + 3 =</div>
+                        <input type="number" id="captcha-answer" placeholder="Jawaban" required>
+                    </div>
+
+                    <div class="tc-box">
+                        <input type="checkbox" id="tc-check" required>
+                        <label for="tc-check">Saya setuju dengan <span onclick="openTcModal()">Syarat & Ketentuan</span> yang berlaku.</label>
+                    </div>
+
                     <button type="submit" class="btn-primary" id="btn-register">
-                        <span id="reg-text">Daftar Sekarang</span>
-                        <i class="fa-solid fa-user-plus" id="reg-icon"></i>
+                        <span id="reg-text">Kirim Pengajuan</span>
+                        <i class="fa-solid fa-paper-plane" id="reg-icon"></i>
                     </button>
                 </form>
                 <p class="switch-text">Sudah punya akun? <span onclick="switchForm('login')">Masuk di sini</span></p>
@@ -286,19 +217,29 @@
     </div>
 
     <script>
-        // 1. KONEKSI SUPABASE
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // 2. SISTEM NOTIFIKASI TOAST (Pengganti Alert)
+        let captchaAnswer = 0;
+
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            captchaAnswer = num1 + num2;
+            document.getElementById('captcha-question').innerText = `${num1} + ${num2} = ?`;
+            document.getElementById('captcha-answer').value = '';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCaptcha();
+        });
+
         function showToast(title, message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             toast.className = `toast ${type}`;
-            
             let icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
-            
             toast.innerHTML = `
                 <i class="fa-solid ${icon}"></i>
                 <div class="toast-content">
@@ -307,50 +248,40 @@
                 </div>
             `;
             container.appendChild(toast);
-            
-            // Hapus elemen setelah animasi selesai (4 detik)
             setTimeout(() => { toast.remove(); }, 4000);
         }
 
-        // 3. FUNGSI TRANSISI FORM UI (Animasi Sliding)
         function switchForm(target) {
             const loginForm = document.getElementById('login-form');
             const registerForm = document.getElementById('register-form');
             
+            if(window.innerWidth <= 768) {
+                if(target === 'register') { loginForm.classList.remove('active'); registerForm.classList.add('active'); generateCaptcha(); } 
+                else { registerForm.classList.remove('active'); loginForm.classList.add('active'); }
+                return;
+            }
+
             if (target === 'register') {
-                loginForm.classList.remove('active');
-                loginForm.classList.add('exit');
-                setTimeout(() => {
-                    registerForm.classList.remove('exit');
-                    registerForm.classList.add('active');
-                }, 100);
+                generateCaptcha();
+                loginForm.classList.remove('active'); loginForm.classList.add('exit');
+                setTimeout(() => { registerForm.classList.remove('exit'); registerForm.classList.add('active'); }, 100);
             } else {
-                registerForm.classList.remove('active');
-                registerForm.classList.add('exit');
-                setTimeout(() => {
-                    loginForm.classList.remove('exit');
-                    loginForm.classList.add('active');
-                }, 100);
+                registerForm.classList.remove('active'); registerForm.classList.add('exit');
+                setTimeout(() => { loginForm.classList.remove('exit'); loginForm.classList.add('active'); }, 100);
             }
         }
 
-        // 4. FUNGSI LOGIN
+        function openTcModal() { document.getElementById('tcModal').classList.add('active'); }
+        function closeTcModal() { document.getElementById('tcModal').classList.remove('active'); }
+
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
-            
-            // Elemen Tombol UI
-            const btn = document.getElementById('btn-login');
-            const btnText = document.getElementById('login-text');
-            const btnIcon = document.getElementById('login-icon');
+            const btn = document.getElementById('btn-login'); const btnText = document.getElementById('login-text'); const btnIcon = document.getElementById('login-icon');
 
-            // Loading State
-            btn.disabled = true;
-            btnText.innerText = "Mengecek otoritas...";
-            btnIcon.className = "fa-solid fa-spinner fa-spin";
+            btn.disabled = true; btnText.innerText = "Mengecek otoritas..."; btnIcon.className = "fa-solid fa-spinner fa-spin";
 
-            // Proses Autentikasi
             const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
 
             if (authError) {
@@ -359,92 +290,69 @@
                 return;
             }
 
-            // Pengecekan Role di tabel user_roles
-            const { data: roleData, error: roleError } = await supabaseClient
-                .from('user_roles')
-                .select('role')
-                .eq('user_id', authData.user.id)
-                .single();
+            const { data: roleData, error: roleError } = await supabaseClient.from('user_roles').select('role').eq('user_id', authData.user.id).single();
 
             if (roleError || !roleData) {
-                showToast("Akses Ditolak", "Role Anda belum diatur oleh sistem.", "error");
+                showToast("Akses Ditolak", "Akun Anda belum disetujui atau role belum diatur.", "error");
                 await supabaseClient.auth.signOut();
                 resetButtonState(btn, btnText, btnIcon, "Masuk ke Sistem", "fa-solid fa-arrow-right");
                 return;
             }
 
             showToast("Berhasil Masuk", "Mengalihkan ke dashboard...", "success");
-
-            // ROUTING BERDASARKAN ROLE
             setTimeout(() => {
                 const userRole = roleData.role;
-                if (userRole === 'superadmin') {
-                    window.location.href = 'superadmin.html';
-                } else if (userRole === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'user-hub.html'; 
-                }
+                if (userRole === 'superadmin') window.location.href = 'superadmin.html';
+                else if (userRole === 'admin') window.location.href = 'admin.html';
+                else window.location.href = 'user-hub.html'; 
             }, 1500);
         }
 
-        // 5. FUNGSI REGISTER
-        async function handleRegister(e) {
+        async function submitRegistrationRequest(e) {
             e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const selectedRole = document.querySelector('input[name="userRole"]:checked').value;
+            const userAnswer = parseInt(document.getElementById('captcha-answer').value);
             
-            // Elemen Tombol UI
-            const btn = document.getElementById('btn-register');
-            const btnText = document.getElementById('reg-text');
-            const btnIcon = document.getElementById('reg-icon');
-
-            // Loading State
-            btn.disabled = true;
-            btnText.innerText = "Mendaftarkan...";
-            btnIcon.className = "fa-solid fa-spinner fa-spin";
-
-            // Sign Up ke Supabase Auth
-            const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-                email: email,
-                password: password,
-                options: { data: { full_name: name } }
-            });
-
-            if (authError) {
-                showToast("Pendaftaran Gagal", authError.message, "error");
-                resetButtonState(btn, btnText, btnIcon, "Daftar Sekarang", "fa-solid fa-user-plus");
+            if (userAnswer !== captchaAnswer) {
+                showToast("Validasi Gagal", "Jawaban matematika (Captcha) salah. Silakan coba lagi.", "error");
+                generateCaptcha();
                 return;
             }
 
-            // Masukkan ke tabel user_roles
-            const { error: insertError } = await supabaseClient
-                .from('user_roles')
-                .insert([{ user_id: authData.user.id, role: selectedRole }]);
-
-            if (insertError) {
-                console.error("Gagal menetapkan role:", insertError);
+            if (!document.getElementById('tc-check').checked) {
+                showToast("Peringatan", "Anda harus menyetujui Syarat & Ketentuan.", "error");
+                return;
             }
 
-            // Sukses
-            const roleName = selectedRole === 'admin' ? "Admin Organisasi" : "Anggota";
-            showToast("Pendaftaran Sukses!", `Anda terdaftar sebagai ${roleName}. Silakan login.`, "success");
-            
-            // Reset Form & UI
+            const name = document.getElementById('req-name').value;
+            const dob = document.getElementById('req-dob').value;
+            const email = document.getElementById('req-email').value;
+            const org = document.getElementById('req-org').value;
+
+            const btn = document.getElementById('btn-register'); const btnText = document.getElementById('reg-text'); const btnIcon = document.getElementById('reg-icon');
+            btn.disabled = true; btnText.innerText = "Mengirim Pengajuan..."; btnIcon.className = "fa-solid fa-spinner fa-spin";
+
+            // Insert into registration_requests table
+            const { error } = await supabaseClient.from('registration_requests').insert([{
+                nama: name, dob: dob, email: email, organisasi: org, status: 'pending'
+            }]);
+
+            if (error) {
+                showToast("Pengajuan Gagal", error.message, "error");
+                resetButtonState(btn, btnText, btnIcon, "Kirim Pengajuan", "fa-solid fa-paper-plane");
+                generateCaptcha();
+                return;
+            }
+
+            showToast("Berhasil Terkirim!", "Pengajuan akun berhasil. Menunggu verifikasi dari Super Admin.", "success");
             e.target.reset();
             setTimeout(() => {
                 switchForm('login');
-                resetButtonState(btn, btnText, btnIcon, "Daftar Sekarang", "fa-solid fa-user-plus");
-            }, 2000);
+                resetButtonState(btn, btnText, btnIcon, "Kirim Pengajuan", "fa-solid fa-paper-plane");
+            }, 2500);
         }
 
-        // Utility Function untuk Reset Tombol
         function resetButtonState(btn, textElement, iconElement, defaultText, defaultIconClass) {
-            btn.disabled = false;
-            textElement.innerText = defaultText;
-            iconElement.className = defaultIconClass;
+            btn.disabled = false; textElement.innerText = defaultText; iconElement.className = defaultIconClass;
         }
     </script>
 </body>
