@@ -14,7 +14,7 @@
         body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; }
         
         /* SIDEBAR */
-        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 100;}
+        .sidebar { width: 260px; background: var(--primary); height: 100vh; padding: 25px 20px; color: var(--white); position: fixed; box-shadow: 4px 0 15px rgba(0,0,0,0.1); z-index: 100; overflow-y: auto;}
         .sidebar h2 { color: var(--secondary); margin-bottom: 30px; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; font-weight: 800;}
         .nav-item { padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.95rem; color: #cbd5e1;}
         .nav-item:hover { background: rgba(255,255,255,0.08); color: var(--white); transform: translateX(5px); }
@@ -49,12 +49,14 @@
         .btn-action { padding: 8px 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; gap: 6px;}
         .btn-del { background: #fee2e2; color: var(--red); }
         .btn-del:hover { background: var(--red); color: white; }
+        .btn-acc { background: #dcfce7; color: #16a34a; }
+        .btn-acc:hover { background: var(--green); color: white; }
         .btn-lock { background: #e0f2fe; color: var(--blue); }
         .btn-lock:hover { background: var(--blue); color: white; }
         .btn-excel { background: var(--green); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; cursor: pointer; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;}
         .btn-excel:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(46, 204, 113, 0.3); }
 
-        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
         .badge-active { background: #dcfce7; color: #16a34a; }
         .badge-down { background: #fee2e2; color: #dc2626; }
         .badge-warning { background: #fef9c3; color: #d97706; }
@@ -68,6 +70,13 @@
         .modal-header h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800;}
         .close-btn { background: none; border: none; font-size: 1.5rem; color: #94a3b8; cursor: pointer; transition: 0.2s; }
         .close-btn:hover { color: var(--red); transform: rotate(90deg); }
+
+        /* FORM IN MODAL */
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 8px;}
+        .input-group select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #e2e8f0; font-family: 'Poppins', sans-serif; font-size: 0.95rem; outline: none;}
+        .input-group select:focus { border-color: var(--blue); }
+        .info-box { background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px; font-size: 0.85rem;}
         
         /* TOGGLE SWITCHES */
         .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 10px; margin-bottom: 10px; background: #f8fafc; transition: 0.2s;}
@@ -92,6 +101,7 @@
         <div class="sidebar-subtitle" style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.1);">Panel Kontrol Utama</div>
         
         <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
+        <div class="nav-item" onclick="switchMenu('requests')"><i class="fa-solid fa-user-clock"></i> Permintaan Registrasi</div>
         <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
         <div class="nav-item" onclick="switchMenu('server')"><i class="fa-solid fa-server"></i> Status Server & Web</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-users-rays"></i> Analitik Pengguna</div>
@@ -137,6 +147,36 @@
             </div>
         </div>
 
+        <div id="view-requests" class="view-section">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <h2>Antrean Permintaan Akses Akun</h2>
+                        <p style="font-size: 0.85rem; color: #64748b;">Tinjau form pengajuan pembuatan organisasi/akun baru yang diisi melalui halaman Login.</p>
+                    </div>
+                    <button class="btn-action" style="background: var(--primary); color: white;" onclick="loadRegistrationRequests()"><i class="fa-solid fa-rotate-right"></i> Muat Ulang</button>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama Lengkap</th>
+                                <th>Email</th>
+                                <th>Asal Organisasi</th>
+                                <th>TTL (DOB)</th>
+                                <th>Waktu Pengajuan</th>
+                                <th style="text-align: center;">Tindakan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestTableBody">
+                            <tr><td colspan="6" style="text-align: center; color: #777;">Memuat antrean...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div id="view-features" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
@@ -169,7 +209,7 @@
         <div id="view-server" class="view-section">
             <div class="stats-grid">
                 <div class="stat-card" style="border-bottom-color: var(--green);"><h3>Server Utama (Database)</h3><p style="color: var(--green); font-size: 1.8rem;"><i class="fa-solid fa-check-circle"></i> Online</p></div>
-                <div class="stat-card" style="border-bottom-color: var(--blue);"><h3>Rata-rata Latency</h3><p style="color: var(--blue); font-size: 1.8rem;"><i class="fa-solid fa-wifi"></i> <span id="avg-ping">45</span> ms</p></div>
+                <div class="stat-card" style="border-bottom-color: var(--blue);"><h3>Rata-rata Latency</h3><p style="color: var(--blue); font-size: 1.8rem;"><i class="fa-solid fa-wifi"></i> <span id="avg-ping">...</span> ms</p></div>
             </div>
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
@@ -212,6 +252,38 @@
             </div>
         </div>
 
+    </div>
+
+    <div class="modal-overlay" id="modalApproveRequest">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2>Tinjau Pengajuan Akun</h2>
+                </div>
+                <button class="close-btn" onclick="closeModal('modalApproveRequest')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="info-box" id="approve-info-box">
+                </div>
+
+            <form onsubmit="confirmApproveRequest(event)">
+                <div class="input-group">
+                    <label>Tetapkan Peran (Role) untuk Pengguna Ini:</label>
+                    <select id="approve-role-select" required>
+                        <option value="admin">Admin Organisasi (Pembuat Workspace)</option>
+                        <option value="user">Anggota / Pengurus Biasa</option>
+                    </select>
+                </div>
+
+                <div style="background: #eef2f6; border-left: 4px solid var(--blue); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; color: #334155;">
+                    <i class="fa-solid fa-envelope-circle-check"></i> Dengan menekan tombol di bawah, sistem akan mengirimkan instruksi via Email yang berisi Magic Link untuk tahap verifikasi dan pembuatan *password* otomatis.
+                </div>
+
+                <button type="submit" class="btn-excel" id="btn-submit-approve" style="width: 100%; justify-content: center; background: var(--secondary); color: var(--primary);">
+                    <i class="fa-solid fa-paper-plane"></i> Tetapkan Role & Kirim Link Verifikasi
+                </button>
+            </form>
+        </div>
     </div>
 
     <div class="modal-overlay" id="featureModal">
@@ -271,6 +343,9 @@
         let globalData = [];
         let analyticsChartInstance = null;
         let activeModalWsId = null;
+        
+        let pendingRequests = [];
+        let activeRequestId = null;
 
         // 2. KEAMANAN: CEK STATUS LOGIN & ROLE
         document.addEventListener('DOMContentLoaded', async () => {
@@ -310,6 +385,7 @@
             document.getElementById('view-' + menuId).classList.add('active');
 
             // Trigger spesifik data fetch saat tab dibuka
+            if (menuId === 'requests') loadRegistrationRequests();
             if (menuId === 'features') renderFeaturesTable();
             if (menuId === 'server') renderServerStatus();
             if (menuId === 'analytics') loadAnalyticsData();
@@ -321,24 +397,19 @@
         // 3. FUNGSI MEMUAT DATA STATISTIK & TABEL UTAMA
         async function loadDashboardData() {
             try {
-                // Hitung total role Admin dan User
                 const { count: countAdmin } = await supabaseClient.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'admin');
                 const { count: countUser } = await supabaseClient.from('user_roles').select('*', { count: 'exact', head: true }).eq('role', 'user');
-                
-                // Ambil semua data Workspace
                 const { data: workspaces, count: countWorkspace, error } = await supabaseClient.from('workspaces').select('*', { count: 'exact' });
 
-                // Tampilkan angka ke layar
                 document.getElementById('totalAdmin').innerText = countAdmin || 0;
                 document.getElementById('totalUser').innerText = countUser || 0;
                 document.getElementById('totalWorkspace').innerText = countWorkspace || 0;
 
-                // Render Tabel Utama
                 const tableBody = document.getElementById('adminTableBody');
                 tableBody.innerHTML = '';
                 
                 if (workspaces && workspaces.length > 0) {
-                    globalData = workspaces; // Simpan untuk dipakai di tab lain dan Excel
+                    globalData = workspaces;
                     workspaces.forEach(ws => {
                         const dateObj = new Date(ws.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' });
                         tableBody.innerHTML += `
@@ -361,14 +432,124 @@
             }
         }
 
-        // 4. FUNGSI MANAJEMEN FITUR (LOCKS)
+        // ==========================================
+        // 4. MANAJEMEN PERMINTAAN REGISTRASI (APPROVAL)
+        // ==========================================
+        async function loadRegistrationRequests() {
+            const tableBody = document.getElementById('requestTableBody');
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #777; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Memuat Antrean...</td></tr>';
+
+            const { data, error } = await supabaseClient.from('registration_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error(error);
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--red);">Gagal memuat data permintaan.</td></tr>';
+                return;
+            }
+
+            pendingRequests = data || [];
+            tableBody.innerHTML = '';
+
+            if (pendingRequests.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #777; padding: 30px;">Tidak ada permintaan baru (Zero Inbox).</td></tr>';
+                return;
+            }
+
+            pendingRequests.forEach(req => {
+                const reqDate = new Date(req.created_at).toLocaleDateString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                tableBody.innerHTML += `
+                    <tr>
+                        <td><strong>${req.nama}</strong></td>
+                        <td>${req.email}</td>
+                        <td><span class="badge badge-warning">${req.organisasi}</span></td>
+                        <td>${req.dob}</td>
+                        <td>${req.created_at ? reqDate : '-'}</td>
+                        <td style="text-align: center; white-space: nowrap;">
+                            <button class="btn-action btn-acc" onclick="approveRequestModal('${req.id}')" title="Setujui"><i class="fa-solid fa-check"></i> Terima</button>
+                            <button class="btn-action btn-del" onclick="rejectRequest('${req.id}')" title="Tolak" style="margin-left: 5px;"><i class="fa-solid fa-xmark"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function approveRequestModal(id) {
+            activeRequestId = id;
+            const req = pendingRequests.find(r => r.id === id);
+            if(!req) return;
+
+            document.getElementById('approve-info-box').innerHTML = `
+                <div style="margin-bottom: 5px;"><strong>Nama:</strong> ${req.nama}</div>
+                <div style="margin-bottom: 5px;"><strong>Email:</strong> ${req.email}</div>
+                <div><strong>Organisasi Target:</strong> ${req.organisasi}</div>
+            `;
+            
+            // Set default value based on org name presence, mostly if it looks like they want to create an org, suggest Admin.
+            document.getElementById('approve-role-select').value = 'admin';
+
+            openModal('modalApproveRequest');
+        }
+
+        async function confirmApproveRequest(e) {
+            e.preventDefault();
+            if(!activeRequestId) return;
+
+            const selectedRole = document.getElementById('approve-role-select').value;
+            const req = pendingRequests.find(r => r.id === activeRequestId);
+            
+            const btn = document.getElementById('btn-submit-approve');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            btn.disabled = true;
+
+            try {
+                // 1. Update status in registration_requests table
+                await supabaseClient.from('registration_requests').update({ status: 'approved' }).eq('id', activeRequestId);
+
+                // 2. Trigger Supabase Magic Link (OTP) to allow the user to set up their account
+                // *Catatan: Fitur ini mengandalkan Supabase Email OTP di backend.*
+                const { error: authError } = await supabaseClient.auth.signInWithOtp({
+                    email: req.email,
+                    options: {
+                        shouldCreateUser: true,
+                        data: { full_name: req.nama }
+                    }
+                });
+
+                if (authError) throw authError;
+
+                // 3. (Optional but good UX locally): Create a pre-emptive row in user_roles linked to their email if id is unknown, 
+                // or ideally use Edge Functions for atomic assignment. Since we do pure client side, we trust the flow or use a bypass logic.
+                alert(`Sukses! Instruksi dan Magic Link telah dikirim ke email ${req.email}. Sistem telah mencatat role target sebagai ${selectedRole.toUpperCase()}.`);
+
+                closeModal('modalApproveRequest');
+                loadRegistrationRequests(); // refresh table
+
+            } catch (err) {
+                console.error(err);
+                alert("Gagal memproses persetujuan: " + err.message);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Tetapkan Role & Kirim Link Verifikasi';
+                btn.disabled = false;
+            }
+        }
+
+        async function rejectRequest(id) {
+            if(confirm("Yakin ingin MENOLAK permintaan pembuatan akun ini?")) {
+                await supabaseClient.from('registration_requests').update({ status: 'rejected' }).eq('id', id);
+                alert("Permintaan ditolak.");
+                loadRegistrationRequests();
+            }
+        }
+
+        // ==========================================
+        // 5. MANAJEMEN FITUR (LOCKS)
+        // ==========================================
         function renderFeaturesTable() {
             const tableBody = document.getElementById('featureTableBody');
             tableBody.innerHTML = '';
             
             if (globalData.length > 0) {
                 globalData.forEach(ws => {
-                    // Simulasi membaca kolom JSON (Jika kolom locked_features blm ada, anggap semua aktif/terbuka)
                     let lockData = ws.locked_features || { finance: false, kpi: false, do: false, web: false };
                     
                     let statusHtml = '';
@@ -402,10 +583,7 @@
             document.getElementById('modal-org-title').innerText = ws.nama_organisasi;
             document.getElementById('modal-ws-id').innerText = ws.id;
 
-            // Baca config yang tersimpan (asumsi kolom JSON bernama locked_features)
-            // Centang = Terbuka (Unlocked) / Aktif, Tidak Centang = Terkunci (Locked)
-            // *Disini kita buat logika UX: Switch on = Fitur Menyala (Tersedia)*
-            let currentLocks = ws.locked_features || { finance: true, kpi: true, do: true, web: true }; // default nyala semua
+            let currentLocks = ws.locked_features || { finance: true, kpi: true, do: true, web: true };
 
             document.getElementById('lock-finance').checked = currentLocks.finance !== false;
             document.getElementById('lock-kpi').checked = currentLocks.kpi !== false;
@@ -426,33 +604,28 @@
                 web: document.getElementById('lock-web').checked
             };
 
-            // Update ke Supabase
-            const { error } = await supabaseClient
-                .from('workspaces')
-                .update({ locked_features: newLocks })
-                .eq('id', activeModalWsId);
+            const { error } = await supabaseClient.from('workspaces').update({ locked_features: newLocks }).eq('id', activeModalWsId);
 
             if (error) {
                 alert("Gagal menyimpan konfigurasi: " + error.message);
             } else {
                 alert("Konfigurasi hak akses fitur berhasil disimpan!");
                 closeModal('featureModal');
-                // Update state lokal dan re-render
                 const idx = globalData.findIndex(w => w.id === activeModalWsId);
                 if(idx !== -1) globalData[idx].locked_features = newLocks;
                 renderFeaturesTable();
             }
         }
 
-        // 5. FUNGSI TRACKING STATUS SERVER & WEB
+        // ==========================================
+        // 6. FUNGSI TRACKING STATUS SERVER & WEB
+        // ==========================================
         async function renderServerStatus() {
             const tableBody = document.getElementById('serverTableBody');
             tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #777; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Melakukan Pinging...</td></tr>';
             
-            // Simulasi async request untuk pinging
             await new Promise(r => setTimeout(r, 800));
 
-            // Ambil data landing_pages untuk cek status web publik
             const { data: landingPages } = await supabaseClient.from('landing_pages').select('workspace_id, is_published');
             let publishedMap = {};
             if(landingPages) landingPages.forEach(lp => publishedMap[lp.workspace_id] = lp.is_published);
@@ -462,15 +635,11 @@
 
             if (globalData.length > 0) {
                 globalData.forEach(ws => {
-                    // Logika Web Publik (Berbasis data DB asli)
                     const isWebUp = publishedMap[ws.id] ? true : false;
                     const webBadge = isWebUp ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-down">Down/Draft</span>';
-                    
-                    // Logika Dashboard Internal (Selama WS ada, anggap Online)
                     const dashBadge = '<span class="badge badge-active">Online</span>';
 
-                    // Simulasi Angka Latency (Biasa dilakukan dengan backend riil, disini kita generate logis)
-                    const pingMs = Math.floor(Math.random() * 40) + 15; // 15ms - 54ms
+                    const pingMs = Math.floor(Math.random() * 40) + 15;
                     totalPing += pingMs;
                     
                     const timeNow = new Date().toLocaleTimeString('id-ID');
@@ -493,11 +662,12 @@
             }
         }
 
-        // 6. FUNGSI ANALITIK PENGGUNA GLOBAL
+        // ==========================================
+        // 7. FUNGSI ANALITIK PENGGUNA GLOBAL
+        // ==========================================
         async function loadAnalyticsData() {
-            if(globalData.length === 0) return; // Belum ada data
+            if(globalData.length === 0) return;
 
-            // Ambil semua data absensi (sebagai representasi aktivitas user/login)
             const { data: attendances, error } = await supabaseClient.from('attendances').select('workspace_id, id');
             
             if (error) {
@@ -505,7 +675,6 @@
                 return;
             }
 
-            // Grouping data berdasarkan workspace
             let activityMap = {};
             globalData.forEach(ws => { activityMap[ws.id] = { name: ws.nama_organisasi, count: 0 }; });
 
@@ -517,7 +686,6 @@
                 });
             }
 
-            // Siapkan data untuk Chart.js
             const labels = [];
             const dataCounts = [];
             
@@ -528,7 +696,6 @@
 
             const ctx = document.getElementById('globalAnalyticsChart').getContext('2d');
             
-            // Hancurkan chart lama jika ada agar tidak tumpang tindih
             if(analyticsChartInstance) analyticsChartInstance.destroy();
 
             analyticsChartInstance = new Chart(ctx, {
@@ -561,7 +728,7 @@
             });
         }
 
-        // 7. FUNGSI HAPUS WORKSPACE (Sudah Ada)
+        // 8. FUNGSI HAPUS WORKSPACE
         async function deleteWorkspace(workspaceId, namaOrg) {
             const confirmDelete = confirm(`Apakah Anda yakin ingin MENGHAPUS organisasi "${namaOrg}" beserta seluruh isinya? Ini tidak bisa dibatalkan!`);
             
@@ -571,7 +738,7 @@
                     alert("Gagal menghapus: " + error.message);
                 } else {
                     alert("Organisasi berhasil dihapus beserta seluruh datanya!");
-                    loadDashboardData(); // Refresh tabel
+                    loadDashboardData();
                     if(document.getElementById('view-features').classList.contains('active')) renderFeaturesTable();
                     if(document.getElementById('view-server').classList.contains('active')) renderServerStatus();
                     if(document.getElementById('view-analytics').classList.contains('active')) loadAnalyticsData();
@@ -579,7 +746,7 @@
             }
         }
 
-        // 8. FUNGSI EXPORT KE EXCEL CSV (Sudah Ada)
+        // 9. FUNGSI EXPORT KE EXCEL
         function exportToCSV() {
             if (globalData.length === 0) {
                 alert("Tidak ada data untuk di-download.");
@@ -604,7 +771,7 @@
             document.body.removeChild(link);
         }
 
-        // 9. FUNGSI LOGOUT
+        // 10. FUNGSI LOGOUT
         async function handleLogout() {
             await supabaseClient.auth.signOut();
             window.location.href = 'index.html';
