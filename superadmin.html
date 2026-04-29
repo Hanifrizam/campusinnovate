@@ -507,11 +507,14 @@
 
                 // 2. Trigger Supabase Magic Link (OTP) to allow the user to set up their account
                 // *Catatan: Fitur ini mengandalkan Supabase Email OTP di backend.*
+                // 2. Trigger Supabase Magic Link (OTP)
                 const { error: authError } = await supabaseClient.auth.signInWithOtp({
                     email: req.email,
                     options: {
                         shouldCreateUser: true,
-                        data: { full_name: req.nama }
+                        data: { full_name: req.nama },
+                        // MENGARAHKAN LINK EMAIL KE HALAMAN BUAT AKUN
+                        emailRedirectTo: window.location.origin + window.location.pathname.replace('superadmin.html', '') + 'buatakun.html'
                     }
                 });
 
