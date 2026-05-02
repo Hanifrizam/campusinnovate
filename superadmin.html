@@ -90,11 +90,12 @@
         .badge-active { background: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0;}
         .badge-down { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca;}
         .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a;}
+        .badge-superadmin { background: #fef08a; color: #b45309; border: 1px solid #fde047;}
 
         /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--white); width: 95%; max-width: 650px; border-radius: 25px; padding: 40px; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
+        .modal-content { background: var(--white); width: 95%; max-width: 650px; border-radius: 25px; padding: 40px; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;}
         .modal-header h2 { color: var(--primary); font-size: 1.6rem; font-weight: 800; line-height: 1.2;}
@@ -104,9 +105,16 @@
         /* FORM IN MODAL */
         .input-group { margin-bottom: 25px; }
         .input-group label { display: block; font-weight: 700; font-size: 0.95rem; color: var(--primary); margin-bottom: 10px;}
-        .input-group select { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; font-family: 'Poppins', sans-serif; font-size: 1rem; outline: none; transition: 0.3s; font-weight: 500; color: var(--text);}
-        .input-group select:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);}
+        .input-group input, .input-group select { width: 100%; padding: 15px; border-radius: 12px; border: 2px solid #e2e8f0; background: #f8fafc; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1rem; outline: none; transition: 0.3s; font-weight: 500; color: var(--text);}
+        .input-group input:focus, .input-group select:focus { border-color: var(--blue); background: white; box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.1);}
         .info-box { background: #f8fafc; padding: 20px; border-radius: 15px; border: 1px solid #e2e8f0; margin-bottom: 25px; font-size: 0.9rem; color: #475569; line-height: 1.6;}
+        
+        /* DROPDOWN SELECT FOR ROLE IN TABLE */
+        .select-role-table { padding: 8px 12px; border-radius: 8px; border: 2px solid #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--primary); outline: none; transition: 0.3s; background: white; cursor: pointer;}
+        .select-role-table:focus { border-color: var(--secondary); }
+        .select-role-table.role-admin { border-color: var(--blue); color: var(--blue); }
+        .select-role-table.role-user { border-color: var(--green); color: var(--green); }
+        .select-role-table.role-superadmin { border-color: var(--secondary); color: #b45309; background: #fef08a; cursor: not-allowed;}
         
         /* TOGGLE SWITCHES */
         .feature-item { display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 2px solid #f1f5f9; border-radius: 15px; margin-bottom: 15px; background: white; transition: 0.3s;}
@@ -127,6 +135,7 @@
 </head>
 <body>
 
+    <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
     <div class="sidebar">
@@ -135,6 +144,10 @@
         
         <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
         <div class="nav-item" onclick="switchMenu('requests')"><i class="fa-solid fa-user-clock"></i> Permintaan Registrasi</div>
+        
+        <!-- MENU BARU: MANAJEMEN PENGGUNA (USERS) -->
+        <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users-gear"></i> Manajemen Pengguna</div>
+        
         <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
         <div class="nav-item" onclick="switchMenu('server')"><i class="fa-solid fa-satellite-dish"></i> Status Server & Web</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-users-rays"></i> Analitik Pengguna</div>
@@ -148,6 +161,7 @@
             <div class="admin-badge"><i class="fa-solid fa-shield-halved" style="color: var(--secondary); font-size: 1.2rem;"></i> Super Administrator</div>
         </div>
 
+        <!-- VIEW 1: DASHBOARD UTAMA -->
         <div id="view-dashboard" class="view-section active">
             <div class="stats-grid">
                 <div class="stat-card"><h3>Total Organisasi (Workspace)</h3><p id="totalWorkspace"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
@@ -180,6 +194,7 @@
             </div>
         </div>
 
+        <!-- VIEW 1.5: PERMINTAAN REGISTRASI BARU -->
         <div id="view-requests" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -210,6 +225,40 @@
             </div>
         </div>
 
+        <!-- VIEW BARU: MANAJEMEN PENGGUNA (ALL USERS) -->
+        <div id="view-users" class="view-section">
+            <div class="panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+                    <div>
+                        <h2><i class="fa-solid fa-users-gear"></i> Kontrol Hak Akses Pengguna (Users)</h2>
+                        <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Manajemen seluruh identitas, pengubahan strata *role*, dan penghapusan akses anggota dari sistem.</p>
+                    </div>
+                    <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalAddUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
+                </div>
+
+                <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; color: #92400e; font-weight: 500;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <b>Catatan Sistem:</b> Menghapus akses pengguna akan melenyapkan izin login dan ID referensi mereka. Mereka tidak akan bisa masuk ke sistem meskipun email mereka pernah terdaftar.
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID User (UUID)</th>
+                                <th>Waktu Terdaftar</th>
+                                <th>Strata Role Akses Saat Ini</th>
+                                <th style="text-align: center;">Tindakan Eksekusi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: MANAJEMEN FITUR (LOCKS) -->
         <div id="view-features" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -239,6 +288,7 @@
             </div>
         </div>
 
+        <!-- VIEW 3: STATUS SERVER & WEB -->
         <div id="view-server" class="view-section">
             <div class="stats-grid">
                 <div class="stat-card" style="border-bottom-color: var(--green);">
@@ -277,6 +327,7 @@
             </div>
         </div>
 
+        <!-- VIEW 4: ANALITIK PENGGUNA GLOBAL -->
         <div id="view-analytics" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -293,6 +344,7 @@
 
     </div>
 
+    <!-- MODAL PERSETUJUAN AKUN (REQUESTS) -->
     <div class="modal-overlay" id="modalApproveRequest">
         <div class="modal-content">
             <div class="modal-header">
@@ -304,7 +356,8 @@
             </div>
             
             <div class="info-box" id="approve-info-box">
-                </div>
+                <!-- Detail Info akan masuk di sini via JS -->
+            </div>
 
             <form onsubmit="confirmApproveRequest(event)">
                 <div class="input-group">
@@ -327,6 +380,46 @@
         </div>
     </div>
 
+    <!-- MODAL PEMBUATAN PENGGUNA BARU LANGSUNG -->
+    <div class="modal-overlay" id="modalAddUser">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div>
+                    <h2><i class="fa-solid fa-user-plus"></i> Undangan Pengguna Baru</h2>
+                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">Sistem akan meluncurkan tautan pendaftaran OTP rahasia ke Email target.</p>
+                </div>
+                <button class="close-btn" onclick="closeModal('modalAddUser')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form onsubmit="handleDirectUserInvite(event)">
+                <div class="input-group">
+                    <label>Alamat Email Tujuan</label>
+                    <input type="email" id="invite-email" placeholder="contoh: anggota@kampus.ac.id" required>
+                </div>
+                <div class="input-group">
+                    <label>Nama Lengkap Identitas (Opsional)</label>
+                    <input type="text" id="invite-name" placeholder="Masukkan nama pengguna yang diundang">
+                </div>
+                <div class="input-group">
+                    <label>Tetapkan Hak Akses Role Definitif</label>
+                    <select id="invite-role" required>
+                        <option value="admin">Admin Organisasi (Tertinggi)</option>
+                        <option value="user" selected>Pengurus/User Biasa</option>
+                    </select>
+                </div>
+
+                <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 25px; font-size: 0.85rem; color: #475569; text-align: justify;">
+                    Karena sistem menggunakan keamanan tingkat lanjut, Anda tidak membuat kata sandi secara manual. Saat tombol ditekan, pengguna wajib mengklik tautan dalam email mereka untuk menciptakan otorisasi kata sandi mandiri.
+                </div>
+
+                <button type="submit" class="btn-excel" id="btn-submit-invite" style="width: 100%; justify-content: center; background: var(--blue); font-size: 1rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Luncurkan Undangan Sistem
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL PENGATURAN FITUR (LOCKS) -->
     <div class="modal-overlay" id="featureModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -387,6 +480,8 @@
         
         let pendingRequests = [];
         let activeRequestId = null;
+        
+        let globalUsersData = [];
 
         // TOAST ALERT SYSTEM (Pengganti window.alert)
         function showToast(title, message, type = 'success') {
@@ -446,6 +541,7 @@
 
             // Trigger spesifik data fetch saat tab dibuka
             if (menuId === 'requests') loadRegistrationRequests();
+            if (menuId === 'users') loadAllUsersData();
             if (menuId === 'features') renderFeaturesTable();
             if (menuId === 'server') renderServerStatus();
             if (menuId === 'analytics') loadAnalyticsData();
@@ -492,6 +588,158 @@
                 showToast("Error Load Data", err.message, "error");
             }
         }
+
+        // ==========================================
+        // 3.5. MANAJEMEN PENGGUNA (ALL USERS ROLE CONTROL)
+        // ==========================================
+        async function loadAllUsersData() {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
+
+            // Tarik seluruh data dari tabel user_roles
+            const { data: userRoles, error } = await supabaseClient.from('user_roles').select('*').order('created_at', { ascending: false });
+            
+            if (error) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
+                return;
+            }
+
+            globalUsersData = userRoles || [];
+            tableBody.innerHTML = '';
+
+            if (globalUsersData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
+                return;
+            }
+
+            globalUsersData.forEach(ur => {
+                const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                
+                // Class untuk warna dropdown sesuai role saat ini
+                let selectClass = 'select-role-table';
+                if(ur.role === 'admin') selectClass += ' role-admin';
+                else if(ur.role === 'user') selectClass += ' role-user';
+                else if(ur.role === 'superadmin') selectClass += ' role-superadmin';
+                
+                // Opsi Dropdown
+                let roleOptions = `
+                    <option value="superadmin" ${ur.role === 'superadmin' ? 'selected' : ''}>Super Administrator</option>
+                    <option value="admin" ${ur.role === 'admin' ? 'selected' : ''}>Admin Organisasi</option>
+                    <option value="user" ${ur.role === 'user' ? 'selected' : ''}>Anggota Biasa (User)</option>
+                `;
+
+                // Nonaktifkan select jika dia superadmin (Mencegah Super Admin menghapus haknya sendiri dari frontend)
+                let disabledAttr = ur.role === 'superadmin' ? 'disabled title="Akses absolut tidak dapat diubah"' : '';
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
+                            <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id}
+                        </td>
+                        <td style="color: var(--primary); font-size: 0.85rem;">
+                            <i class="fa-regular fa-clock"></i> ${joinDate}
+                        </td>
+                        <td>
+                            <select class="${selectClass}" ${disabledAttr} onchange="changeUserRole('${ur.user_id}', this.value, this)">
+                                ${roleOptions}
+                            </select>
+                        </td>
+                        <td style="text-align: center;">
+                            <button class="btn-action btn-del" ${ur.role === 'superadmin' ? 'disabled style="opacity:0.5;"' : ''} onclick="revokeUserAccess('${ur.user_id}')" title="Cabut Izin Akses & Hapus Riwayat">
+                                <i class="fa-solid fa-user-slash"></i> Cabut Akses
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function changeUserRole(userId, newRole, selectElement) {
+            // Konfirmasi perubahan
+            if(!confirm(`Anda yakin ingin mengubah strata otoritas pengguna ini menjadi [${newRole.toUpperCase()}]?`)) {
+                // Revert seleksi jika dibatalkan
+                loadAllUsersData(); 
+                return;
+            }
+
+            selectElement.style.opacity = '0.5';
+            
+            const { error } = await supabaseClient.from('user_roles').update({ role: newRole }).eq('user_id', userId);
+            
+            if(error) {
+                showToast("Update Gagal", error.message, "error");
+            } else {
+                showToast("Otoritas Diperbarui", `Role pengguna berhasil dinaikkan/diturunkan menjadi ${newRole}.`, "success");
+            }
+            
+            // Render ulang untuk memperbaiki style warnanya
+            loadAllUsersData();
+            loadDashboardData(); // Refresh statistik angka admin/user di dashboard
+        }
+
+        async function revokeUserAccess(userId) {
+            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace akan ikut lenyap. Lanjutkan?")) {
+                showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
+                
+                // Menghapus data dari user_roles (Akses login utama)
+                const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
+                
+                // Menghapus dari workspace_members jika ada
+                await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
+
+                if(roleErr) {
+                    showToast("Penghapusan Gagal", roleErr.message, "error");
+                } else {
+                    showToast("Akses Dicabut", "Pengguna tersebut tidak akan bisa login lagi ke dalam sistem.", "success");
+                    loadAllUsersData();
+                    loadDashboardData();
+                }
+            }
+        }
+
+        async function handleDirectUserInvite(e) {
+            e.preventDefault();
+            const email = document.getElementById('invite-email').value;
+            const name = document.getElementById('invite-name').value || "Pengguna Baru";
+            const role = document.getElementById('invite-role').value;
+            
+            const btn = document.getElementById('btn-submit-invite');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memanggil SMTP Server...';
+            btn.disabled = true;
+
+            try {
+                // Kita gunakan trick Supabase SignInWithOtp untuk Mendaftarkan user (shouldCreateUser: true)
+                const { error: authError } = await supabaseClient.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        shouldCreateUser: true,
+                        data: { full_name: name },
+                        // MENGARAHKAN LINK EMAIL KE HALAMAN BUAT AKUN
+                        emailRedirectTo: window.location.origin + window.location.pathname.replace('superadmin.html', '') + 'buatakun.html'
+                    }
+                });
+
+                if(authError) throw authError;
+
+                // Memasukkan ke Registration Requests Dummy agar admin dapat jejak
+                // (Ini opsional, tapi membantu mencatat bahwa superadmin pernah menginvite orang ini)
+                await supabaseClient.from('registration_requests').insert([{
+                    nama: name, dob: "Diundang oleh Super Admin", email: email, organisasi: "Undangan Langsung", status: 'approved'
+                }]);
+
+                showToast("Link Diterbangkan!", `Magic Link verifikasi berhasil dikirimkan ke kotak masuk ${email}. Pengguna dapat mengklaim akunnya.`, "success");
+                closeModal('modalAddUser');
+                e.target.reset();
+
+            } catch(err) {
+                console.error(err);
+                showToast("Pengiriman Gagal", err.message, "error");
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Luncurkan Undangan Sistem';
+                btn.disabled = false;
+            }
+        }
+
 
         // ==========================================
         // 4. MANAJEMEN PERMINTAAN REGISTRASI (APPROVAL)
@@ -812,8 +1060,8 @@
                         legend: { display: false },
                         tooltip: {
                             backgroundColor: 'rgba(10, 48, 85, 0.9)',
-                            titleFont: { family: 'Poppins', size: 14 },
-                            bodyFont: { family: 'Poppins', size: 13 },
+                            titleFont: { family: 'Plus Jakarta Sans', size: 14 },
+                            bodyFont: { family: 'Plus Jakarta Sans', size: 13 },
                             padding: 15,
                             cornerRadius: 8,
                             callbacks: {
@@ -824,11 +1072,11 @@
                     scales: {
                         y: { 
                             beginAtZero: true, 
-                            ticks: { precision: 0, font: {family: 'Poppins'} },
+                            ticks: { precision: 0, font: {family: 'Plus Jakarta Sans'} },
                             grid: { color: '#f1f5f9', borderDash: [5, 5] }
                         },
                         x: { 
-                            ticks: { font: {family: 'Poppins', weight: '600'} },
+                            ticks: { font: {family: 'Plus Jakarta Sans', weight: '600'} },
                             grid: { display: false }
                         }
                     }

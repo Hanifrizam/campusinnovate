@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Workspace - Campus Innovate</title>
+    <!-- Fix untuk Error 404 Favicon di Console -->
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -612,6 +614,9 @@
             .builder-wrapper:not(.builder-fullscreen) .builder-tools { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 15px;}
             .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); margin-left: 0;}
             .builder-wrapper:not(.builder-fullscreen) .resizer { display: none; }
+            .tree-children { flex-direction: column; align-items: center; }
+            .tree-children::before { display: none; }
+            .tree-node::before { display: none; }
         }
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
@@ -675,6 +680,7 @@
                 <button class="btn-sm" style="background: var(--blue); color: white; padding: 10px 20px;" onclick="goToUserDashboard()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Dashboard Internal</button>
             </div>
 
+            <!-- KONFIGURASI UTAMA -->
             <div id="menu-setup" class="menu-content active">
                 <div class="card">
                     <h2 style="font-weight: 800;"><i class="fa-solid fa-globe"></i> Status Website Publik</h2>
@@ -725,6 +731,7 @@
                 </div>
             </div>
 
+            <!-- WEB BUILDER STUDIO DENGAN ADJUSTABLE PANELS -->
             <div id="menu-builder" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -740,6 +747,7 @@
                 <div class="builder-wrapper" id="builder-main-wrapper">
                     <button class="btn-exit-fs" onclick="toggleFullscreenBuilder()"><i class="fa-solid fa-compress"></i> Keluar Fullscreen</button>
 
+                    <!-- PANEL TOOLS KIRI -->
                     <div class="builder-tools" id="builder-tools-panel">
                         <div class="tool-category">Struktur Utama</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-image"></i> Hero Banner</div>
@@ -759,8 +767,10 @@
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Status Program</div>
                     </div>
 
+                    <!-- SPLITTER KIRI -->
                     <div class="resizer" id="resizer-left"></div>
 
+                    <!-- KANVAS TENGAH -->
                     <div class="builder-canvas-container" id="builder-canvas-panel">
                         <div class="canvas-area" id="canvas-dropzone" ondragover="allowDrop(event)" ondrop="dropToCanvas(event)">
                             <div class="preview-window" id="preview-window">
@@ -772,8 +782,10 @@
                         </div>
                     </div>
 
+                    <!-- SPLITTER KANAN (Tampil saat prop panel aktif) -->
                     <div class="resizer" id="resizer-right" style="display: none;"></div>
 
+                    <!-- PANEL PROPERTY KANAN -->
                     <div class="builder-properties" id="properties-panel">
                         <div class="prop-header-flex">
                             <h3><i class="fa-solid fa-sliders"></i> Detail & Styling</h3>
@@ -788,6 +800,7 @@
                 </div>
             </div>
 
+            <!-- SECTION BARU: STRUKTUR ORGANISASI DRAG & DROP -->
             <div id="menu-struktur" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -839,6 +852,7 @@
                 </div>
             </div>
 
+            <!-- SECTION BARU: BERITA & PENGUMUMAN -->
             <div id="menu-berita" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -863,6 +877,7 @@
                     </div>
                     <div class="prop-group">
                         <label>Isi Detail Pengumuman</label>
+                        <!-- Rich Editor untuk Pengumuman -->
                         <div class="mini-rte-container">
                             <div class="mini-rte-toolbar">
                                 <button type="button" onclick="document.execCommand('bold',false,null)" title="Tebal"><i class="fa-solid fa-bold"></i></button>
@@ -894,6 +909,7 @@
                             </div>
                             <div class="prop-group">
                                 <label>Ringkasan / Paragraf Berita</label>
+                                <!-- Rich Editor untuk Berita -->
                                 <div class="mini-rte-container">
                                     <div class="mini-rte-toolbar">
                                         <button type="button" onclick="document.execCommand('bold',false,null)"><i class="fa-solid fa-bold"></i></button>
@@ -917,6 +933,7 @@
                 </div>
             </div>
 
+            <!-- SECTION BARU: TRANSPARANSI & KPI -->
             <div id="menu-transparansi" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -1912,12 +1929,17 @@
         // ANALYTICS DATA FETCH & CHARTS
         // ==========================================
         async function initChartsSafe() {
-            const ctx1 = document.getElementById('publicTrafficChart');
-            const ctx2 = document.getElementById('userActivityChart');
+            const canvas1 = document.getElementById('publicTrafficChart');
+            const canvas2 = document.getElementById('userActivityChart');
             
-            if(ctx1 && ctx2) {
-                if (chartTraffic) chartTraffic.destroy();
-                if (chartActivity) chartActivity.destroy();
+            if(canvas1 && canvas2) {
+                // BUG FIX: Hancurkan instance chart yang lama menggunakan registry bawaan Chart.js
+                // Ini mencegah error "Canvas is already in use" saat user klik menu bolak-balik
+                let existingChart1 = Chart.getChart(canvas1);
+                if (existingChart1) existingChart1.destroy();
+
+                let existingChart2 = Chart.getChart(canvas2);
+                if (existingChart2) existingChart2.destroy();
 
                 const today = new Date();
                 const past7Days = new Date(today);
@@ -1947,7 +1969,7 @@
                 const labelsTraffic = Object.keys(dateCountsMap).map(d => { let p = d.split('-'); return `${p[2]}/${p[1]}`; });
                 const dataTraffic = Object.values(dateCountsMap).map(set => set.size);
 
-                chartTraffic = new Chart(ctx1.getContext('2d'), { 
+                chartTraffic = new Chart(canvas1.getContext('2d'), { 
                     type: 'line', 
                     data: { 
                         labels: labelsTraffic, 
@@ -1968,7 +1990,7 @@
                 const { count: countRab } = await supabaseClient.from('rab_items').select('*', {count: 'exact', head: true}).eq('workspace_id', currentWorkspaceId);
                 const { count: countDO } = await supabaseClient.from('digital_office').select('*', {count: 'exact', head: true}).eq('workspace_id', currentWorkspaceId);
 
-                chartActivity = new Chart(ctx2.getContext('2d'), { 
+                chartActivity = new Chart(canvas2.getContext('2d'), { 
                     type: 'bar', 
                     data: { 
                         labels: ['KPI Target', 'Keuangan (RAB)', 'Program Kerja', 'Surat Digital'], 
