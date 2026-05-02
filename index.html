@@ -132,13 +132,14 @@
 
     <div id="toast-container"></div>
 
+    <!-- MODAL T&C UPDATE UNTUK BYPASS SYSTEM -->
     <div class="modal-overlay" id="tcModal">
         <div class="modal-content">
             <h3>Syarat & Ketentuan Penggunaan</h3>
             <p>1. <b>Penggunaan Data:</b> Dengan mengajukan akun, Anda menyetujui bahwa data organisasi Anda akan disimpan dengan aman dalam sistem Campus Innovate.</p>
             <p>2. <b>Tanggung Jawab:</b> Anda bertanggung jawab penuh atas kebenaran informasi yang diberikan. Pemalsuan identitas organisasi dapat menyebabkan penolakan atau penghapusan akses permanen.</p>
             <p>3. <b>Persetujuan Admin:</b> Akses ke dalam sistem ERP ini membutuhkan verifikasi manual oleh Super Admin. Proses ini bisa memakan waktu 1x24 Jam.</p>
-            <p>4. <b>Keamanan Akun:</b> Setelah disetujui, link verifikasi akan dikirimkan ke Email Anda. Jangan bagikan link tersebut kepada siapa pun.</p>
+            <p>4. <b>Aktivasi Akun:</b> Setelah disetujui oleh Super Admin, Anda dapat <b>langsung masuk</b> menggunakan Email dan Kata Sandi yang Anda daftarkan di form pengajuan ini.</p>
             <button class="btn-primary" style="margin-top: 15px;" onclick="closeTcModal()">Saya Mengerti</button>
         </div>
     </div>
@@ -153,6 +154,7 @@
         </div>
 
         <div class="form-panel">
+            <!-- LOGIN FORM -->
             <div class="form-wrapper active" id="login-form">
                 <h2>Selamat Datang 👋</h2>
                 <p class="subtitle">Masuk untuk mengakses ruang kerja Anda.</p>
@@ -173,6 +175,7 @@
                 <p class="switch-text">Belum punya akses? <span onclick="switchForm('register')">Ajukan Akun</span></p>
             </div>
 
+            <!-- REQUEST ACCESS FORM (UPDATED DENGAN PASSWORD) -->
             <div class="form-wrapper" id="register-form">
                 <h2>Pengajuan Akses 🚀</h2>
                 <p class="subtitle">Daftarkan organisasi Anda untuk ditinjau oleh Admin.</p>
@@ -194,7 +197,13 @@
                         <i class="fa-solid fa-building"></i>
                         <input type="text" id="req-org" placeholder="Nama Organisasi (BEM/DEMA/UKM...)" required>
                     </div>
+                    <!-- INPUT PASSWORD BARU -->
+                    <div class="input-group">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="req-password" placeholder="Buat Kata Sandi (Untuk akses nanti)" required minlength="6">
+                    </div>
 
+                    <!-- CAPTCHA -->
                     <div class="captcha-box">
                         <div class="captcha-text" id="captcha-question">5 + 3 =</div>
                         <input type="number" id="captcha-answer" placeholder="Jawaban" required>
@@ -327,13 +336,19 @@
             const dob = document.getElementById('req-dob').value;
             const email = document.getElementById('req-email').value;
             const org = document.getElementById('req-org').value;
+            const password = document.getElementById('req-password').value; // Mengambil password baru
 
             const btn = document.getElementById('btn-register'); const btnText = document.getElementById('reg-text'); const btnIcon = document.getElementById('reg-icon');
             btn.disabled = true; btnText.innerText = "Mengirim Pengajuan..."; btnIcon.className = "fa-solid fa-spinner fa-spin";
 
-            // Insert into registration_requests table
+            // Insert into registration_requests table including the password
             const { error } = await supabaseClient.from('registration_requests').insert([{
-                nama: name, dob: dob, email: email, organisasi: org, status: 'pending'
+                nama: name, 
+                dob: dob, 
+                email: email, 
+                password: password, 
+                organisasi: org, 
+                status: 'pending'
             }]);
 
             if (error) {

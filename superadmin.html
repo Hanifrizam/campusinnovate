@@ -18,14 +18,50 @@
             --green: #2ecc71; 
             --red: #e74c3c; 
             --blue: #3498db; 
+            --border: #e2e8f0;
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; min-height: 100vh;}
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
+        
+        body { 
+            background: var(--bg); 
+            display: flex; 
+            color: var(--text); 
+            overflow-x: hidden; 
+            min-height: 100vh;
+        }
         
         /* CUSTOM TOAST NOTIFICATION */
-        #toast-container { position: fixed; top: 30px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 0.95rem; border-left: 5px solid var(--primary); transform: translateX(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        #toast-container { 
+            position: fixed; 
+            top: 30px; 
+            right: 20px; 
+            z-index: 100000; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        
+        .toast { 
+            background: white; 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            border-left: 5px solid var(--primary); 
+            transform: translateX(150%); 
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
         .toast.show { transform: translateX(0); }
         .toast i { font-size: 1.3rem; }
         .toast.success { border-color: var(--green); color: #166534; }
@@ -36,40 +72,216 @@
         .toast.info i { color: var(--blue); }
         
         /* SIDEBAR */
-        .sidebar { width: 270px; background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); height: 100vh; padding: 30px 20px; color: var(--white); position: fixed; box-shadow: 5px 0 20px rgba(0,0,0,0.05); z-index: 100; overflow-y: auto; transition: 0.3s;}
-        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.6rem; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.5px;}
-        .sidebar-subtitle { font-size: 0.75rem; color: #cbd5e1; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 1px;}
+        .sidebar { 
+            width: 270px; 
+            background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); 
+            height: 100vh; 
+            padding: 30px 20px; 
+            color: var(--white); 
+            position: fixed; 
+            box-shadow: 5px 0 20px rgba(0,0,0,0.05); 
+            z-index: 100; 
+            overflow-y: auto; 
+            transition: 0.3s;
+        }
         
-        .nav-item { padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; color: #e2e8f0;}
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--white); transform: translateX(5px); }
-        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); font-weight: 800;}
+        .sidebar h2 { 
+            color: var(--secondary); 
+            margin-bottom: 5px; 
+            font-size: 1.6rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar-subtitle { 
+            font-size: 0.75rem; 
+            color: #cbd5e1; 
+            margin-bottom: 30px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        .nav-item { 
+            padding: 14px 18px; 
+            margin-bottom: 10px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            color: #e2e8f0;
+        }
+        
+        .nav-item:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: var(--white); 
+            transform: translateX(5px); 
+        }
+        
+        .nav-item.active { 
+            background: var(--secondary); 
+            color: var(--primary); 
+            box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); 
+            font-weight: 800;
+        }
         
         /* MAIN CONTENT */
-        .main-content { margin-left: 270px; padding: 40px; width: calc(100% - 270px); min-height: 100vh; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; background: white; padding: 25px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);}
-        .header h1 { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px;}
-        .admin-badge { background: rgba(10,48,85,0.05); color: var(--primary); padding: 10px 20px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;}
+        .main-content { 
+            margin-left: 270px; 
+            padding: 40px; 
+            width: calc(100% - 270px); 
+            min-height: 100vh; 
+        }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 35px; 
+            background: white; 
+            padding: 25px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        
+        .header h1 { 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            margin: 0; 
+            letter-spacing: -0.5px;
+        }
+        
+        .admin-badge { 
+            background: rgba(10,48,85,0.05); 
+            color: var(--primary); 
+            padding: 10px 20px; 
+            border-radius: 30px; 
+            font-weight: 800; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
         
         /* VIEW SECTIONS */
-        .view-section { display: none; animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .view-section.active { display: block; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .view-section { 
+            display: none; 
+            animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        
+        .view-section.active { 
+            display: block; 
+        }
+        
+        @keyframes fadeUp { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         /* CARDS & GRIDS */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 35px; }
-        .stat-card { background: var(--white); padding: 35px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-bottom: 5px solid var(--primary); transition: 0.3s; position: relative; overflow: hidden;}
-        .stat-card::after { content: '\f201'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: -15px; bottom: -20px; font-size: 7rem; color: var(--primary); opacity: 0.03; pointer-events: none;}
-        .stat-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08);}
-        .stat-card h3 { color: #64748b; font-size: 1.05rem; margin-bottom: 15px; font-weight: 700;}
-        .stat-card p { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+            margin-bottom: 35px; 
+        }
         
-        .panel { background: var(--white); padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow-x: auto; margin-bottom: 30px;}
-        .panel h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
+        .stat-card { 
+            background: var(--white); 
+            padding: 35px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
+            border-bottom: 5px solid var(--primary); 
+            transition: 0.3s; 
+            position: relative; 
+            overflow: hidden;
+        }
+        
+        .stat-card::after { 
+            content: '\f201'; 
+            font-family: 'Font Awesome 6 Free'; 
+            font-weight: 900; 
+            position: absolute; 
+            right: -15px; 
+            bottom: -20px; 
+            font-size: 7rem; 
+            color: var(--primary); 
+            opacity: 0.03; 
+            pointer-events: none;
+        }
+        
+        .stat-card:hover { 
+            transform: translateY(-8px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+        }
+        
+        .stat-card h3 { 
+            color: #64748b; 
+            font-size: 1.05rem; 
+            margin-bottom: 15px; 
+            font-weight: 700;
+        }
+        
+        .stat-card p { 
+            font-size: 3rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            line-height: 1;
+        }
+        
+        .panel { 
+            background: var(--white); 
+            padding: 35px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
+            overflow-x: auto; 
+            margin-bottom: 30px;
+        }
+        
+        .panel h2 { 
+            color: var(--primary); 
+            font-size: 1.4rem; 
+            font-weight: 800; 
+            margin-bottom: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+        }
         
         /* TABLES */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; min-width: 800px; }
-        th, td { padding: 18px 15px; text-align: left; font-size: 0.95rem; }
-        th { background: #f8fafc; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;}
+        table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            margin-top: 15px; 
+            min-width: 800px; 
+        }
+        
+        th, td { 
+            padding: 18px 15px; 
+            text-align: left; 
+            font-size: 0.95rem; 
+        }
+        
+        th { 
+            background: #f8fafc; 
+            color: var(--primary); 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            font-size: 0.8rem; 
+            letter-spacing: 0.5px; 
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
         th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
         th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
         td { border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 500;}
@@ -93,9 +305,19 @@
         .badge-superadmin { background: #fef08a; color: #b45309; border: 1px solid #fde047;}
 
         /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; }
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
+            display: flex; align-items: center; justify-content: center; 
+            opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; 
+        }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { background: var(--white); width: 95%; max-width: 650px; border-radius: 25px; padding: 40px; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
+        .modal-content { 
+            background: var(--white); width: 95%; max-width: 650px; 
+            border-radius: 25px; padding: 40px; 
+            transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
+        }
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;}
         .modal-header h2 { color: var(--primary); font-size: 1.6rem; font-weight: 800; line-height: 1.2;}
@@ -233,7 +455,7 @@
                         <h2><i class="fa-solid fa-users-gear"></i> Kontrol Hak Akses Pengguna (Users)</h2>
                         <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Manajemen seluruh identitas, pengubahan strata *role*, dan penghapusan akses anggota dari sistem.</p>
                     </div>
-                    <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalAddUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
+                    <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalDirectCreateUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
                 </div>
 
                 <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; color: #92400e; font-weight: 500;">
@@ -245,13 +467,14 @@
                         <thead>
                             <tr>
                                 <th>ID User (UUID)</th>
+                                <th>Nama Pengguna</th>
                                 <th>Waktu Terdaftar</th>
                                 <th>Strata Role Akses Saat Ini</th>
                                 <th style="text-align: center;">Tindakan Eksekusi</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
+                            <tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -369,51 +592,55 @@
                 </div>
 
                 <div style="background: #f0fdfa; border-left: 4px solid #14b8a6; padding: 15px; border-radius: 10px; margin-bottom: 25px; font-size: 0.85rem; color: #166534; line-height: 1.6;">
-                    <i class="fa-solid fa-envelope-circle-check" style="font-size: 1rem; margin-bottom: 5px;"></i><br>
-                    Dengan menekan tombol Setujui, sistem OTP Supabase akan segera mengirimkan <b>Magic Link Authentication</b> ke email pemohon untuk memverifikasi kepemilikan dan mengarahkan mereka membuat *password* permanen.
+                    <i class="fa-solid fa-bolt" style="font-size: 1rem; margin-bottom: 5px;"></i><br>
+                    Dengan menekan tombol Setujui, sistem akan <b>meng-Bypass Email Verifikasi</b> dan langsung menciptakan akun untuk pengguna ini menggunakan password yang telah diisikan saat proses pendaftaran awal.
                 </div>
 
                 <button type="submit" class="btn-excel" id="btn-submit-approve" style="width: 100%; justify-content: center; font-size: 1rem;">
-                    <i class="fa-solid fa-paper-plane"></i> Setujui & Kirim Link Verifikasi
+                    <i class="fa-solid fa-user-check"></i> Setujui & Buat Akun Langsung
                 </button>
             </form>
         </div>
     </div>
 
     <!-- MODAL PEMBUATAN PENGGUNA BARU LANGSUNG -->
-    <div class="modal-overlay" id="modalAddUser">
+    <div class="modal-overlay" id="modalDirectCreateUser">
         <div class="modal-content">
             <div class="modal-header">
                 <div>
-                    <h2><i class="fa-solid fa-user-plus"></i> Undangan Pengguna Baru</h2>
-                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">Sistem akan meluncurkan tautan pendaftaran OTP rahasia ke Email target.</p>
+                    <h2><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</h2>
+                    <p style="font-size: 0.85rem; color: #64748b; margin-top: 5px;">Otoritas Bypass: Daftarkan pengguna tanpa perlu konfirmasi email.</p>
                 </div>
-                <button class="close-btn" onclick="closeModal('modalAddUser')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="close-btn" onclick="closeModal('modalDirectCreateUser')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form onsubmit="handleDirectUserInvite(event)">
+            <form onsubmit="handleDirectUserCreate(event)">
                 <div class="input-group">
-                    <label>Alamat Email Tujuan</label>
-                    <input type="email" id="invite-email" placeholder="contoh: anggota@kampus.ac.id" required>
+                    <label>Nama Lengkap Pengguna</label>
+                    <input type="text" id="create-name" placeholder="contoh: Muhammad Hanif Riza" required>
                 </div>
                 <div class="input-group">
-                    <label>Nama Lengkap Identitas (Opsional)</label>
-                    <input type="text" id="invite-name" placeholder="Masukkan nama pengguna yang diundang">
+                    <label>Alamat Email</label>
+                    <input type="email" id="create-email" placeholder="contoh: anggota@kampus.ac.id" required>
+                </div>
+                <div class="input-group">
+                    <label>Buatkan Kata Sandi (Password)</label>
+                    <input type="text" id="create-password" placeholder="Minimal 6 karakter" required minlength="6">
                 </div>
                 <div class="input-group">
                     <label>Tetapkan Hak Akses Role Definitif</label>
-                    <select id="invite-role" required>
+                    <select id="create-role" required>
                         <option value="admin">Admin Organisasi (Tertinggi)</option>
                         <option value="user" selected>Pengurus/User Biasa</option>
                     </select>
                 </div>
 
                 <div style="background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 25px; font-size: 0.85rem; color: #475569; text-align: justify;">
-                    Karena sistem menggunakan keamanan tingkat lanjut, Anda tidak membuat kata sandi secara manual. Saat tombol ditekan, pengguna wajib mengklik tautan dalam email mereka untuk menciptakan otorisasi kata sandi mandiri.
+                    Karena otentikasi Bypass digunakan, akun pengguna akan segera aktif seketika setelah tombol ini diklik. Pastikan Anda mencatat dan memberikan kredensial (Email & Sandi) kepada pemilik akun bersangkutan.
                 </div>
 
-                <button type="submit" class="btn-excel" id="btn-submit-invite" style="width: 100%; justify-content: center; background: var(--blue); font-size: 1rem;">
-                    <i class="fa-solid fa-paper-plane"></i> Luncurkan Undangan Sistem
+                <button type="submit" class="btn-excel" id="btn-submit-create" style="width: 100%; justify-content: center; background: var(--blue); font-size: 1rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Buat Akun & Aktifkan
                 </button>
             </form>
         </div>
@@ -471,7 +698,19 @@
         // 1. KONEKSI SUPABASE
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
+        
+        // Client Utama (Terikat ke Session Super Admin)
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Client Sekunder (Bypass Session)
+        // Diperlukan agar signUp dari frontend tidak menimpa cookie session Super Admin dan me-logout-nya
+        const supabaseSecondary = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                persistSession: false,
+                autoRefreshToken: false,
+                detectSessionInUrl: false
+            }
+        });
 
         // Variabel global
         let globalData = [];
@@ -594,27 +833,39 @@
         // ==========================================
         async function loadAllUsersData() {
             const tableBody = document.getElementById('usersTableBody');
-            tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
 
             // Tarik seluruh data dari tabel user_roles
             const { data: userRoles, error } = await supabaseClient.from('user_roles').select('*').order('created_at', { ascending: false });
             
             if (error) {
-                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
                 return;
+            }
+
+            // Supabase API Rest Frontend tidak bisa mengakses email/password dari auth.users secara bebas.
+            // Strategi: Kita mencoba menarik nama dari workspace_members.
+            const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
+            let nameMap = {};
+            if(membersInfo) {
+                membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
             }
 
             globalUsersData = userRoles || [];
             tableBody.innerHTML = '';
 
             if (globalUsersData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
                 return;
             }
 
             globalUsersData.forEach(ur => {
                 const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                 
+                // Cek Map Nama, jika tidak ada fallback
+                let identifiedName = nameMap[ur.user_id] || "Identitas Disembunyikan / Baru Dibuat";
+                if(ur.role === 'superadmin') identifiedName = "Chief of System (Super Admin)";
+
                 // Class untuk warna dropdown sesuai role saat ini
                 let selectClass = 'select-role-table';
                 if(ur.role === 'admin') selectClass += ' role-admin';
@@ -634,8 +885,9 @@
                 tableBody.innerHTML += `
                     <tr>
                         <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
-                            <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id}
+                            <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,18)}...
                         </td>
+                        <td><strong style="color: var(--primary);">${identifiedName}</strong></td>
                         <td style="color: var(--primary); font-size: 0.85rem;">
                             <i class="fa-regular fa-clock"></i> ${joinDate}
                         </td>
@@ -681,7 +933,7 @@
             if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace akan ikut lenyap. Lanjutkan?")) {
                 showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
                 
-                // Menghapus data dari user_roles (Akses login utama)
+                // Menghapus data dari user_roles (Akses login utama frontend reference)
                 const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
                 
                 // Menghapus dari workspace_members jika ada
@@ -690,52 +942,68 @@
                 if(roleErr) {
                     showToast("Penghapusan Gagal", roleErr.message, "error");
                 } else {
-                    showToast("Akses Dicabut", "Pengguna tersebut tidak akan bisa login lagi ke dalam sistem.", "success");
+                    showToast("Akses Dicabut", "Pengguna tersebut dihilangkan dari tabel referensi sistem.", "success");
                     loadAllUsersData();
                     loadDashboardData();
                 }
             }
         }
 
-        async function handleDirectUserInvite(e) {
+        async function handleDirectUserCreate(e) {
             e.preventDefault();
-            const email = document.getElementById('invite-email').value;
-            const name = document.getElementById('invite-name').value || "Pengguna Baru";
-            const role = document.getElementById('invite-role').value;
+            const email = document.getElementById('create-email').value;
+            const password = document.getElementById('create-password').value;
+            const name = document.getElementById('create-name').value || "Pengguna Baru";
+            const role = document.getElementById('create-role').value;
             
-            const btn = document.getElementById('btn-submit-invite');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memanggil SMTP Server...';
+            const btn = document.getElementById('btn-submit-create');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mem-bypass Autentikasi...';
             btn.disabled = true;
 
             try {
-                // Kita gunakan trick Supabase SignInWithOtp untuk Mendaftarkan user (shouldCreateUser: true)
-                const { error: authError } = await supabaseClient.auth.signInWithOtp({
+                // Gunakan secondary client agar sesi Super Admin tidak tergantikan oleh akun yang baru dibuat!
+                const { data: newAuthData, error: authError } = await supabaseSecondary.auth.signUp({
                     email: email,
+                    password: password,
                     options: {
-                        shouldCreateUser: true,
-                        data: { full_name: name },
-                        // MENGARAHKAN LINK EMAIL KE HALAMAN BUAT AKUN
-                        emailRedirectTo: window.location.origin + window.location.pathname.replace('superadmin.html', '') + 'buatakun.html'
+                        data: { full_name: name }
                     }
                 });
 
                 if(authError) throw authError;
+                
+                if (!newAuthData || !newAuthData.user) {
+                    throw new Error("Gagal menerima ID User dari server. Cek apakah limit tercapai.");
+                }
 
-                // Memasukkan ke Registration Requests Dummy agar admin dapat jejak
-                // (Ini opsional, tapi membantu mencatat bahwa superadmin pernah menginvite orang ini)
-                await supabaseClient.from('registration_requests').insert([{
-                    nama: name, dob: "Diundang oleh Super Admin", email: email, organisasi: "Undangan Langsung", status: 'approved'
+                // Masukkan ke tabel user_roles sebagai referensi akses sistem
+                const { error: insertError } = await supabaseClient.from('user_roles').insert([{ 
+                    user_id: newAuthData.user.id, 
+                    role: role 
                 }]);
 
-                showToast("Link Diterbangkan!", `Magic Link verifikasi berhasil dikirimkan ke kotak masuk ${email}. Pengguna dapat mengklaim akunnya.`, "success");
-                closeModal('modalAddUser');
+                if (insertError) throw insertError;
+
+                // Tambahan: Logika agar masuk track list registration dummy untuk visual history
+                await supabaseClient.from('registration_requests').insert([{
+                    nama: name, 
+                    dob: "Bypass Buat Langsung", 
+                    email: email, 
+                    password: password, // Menyimpan histori plain text sebagaimana alur request index
+                    organisasi: "Instalasi Mandiri Super Admin", 
+                    status: 'approved'
+                }]);
+
+                showToast("Akun Berhasil Aktif!", `Akun ${email} telah berhasil dibentuk tanpa perlu verifikasi email.`, "success");
+                closeModal('modalDirectCreateUser');
                 e.target.reset();
+                loadAllUsersData();
 
             } catch(err) {
                 console.error(err);
-                showToast("Pengiriman Gagal", err.message, "error");
+                showToast("Pembuatan Gagal", err.message, "error");
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Luncurkan Undangan Sistem';
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Buat Akun & Aktifkan';
                 btn.disabled = false;
             }
         }
@@ -748,6 +1016,7 @@
             const tableBody = document.getElementById('requestTableBody');
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i> Menyinkronkan antrean masuk...</td></tr>';
 
+            // Menampilkan request yang murni pending dari pendaftaran index.html
             const { data, error } = await supabaseClient.from('registration_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
             
             if (error) {
@@ -790,6 +1059,9 @@
             const req = pendingRequests.find(r => r.id === id);
             if(!req) return;
 
+            // Catatan: Asumsi index.html mengirim dan menyimpan data `password` pada tabel registration_requests
+            let passToDisplay = req.password ? req.password : "Tidak Dilampirkan / Tersembunyi";
+
             document.getElementById('approve-info-box').innerHTML = `
                 <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 10px; margin-bottom: 10px;">
                     <span style="color:#64748b;">Nama Pendaftar:</span> <strong style="color:var(--primary); font-size:1.05rem;">${req.nama}</strong>
@@ -797,13 +1069,15 @@
                 <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 10px; margin-bottom: 10px;">
                     <span style="color:#64748b;">Alamat Surel (Email):</span> <strong style="color:var(--blue);">${req.email}</strong>
                 </div>
+                <div style="display:flex; justify-content:space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 10px; margin-bottom: 10px;">
+                    <span style="color:#64748b;">Kata Sandi (Password):</span> <strong style="color:var(--red); font-family: monospace;">${passToDisplay}</strong>
+                </div>
                 <div style="display:flex; justify-content:space-between;">
                     <span style="color:#64748b;">Organisasi Diajukan:</span> <strong style="color:#d97706; background:#fef3c7; padding:2px 10px; border-radius:10px;">${req.organisasi}</strong>
                 </div>
             `;
             
             document.getElementById('approve-role-select').value = 'admin'; // Default suggestion
-
             openModal('modalApproveRequest');
         }
 
@@ -815,27 +1089,30 @@
             const req = pendingRequests.find(r => r.id === activeRequestId);
             
             const btn = document.getElementById('btn-submit-approve');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Engine sedang memproses rute Otentikasi...';
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Engine sedang memproses By-Pass Otentikasi...';
             btn.disabled = true;
 
             try {
-                // Update status in registration_requests table
-                await supabaseClient.from('registration_requests').update({ status: 'approved' }).eq('id', activeRequestId);
+                if(!req.password) {
+                    throw new Error("Password pemohon tidak tercatat dalam database. Buat akun melalui menu Manajemen Pengguna saja.");
+                }
 
-                // Trigger Supabase Magic Link (OTP)
-                const { error: authError } = await supabaseClient.auth.signInWithOtp({
+                // MENGGUNAKAN SECONDARY CLIENT AGAR SESSION SUPER ADMIN TIDAK LOGOUT
+                const { data: newUser, error: authError } = await supabaseSecondary.auth.signUp({
                     email: req.email,
-                    options: {
-                        shouldCreateUser: true,
-                        data: { full_name: req.nama },
-                        // MENGARAHKAN LINK EMAIL KE HALAMAN BUAT AKUN (Relative Path to buatakun.html)
-                        emailRedirectTo: window.location.origin + window.location.pathname.replace('superadmin.html', '') + 'buatakun.html'
-                    }
+                    password: req.password,
+                    options: { data: { full_name: req.nama } }
                 });
 
                 if (authError) throw authError;
 
-                showToast("Email Akses Terkirim!", `Undangan (Magic Link) resmi telah dilontarkan oleh server SMTP ke email: ${req.email}.`, "success");
+                // Masukkan Hak Akses ke user_roles
+                await supabaseClient.from('user_roles').insert([{ user_id: newUser.user.id, role: selectedRole }]);
+
+                // Update status in registration_requests table
+                await supabaseClient.from('registration_requests').update({ status: 'approved' }).eq('id', activeRequestId);
+
+                showToast("By-Pass Akun Berhasil!", `Sistem sukses mencetak identitas untuk ${req.email} dan mengubah status registrasi.`, "success");
 
                 closeModal('modalApproveRequest');
                 loadRegistrationRequests(); // refresh table view
@@ -844,7 +1121,7 @@
                 console.error(err);
                 showToast("Proses Otentikasi Gagal", err.message, "error");
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Setujui & Kirim Link Verifikasi';
+                btn.innerHTML = '<i class="fa-solid fa-user-check"></i> Setujui & Buat Akun Langsung';
                 btn.disabled = false;
             }
         }
