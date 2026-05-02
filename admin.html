@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Workspace - Campus Innovate</title>
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -579,9 +580,14 @@
         .mini-rte-editor { padding: 12px; min-height: 120px; max-height: 400px; overflow-y: auto; outline: none; font-size: 0.9rem; line-height: 1.6; color: #334155; }
         .mini-rte-editor ul, .mini-rte-editor ol { padding-left: 20px; margin: 10px 0;}
 
-        /* DRAG AND DROP ORG TREE ADMIN */
-        .drag-over-org { background-color: #e0f2fe !important; outline: 2px dashed var(--blue); }
-        
+        /* HIERARCHY TREE ADMIN */
+        .tree-node { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: 20px; width: 100%;}
+        .tree-node::before { content: ''; position: absolute; top: -20px; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; }
+        .tree-node:first-child::before { display: none; }
+        .tree-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--theme-color); text-align: center; width: 220px; position: relative; z-index: 2;}
+        .tree-children { display: flex; justify-content: center; gap: 20px; width: 100%; position: relative; padding-top: 20px; }
+        .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 2px solid #cbd5e1; width: calc(100% - 220px); transform: translateX(-50%); }
+
         .pricing-card { border: 2px solid var(--secondary); border-radius: 15px; padding: 30px; text-align: center; background: linear-gradient(180deg, #fff, #fffdf8); position: relative; overflow: hidden;}
         .pricing-card .badge { position: absolute; top: 15px; right: -30px; background: var(--secondary); color: var(--primary); padding: 5px 40px; transform: rotate(45deg); font-weight: bold; font-size: 0.8rem;}
         
@@ -612,6 +618,9 @@
             .builder-wrapper:not(.builder-fullscreen) .builder-tools { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 15px;}
             .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); margin-left: 0;}
             .builder-wrapper:not(.builder-fullscreen) .resizer { display: none; }
+            .tree-children { flex-direction: column; align-items: center; }
+            .tree-children::before { display: none; }
+            .tree-node::before { display: none; }
         }
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
@@ -675,7 +684,6 @@
                 <button class="btn-sm" style="background: var(--blue); color: white; padding: 10px 20px;" onclick="goToUserDashboard()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Dashboard Internal</button>
             </div>
 
-            <!-- KONFIGURASI UTAMA -->
             <div id="menu-setup" class="menu-content active">
                 <div class="card">
                     <h2 style="font-weight: 800;"><i class="fa-solid fa-globe"></i> Status Website Publik</h2>
@@ -726,7 +734,6 @@
                 </div>
             </div>
 
-            <!-- WEB BUILDER STUDIO DENGAN ADJUSTABLE PANELS -->
             <div id="menu-builder" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -742,7 +749,6 @@
                 <div class="builder-wrapper" id="builder-main-wrapper">
                     <button class="btn-exit-fs" onclick="toggleFullscreenBuilder()"><i class="fa-solid fa-compress"></i> Keluar Fullscreen</button>
 
-                    <!-- PANEL TOOLS KIRI -->
                     <div class="builder-tools" id="builder-tools-panel">
                         <div class="tool-category">Struktur Utama</div>
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'hero')"><i class="fa-solid fa-image"></i> Hero Banner</div>
@@ -762,10 +768,8 @@
                         <div class="tool-btn" draggable="true" ondragstart="dragStartTool(event, 'program')"><i class="fa-solid fa-list-check" style="color:#d35400;"></i> Status Program</div>
                     </div>
 
-                    <!-- SPLITTER KIRI -->
                     <div class="resizer" id="resizer-left"></div>
 
-                    <!-- KANVAS TENGAH -->
                     <div class="builder-canvas-container" id="builder-canvas-panel">
                         <div class="canvas-area" id="canvas-dropzone" ondragover="allowDrop(event)" ondrop="dropToCanvas(event)">
                             <div class="preview-window" id="preview-window">
@@ -777,10 +781,8 @@
                         </div>
                     </div>
 
-                    <!-- SPLITTER KANAN (Tampil saat prop panel aktif) -->
                     <div class="resizer" id="resizer-right" style="display: none;"></div>
 
-                    <!-- PANEL PROPERTY KANAN -->
                     <div class="builder-properties" id="properties-panel">
                         <div class="prop-header-flex">
                             <h3><i class="fa-solid fa-sliders"></i> Detail & Styling</h3>
@@ -795,7 +797,6 @@
                 </div>
             </div>
 
-            <!-- SECTION BARU: STRUKTUR ORGANISASI DRAG & DROP -->
             <div id="menu-struktur" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -847,7 +848,6 @@
                 </div>
             </div>
 
-            <!-- SECTION BARU: BERITA & PENGUMUMAN -->
             <div id="menu-berita" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -872,7 +872,6 @@
                     </div>
                     <div class="prop-group">
                         <label>Isi Detail Pengumuman</label>
-                        <!-- Rich Editor untuk Pengumuman -->
                         <div class="mini-rte-container">
                             <div class="mini-rte-toolbar">
                                 <button type="button" onclick="document.execCommand('bold',false,null)" title="Tebal"><i class="fa-solid fa-bold"></i></button>
@@ -904,7 +903,6 @@
                             </div>
                             <div class="prop-group">
                                 <label>Ringkasan / Paragraf Berita</label>
-                                <!-- Rich Editor untuk Berita -->
                                 <div class="mini-rte-container">
                                     <div class="mini-rte-toolbar">
                                         <button type="button" onclick="document.execCommand('bold',false,null)"><i class="fa-solid fa-bold"></i></button>
@@ -928,7 +926,6 @@
                 </div>
             </div>
 
-            <!-- SECTION BARU: TRANSPARANSI & KPI -->
             <div id="menu-transparansi" class="menu-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                     <div>
@@ -1103,6 +1100,45 @@
             }
         }
 
+        async function createWorkspace(e) {
+            e.preventDefault();
+            const orgName = document.getElementById('orgName').value;
+            const btn = e.target.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Membangun...';
+            btn.disabled = true;
+
+            try {
+                // 1. Insert Workspace
+                const { data: newWs, error: wsError } = await supabaseClient.from('workspaces')
+                    .insert([{ nama_organisasi: orgName, admin_id: currentAdminSession.id }])
+                    .select()
+                    .single();
+
+                if (wsError) throw wsError;
+
+                // 2. Insert Admin as member
+                await supabaseClient.from('workspace_members').insert([{
+                    workspace_id: newWs.id,
+                    user_id: currentAdminSession.id,
+                    nama_user: currentAdminSession.user_metadata?.full_name || 'Admin Master',
+                    role: 'Admin'
+                }]);
+
+                showToast("Berhasil!", "Ruang Kerja (Workspace) berhasil dibuat.", "success");
+                
+                // Reload page to enter dashboard mode
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal Membuat Workspace", err.message, "error");
+                btn.innerHTML = 'Bangun Ruang Kerja';
+                btn.disabled = false;
+            }
+        }
+
         async function deleteLandingPage() {
             if(confirm("Yakin ingin menghapus seluruh website publik ini beserta desainnya?")) {
                 const { error } = await supabaseClient.from('landing_pages').delete().eq('workspace_id', currentWorkspaceId);
@@ -1233,7 +1269,8 @@
             if (!session) { window.location.href = 'index.html'; return; }
             currentAdminSession = session.user;
             
-            const { data: wsData } = await supabaseClient.from('workspaces').select('*').eq('admin_id', currentAdminSession.id).single(); 
+            // FIX 406 ERROR: USE maybeSingle()
+            const { data: wsData } = await supabaseClient.from('workspaces').select('*').eq('admin_id', currentAdminSession.id).maybeSingle(); 
             if (wsData) {
                 currentWorkspaceId = wsData.id;
                 globalOrgName = wsData.nama_organisasi;
@@ -1417,7 +1454,7 @@
         // ADVANCED BUILDER & DATA SYNC LOGIC
         // ==========================================
         async function loadLandingPageData() {
-            const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
+            const { data } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).maybeSingle();
             const statusTxt = document.getElementById('ws-status-text');
             const linkBtn = document.getElementById('link-public');
             const delBtn = document.getElementById('btn-hapus-web');
@@ -1672,7 +1709,7 @@
         // --- TRANSPARANSI & KPI ADMIN DASHBOARD LOGIC ---
         async function loadAdminTransparansi() {
             // Fetch Keuangan
-            const { data: finData } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single(); 
+            const { data: finData } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).maybeSingle(); 
             let t = 0; let r = 0; 
             if (finData) { t = parseFloat(finData.total_rab); r = parseFloat(finData.realisasi_rab); } 
             const sisa = t - r; const persentase = t > 0 ? Math.round((r/t)*100) : 0; 
