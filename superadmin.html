@@ -23,7 +23,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; min-height: 100vh;}
         
-        /* CUSTOM TOAST NOTIFICATION SYSTEM */
+        /* CUSTOM TOAST NOTIFICATION */
         #toast-container { position: fixed; top: 30px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
         .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 0.95rem; border-left: 5px solid var(--primary); transform: translateX(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
@@ -35,7 +35,7 @@
         .toast.info { border-color: var(--blue); color: var(--blue); }
         .toast.info i { color: var(--blue); }
         
-        /* SIDEBAR NAVIGATION */
+        /* SIDEBAR */
         .sidebar { width: 270px; background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); height: 100vh; padding: 30px 20px; color: var(--white); position: fixed; box-shadow: 5px 0 20px rgba(0,0,0,0.05); z-index: 100; overflow-y: auto; transition: 0.3s;}
         .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.6rem; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.5px;}
         .sidebar-subtitle { font-size: 0.75rem; color: #cbd5e1; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 1px;}
@@ -44,18 +44,18 @@
         .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--white); transform: translateX(5px); }
         .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); font-weight: 800;}
         
-        /* MAIN CONTENT AREA */
+        /* MAIN CONTENT */
         .main-content { margin-left: 270px; padding: 40px; width: calc(100% - 270px); min-height: 100vh; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; background: white; padding: 25px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);}
         .header h1 { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px;}
         .admin-badge { background: rgba(10,48,85,0.05); color: var(--primary); padding: 10px 20px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;}
         
-        /* VIEW SECTIONS MODIFIER */
+        /* VIEW SECTIONS */
         .view-section { display: none; animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .view-section.active { display: block; }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS & GRIDS COMPONENTS */
+        /* CARDS & GRIDS */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 35px; }
         .stat-card { background: var(--white); padding: 35px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-bottom: 5px solid var(--primary); transition: 0.3s; position: relative; overflow: hidden;}
         .stat-card::after { content: '\f201'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: -15px; bottom: -20px; font-size: 7rem; color: var(--primary); opacity: 0.03; pointer-events: none;}
@@ -66,7 +66,7 @@
         .panel { background: var(--white); padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow-x: auto; margin-bottom: 30px;}
         .panel h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
         
-        /* TABLES STYLING */
+        /* TABLES */
         table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; min-width: 800px; }
         th, td { padding: 18px 15px; text-align: left; font-size: 0.95rem; }
         th { background: #f8fafc; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;}
@@ -92,7 +92,7 @@
         .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a;}
         .badge-superadmin { background: #fef08a; color: #b45309; border: 1px solid #fde047;}
 
-        /* MODAL POPUPS */
+        /* MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-content { background: var(--white); width: 95%; max-width: 650px; border-radius: 25px; padding: 40px; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
@@ -125,8 +125,8 @@
         .switch { position: relative; display: inline-block; width: 54px; height: 30px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background-color: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-        input:checked + .slider { background-color: var(--green); }
+        .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        input:checked + .slider { background: var(--green); }
         input:checked + .slider:before { transform: translateX(24px); }
         
         /* CHART CONTAINER */
@@ -138,14 +138,16 @@
     <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
-    <!-- SIDEBAR NAV -->
     <div class="sidebar">
         <h2><i class="fa-solid fa-server"></i> CI Super</h2>
         <div class="sidebar-subtitle">Panel Kontrol Utama</div>
         
         <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
         <div class="nav-item" onclick="switchMenu('requests')"><i class="fa-solid fa-user-clock"></i> Permintaan Registrasi</div>
+        
+        <!-- MENU BARU: MANAJEMEN PENGGUNA (USERS) -->
         <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users-gear"></i> Manajemen Pengguna</div>
+        
         <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
         <div class="nav-item" onclick="switchMenu('server')"><i class="fa-solid fa-satellite-dish"></i> Status Server & Web</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-users-rays"></i> Analitik Pengguna</div>
@@ -153,7 +155,6 @@
         <div class="nav-item" style="margin-top: 60px; background: rgba(231, 76, 60, 0.1); color: var(--red); justify-content: center;" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
     </div>
 
-    <!-- MAIN BODY -->
     <div class="main-content">
         <div class="header">
             <h1>Sistem Monitoring Global</h1>
@@ -236,7 +237,7 @@
                 </div>
 
                 <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; color: #92400e; font-weight: 500;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <b>Catatan Sistem:</b> Menghapus akses pengguna akan melenyapkan izin login secara permanen dan membersihkan data eksistensi pengguna dari seluruh referensi relasional database.
+                    <i class="fa-solid fa-triangle-exclamation"></i> <b>Catatan Sistem:</b> Menghapus akses pengguna akan melenyapkan izin login dan ID referensi mereka. Mereka tidak akan bisa masuk ke sistem meskipun email mereka pernah terdaftar.
                 </div>
                 
                 <div style="overflow-x: auto;">
@@ -620,8 +621,8 @@
                 return;
             }
 
-            // MENGAMBIL DATA NAMA USER: Kita mengkombinasikan data dari `workspace_members` 
-            // ATAU mengambil dari `registration_requests` yang telah di-approve
+            // Supabase API Rest Frontend tidak bisa mengakses email/password dari auth.users secara bebas.
+            // Strategi: Kita mencoba menarik nama dari workspace_members.
             const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
             let nameMap = {};
             if(membersInfo) {
@@ -674,7 +675,7 @@
                             </select>
                         </td>
                         <td style="text-align: center;">
-                            <button class="btn-action btn-del" ${ur.role === 'superadmin' ? 'disabled style="opacity:0.5;"' : ''} onclick="revokeUserAccess('${ur.user_id}')" title="Cabut Izin Akses & Hapus Riwayat secara total">
+                            <button class="btn-action btn-del" ${ur.role === 'superadmin' ? 'disabled style="opacity:0.5;"' : ''} onclick="revokeUserAccess('${ur.user_id}')" title="Cabut Izin Akses & Hapus Riwayat">
                                 <i class="fa-solid fa-user-slash"></i> Cabut Akses
                             </button>
                         </td>
@@ -706,44 +707,34 @@
             loadDashboardData(); // Refresh statistik angka admin/user di dashboard
         }
 
-        // PERBAIKAN FUNGSI REVOKE USER ACCESS YANG LEBIH AGRESIF (CASCADE DELETE PADA FRONTEND)
         async function revokeUserAccess(userId) {
-            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace (termasuk Workspace miliknya jika ia Admin) akan ikut lenyap. Lanjutkan?")) {
-                
-                // Mencegah double click
-                const btnList = document.querySelectorAll('.btn-del');
-                btnList.forEach(b => b.disabled = true);
-                
-                showToast("Sistem Bekerja", "Mengeksekusi perintah pencabutan akses ke server...", "info");
+            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya dan workspace yang ia buat akan lenyap. Lanjutkan?")) {
+                showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
                 
                 try {
-                    // 1. Hapus keanggotaan dari semua workspace_members (agar lepas dari referensi org)
+                    // 1. Hapus dari keanggotaan workspace
                     await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
-
-                    // 2. Hapus absensi / attendances miliknya
-                    await supabaseClient.from('attendances').delete().eq('user_id', userId);
-
-                    // 3. Jika dia pembuat workspace (Admin), hapus workspacenya agar tidak jadi zombie data
-                    // Proses ini juga akan otomatis memusnahkan landing_pages, kpi, dll (Karena ON DELETE CASCADE di database)
+                    
+                    // 2. Hapus workspace yang DIBUAT oleh orang ini (Cascade delete semua isinya)
                     await supabaseClient.from('workspaces').delete().eq('admin_id', userId);
 
-                    // 4. Terakhir, hapus hak akses mutlak dari tabel user_roles.
-                    // Saat row ini dihapus, skrip index.html akan otomatis menolak mereka saat mencoba login.
+                    // 3. Cabut hak akses utamanya (Mencegah dia login selamanya)
                     const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
 
                     if(roleErr) throw roleErr;
 
-                    showToast("Akses Berhasil Dicabut", "Pengguna tersebut telah dilenyapkan dari referensi aplikasi secara permanen.", "success");
+                    showToast("Akses Dicabut", "Pengguna tersebut telah dihapus secara paksa dari sistem.", "success");
                     
-                    // Refresh View
+                    // Hapus dari state lokal langsung agar UI langsung responsif
+                    globalUsersData = globalUsersData.filter(u => u.user_id !== userId);
+                    
+                    // Refresh semua data
                     loadAllUsersData();
                     loadDashboardData();
+
                 } catch (err) {
                     console.error(err);
-                    showToast("Gagal Menghapus Akses", err.message + " (Cek Policy RLS Supabase Anda)", "error");
-                } finally {
-                    const btnList = document.querySelectorAll('.btn-del');
-                    btnList.forEach(b => b.disabled = false);
+                    showToast("Penghapusan Gagal", err.message, "error");
                 }
             }
         }
