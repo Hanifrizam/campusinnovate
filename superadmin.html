@@ -18,6 +18,7 @@
             --green: #2ecc71; 
             --red: #e74c3c; 
             --blue: #3498db; 
+            --border: #e2e8f0;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
@@ -126,7 +127,7 @@
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; border-radius: 34px; }
         .slider:before { position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 4px; background: white; transition: .4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-        input:checked + .slider { background: var(--green); }
+        input:checked + .slider { background-color: var(--green); }
         input:checked + .slider:before { transform: translateX(24px); }
         
         /* CHART CONTAINER */
@@ -661,7 +662,7 @@
                 let disabledAttr = ur.role === 'superadmin' ? 'disabled title="Akses absolut tidak dapat diubah"' : '';
 
                 tableBody.innerHTML += `
-                    <tr>
+                    <tr id="row-user-${ur.user_id}">
                         <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
                             <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,18)}...
                         </td>
@@ -708,7 +709,7 @@
         }
 
         async function revokeUserAccess(userId) {
-            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya dan workspace yang ia buat akan lenyap. Lanjutkan?")) {
+            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace akan ikut lenyap. Lanjutkan?")) {
                 showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
                 
                 try {
@@ -719,17 +720,30 @@
                     await supabaseClient.from('workspaces').delete().eq('admin_id', userId);
 
                     // 3. Cabut hak akses utamanya (Mencegah dia login selamanya)
-                    const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
+                    const { data: deletedRole, error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId).select();
 
                     if(roleErr) throw roleErr;
 
+                    // Validasi apakah baris benar-benar terhapus (Menghindari Silent Fail RLS)
+                    if (!deletedRole || deletedRole.length === 0) {
+                        throw new Error("Gagal: Database menolak penghapusan. Pastikan RLS Policy 'DELETE' untuk tabel user_roles, workspaces, & workspace_members sudah aktif (true).");
+                    }
+
                     showToast("Akses Dicabut", "Pengguna tersebut telah dihapus secara paksa dari sistem.", "success");
                     
-                    // Hapus dari state lokal langsung agar UI langsung responsif
+                    // HAPUS LANGSUNG DARI TAMPILAN (DOM) AGAR INSTAN
+                    const rowToRemove = document.getElementById(`row-user-${userId}`);
+                    if (rowToRemove) {
+                        rowToRemove.style.transition = "0.5s";
+                        rowToRemove.style.opacity = "0";
+                        rowToRemove.style.transform = "translateX(-50px)";
+                        setTimeout(() => rowToRemove.remove(), 500);
+                    }
+                    
+                    // Hapus dari state lokal
                     globalUsersData = globalUsersData.filter(u => u.user_id !== userId);
                     
-                    // Refresh semua data
-                    loadAllUsersData();
+                    // Refresh statistik dashboard
                     loadDashboardData();
 
                 } catch (err) {
@@ -1160,16 +1174,24 @@
             
             if (confirmName === namaOrg) {
                 showToast("Proses Penghapusan Berjalan", "Memerintahkan Cascade Delete ke inti database...", "info");
-                const { error } = await supabaseClient.from('workspaces').delete().eq('id', workspaceId);
                 
-                if (error) {
-                    showToast("Gagal Menghapus", error.message, "error");
-                } else {
+                try {
+                    const { data: deletedData, error } = await supabaseClient.from('workspaces').delete().eq('id', workspaceId).select();
+                    
+                    if (error) throw error;
+
+                    if (!deletedData || deletedData.length === 0) {
+                        throw new Error("Gagal: RLS Policy Supabase memblokir perintah DELETE pada tabel workspaces.");
+                    }
+                    
                     showToast("Penghapusan Berhasil", "Organisasi dan seluruh relasinya telah hangus tidak tersisa dari hard disk server.", "success");
                     loadDashboardData();
                     if(document.getElementById('view-features').classList.contains('active')) renderFeaturesTable();
                     if(document.getElementById('view-server').classList.contains('active')) renderServerStatus();
                     if(document.getElementById('view-analytics').classList.contains('active')) loadAnalyticsData();
+                } catch (err) {
+                    console.error(err);
+                    showToast("Gagal Menghapus", err.message, "error");
                 }
             } else if (confirmName !== null) {
                 showToast("Aborted", "Nama yang diketik tidak cocok. Operasi dibatalkan demi keamanan.", "error");
