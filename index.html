@@ -57,20 +57,25 @@
         @keyframes slideInToast { to { transform: translateX(0); } }
         @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-20px); visibility: hidden; } }
 
-        /* ANIMASI BOLD TOYFIGHT */
-        .reveal { opacity: 0; transform: translateY(50px); transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .reveal.active { opacity: 1; transform: translateY(0); }
-        .fade-in-up { animation: fadeInUpAnim 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; opacity: 0; transform: translateY(40px); }
+        /* ==========================================
+           LANDING PAGE STYLES (NEO-BRUTALISM / TOYFIGHT VIBE)
+           ========================================== */
         
-        @keyframes fadeInUpAnim { to { opacity: 1; transform: translateY(0); } }
-        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-15px) rotate(5deg); } 100% { transform: translateY(0px) rotate(0deg); } }
-        @keyframes pulse-shadow { 0% { box-shadow: 4px 4px 0px var(--primary); } 50% { box-shadow: 8px 8px 0px var(--primary); transform: translate(-2px, -2px); } 100% { box-shadow: 4px 4px 0px var(--primary); } }
-        @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
+        /* Typography & Utils */
+        /* FIX BUG: Animasi dijamin muncul dengan opacity 1 di akhir keyframes */
+        .reveal { opacity: 0; }
+        .reveal.active { animation: fadeInUpAnim 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        .fade-in-up { opacity: 0; animation: fadeInUpAnim 1s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        
+        @keyframes fadeInUpAnim {
+            0% { opacity: 0; transform: translateY(50px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
 
         .section-title { font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 900; line-height: 1.2; margin-bottom: 15px; color: var(--primary); letter-spacing: -1.5px;}
         .section-subtitle { font-size: clamp(0.95rem, 1.5vw, 1.1rem); color: #475569; max-width: 650px; margin-bottom: 30px; line-height: 1.6; font-weight: 500;}
         
-        /* Buttons */
+        /* Bold Playful Buttons */
         .btn-bold {
             display: inline-flex; align-items: center; justify-content: center; gap: 12px;
             background: var(--white); color: var(--primary);
@@ -112,7 +117,7 @@
         }
         .hero-content h1 span { 
             color: var(--secondary); text-shadow: 3px 3px 0px var(--primary);
-            display: inline-block; animation: float 4s ease-in-out infinite;
+            display: inline-block; animation: floatText 4s ease-in-out infinite;
         }
         .hero-content p { 
             font-size: clamp(1rem, 2vw, 1.2rem); color: var(--primary); margin-bottom: 40px; font-weight: 600;
@@ -120,32 +125,44 @@
             border: 3px solid var(--primary); box-shadow: 5px 5px 0px var(--primary); display: inline-block;
         }
         
-        .shape { position: absolute; z-index: 1; pointer-events: none; animation: float 6s ease-in-out infinite; }
-        .shape-1 { top: 15%; left: 8%; font-size: 6rem; color: var(--secondary); transform: rotate(15deg); filter: drop-shadow(4px 4px 0 var(--primary));}
-        .shape-2 { bottom: 15%; right: 8%; font-size: 7rem; color: var(--green); transform: rotate(-15deg); animation-delay: 1s; filter: drop-shadow(5px 5px 0 var(--primary));}
-        .shape-3 { top: 25%; right: 15%; width: 60px; height: 60px; background: var(--error); border-radius: 50%; border: 4px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); animation-delay: 2s; }
-        .shape-4 { bottom: 25%; left: 12%; width: 80px; height: 80px; background: var(--accent); border-radius: 15px; border: 4px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); animation-delay: 1.5s; transform: rotate(45deg);}
+        /* Floating Animated Shapes */
+        @keyframes floatText { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-8px) rotate(2deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        @keyframes float { 0% { transform: translateY(0px) rotate(0deg); } 50% { transform: translateY(-25px) rotate(8deg); } 100% { transform: translateY(0px) rotate(0deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-shadow { 0% { box-shadow: 4px 4px 0px var(--primary); } 50% { box-shadow: 8px 8px 0px var(--primary); transform: translate(-2px, -2px); } 100% { box-shadow: 4px 4px 0px var(--primary); } }
 
-        /* Interactive Simulation Section */
-        .section { padding: 100px 5%; position: relative; z-index: 2; }
+        .shape { position: absolute; z-index: 1; pointer-events: none; animation: float 6s ease-in-out infinite; }
+        .shape-1 { top: 15%; left: 5%; font-size: 6rem; color: var(--secondary); filter: drop-shadow(4px 4px 0 var(--primary));}
+        .shape-2 { bottom: 10%; right: 8%; font-size: 7rem; color: var(--green); animation-delay: 1s; filter: drop-shadow(5px 5px 0 var(--primary));}
+        .shape-3 { top: 25%; right: 10%; width: 60px; height: 60px; background: var(--error); border-radius: 50%; border: 4px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); animation-delay: 2s; }
+        .shape-4 { bottom: 25%; left: 8%; width: 80px; height: 80px; background: var(--accent); border-radius: 15px; border: 4px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); animation-delay: 1.5s; transform: rotate(45deg);}
+
+        /* Section Global */
+        .section { padding: 80px 5%; position: relative; z-index: 2; }
+        
+        /* Features / Interactive Simulation */
         .sim-section { 
             background: var(--primary); color: white; border-radius: 40px; 
             margin: 0 2% 80px; padding: 80px 5%; display: flex; flex-direction: column; 
             align-items: center; text-align: center; position: relative; overflow: hidden;
-            border: 4px solid var(--text); box-shadow: 15px 15px 0px var(--secondary);
+            border: 4px solid var(--text); box-shadow: 12px 12px 0px var(--secondary);
         }
         .sim-section .section-title { color: var(--secondary); text-shadow: 3px 3px 0px var(--text);}
         .sim-section .section-subtitle { color: #e2e8f0; }
-        .sim-bg { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(246,178,59,0.15) 0%, transparent 70%); top: -400px; right: -400px; border-radius: 50%; pointer-events: none; animation: float 10s infinite alternate;}
-
-        .mockup-container {
-            width: 100%; max-width: 950px; background: #0f172a; border-radius: 20px;
-            padding: 15px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 4px solid #334155;
-            position: relative; z-index: 2; transform: perspective(1200px) rotateX(3deg); transition: 0.5s ease;
-        }
-        .mockup-container:hover { transform: perspective(1200px) rotateX(0deg); box-shadow: 0 30px 60px rgba(0,0,0,0.8); border-color: var(--secondary);}
         
-        /* FULLSCREEN MOCKUP LOGIC (Fixed for Desktop & Mobile) */
+        /* Decorative Elements in Sim */
+        .sim-bg { position: absolute; width: 800px; height: 800px; background: radial-gradient(circle, rgba(246,178,59,0.15) 0%, transparent 70%); top: -400px; right: -400px; border-radius: 50%; pointer-events: none; animation: float 10s infinite alternate;}
+        .spin-slow { position: absolute; animation: spin 15s linear infinite; opacity: 0.3; pointer-events: none;}
+
+        /* MOCKUP CONTAINER (Diperkecil agar proporsional di Desktop) */
+        .mockup-container {
+            width: 100%; max-width: 850px; background: #0f172a; border-radius: 20px;
+            padding: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); border: 4px solid #334155;
+            position: relative; z-index: 2; transform: perspective(1000px) rotateX(2deg); transition: 0.5s ease;
+        }
+        .mockup-container:hover { transform: perspective(1000px) rotateX(0deg); box-shadow: 0 30px 60px rgba(0,0,0,0.8); border-color: var(--secondary);}
+        
+        /* Fullscreen Mode for Mockup */
         .mockup-container.fullscreen-mode {
             position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; 
             max-width: none !important; border-radius: 0 !important; border: none !important; transform: none !important; margin: 0 !important;
@@ -155,24 +172,24 @@
         .mockup-container.fullscreen-mode .mockup-header { background: #0f172a; padding: 15px; border-radius: 12px; margin-bottom: 15px;}
         .mockup-container.fullscreen-mode .mockup-body { flex-grow: 1; border-radius: 15px; background: var(--white); box-shadow: 0 10px 30px rgba(0,0,0,0.1);}
         
-        .mockup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 0 10px;}
+        .mockup-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 0 10px;}
         .mockup-dots { display: flex; gap: 8px;}
-        .mockup-dot { width: 15px; height: 15px; border-radius: 50%; background: #ef4444; border: 2px solid #0f172a; cursor: pointer;}
+        .mockup-dot { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; border: 2px solid #0f172a; cursor: pointer;}
         .mockup-dot:nth-child(2) { background: #f59e0b; }
         .mockup-dot:nth-child(3) { background: #10b981; }
         
         .mockup-tools { display: flex; gap: 10px;}
-        .mockup-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.3s; display: flex; align-items: center; gap: 6px;}
+        .mockup-btn { background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-family: 'Poppins'; font-weight: 600; font-size: 0.8rem; transition: 0.3s; display: flex; align-items: center; gap: 6px;}
         .mockup-btn:hover { background: var(--secondary); color: var(--primary); border-color: var(--primary);}
         .close-fs-btn { display: none; background: var(--red) !important; color: white !important; border-color: var(--primary) !important;}
         .close-fs-btn:hover { background: #c0392b !important;}
         .fullscreen-mode .fs-expand-btn { display: none !important;}
         .fullscreen-mode .close-fs-btn { display: flex !important;}
 
-        .mockup-body { background: var(--bg); border-radius: 12px; padding: 20px; display: grid; grid-template-columns: 220px 1fr; gap: 20px; min-height: 450px; overflow-y: auto;}
+        .mockup-body { background: var(--bg); border-radius: 12px; padding: 15px; display: grid; grid-template-columns: 200px 1fr; gap: 15px; min-height: 400px; overflow-y: auto;}
         
-        .mockup-sidebar { background: white; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 3px solid #e2e8f0; box-shadow: 4px 4px 0 #e2e8f0;}
-        .mockup-sidebar-item { height: 45px; background: #f8fafc; border: 2px solid transparent; border-radius: 10px; transition: 0.2s; cursor: pointer; display:flex; align-items:center; padding: 0 15px; color: #64748b; font-weight: 800; font-size: 0.9rem;}
+        .mockup-sidebar { background: white; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px; border: 3px solid #e2e8f0; box-shadow: 4px 4px 0 #e2e8f0;}
+        .mockup-sidebar-item { height: 40px; background: #f8fafc; border: 2px solid transparent; border-radius: 8px; transition: 0.2s; cursor: pointer; display:flex; align-items:center; padding: 0 10px; color: #64748b; font-weight: 800; font-size: 0.85rem;}
         .mockup-sidebar-item:hover { background: #e2e8f0; color: var(--primary); transform: translateX(5px);}
         .mockup-sidebar-item.active { background: var(--secondary); color: var(--primary); border-color: var(--primary); box-shadow: 3px 3px 0 var(--primary);}
         
@@ -180,23 +197,24 @@
         .mockup-tab-content { display: none; animation: fadeIn 0.4s ease; height: 100%;}
         .mockup-tab-content.active { display: flex; flex-direction: column; gap: 15px;}
         
-        .mockup-card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }
-        .m-card { background: white; padding: 20px; border-radius: 12px; border: 3px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); transition: 0.3s; animation: pulse-shadow 3s infinite;}
+        .mockup-card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+        .m-card { background: white; padding: 15px; border-radius: 10px; border: 3px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); transition: 0.3s; animation: pulse-shadow 3s infinite;}
         .m-card:nth-child(2) { animation-delay: 1s;}
         .m-card:nth-child(3) { animation-delay: 2s; border-color: var(--green); box-shadow: 4px 4px 0 var(--green);}
         .m-card:hover { transform: translate(-3px, -3px); box-shadow: 6px 6px 0 var(--primary); animation: none;}
-        .m-card .title { font-size: 0.8rem; color: #64748b; text-transform: uppercase; font-weight: 900; margin-bottom: 5px;}
-        .m-card .val { font-size: 2rem; font-weight: 900; color: var(--primary); line-height: 1;}
-        .mockup-chart { background: white; padding: 20px; border-radius: 15px; border: 3px solid var(--primary); box-shadow: 5px 5px 0 var(--primary); flex: 1; display: flex; flex-direction: column; min-height: 250px;}
+        .m-card .title { font-size: 0.75rem; color: #64748b; text-transform: uppercase; font-weight: 900; margin-bottom: 5px;}
+        .m-card .val { font-size: 1.6rem; font-weight: 900; color: var(--primary); line-height: 1;}
+        .mockup-chart { background: white; padding: 15px; border-radius: 10px; border: 3px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); flex: 1; display: flex; flex-direction: column; min-height: 200px;}
         
-        .m-table-container { background: white; border-radius: 15px; border: 3px solid var(--primary); box-shadow: 5px 5px 0 var(--primary); overflow-x: auto;}
-        .m-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 550px;}
-        .m-table th { background: var(--primary); color: white; padding: 15px; font-size: 0.85rem; font-weight: 800; text-transform: uppercase;}
-        .m-table td { padding: 15px; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; font-weight: 600; color: var(--text);}
+        .m-table-container { background: white; border-radius: 10px; border: 3px solid var(--primary); box-shadow: 4px 4px 0 var(--primary); overflow-x: auto;}
+        .m-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 500px;}
+        .m-table th { background: var(--primary); color: white; padding: 12px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase;}
+        .m-table td { padding: 12px; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; font-weight: 600; color: var(--text);}
         .m-table tr:hover td { background: #f8fafc;}
-        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; border: 2px solid currentColor;}
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 900; border: 2px solid currentColor;}
 
         /* 30 Days Trial Banner with Marquee */
+        @keyframes marquee { 0% { transform: translateX(0%); } 100% { transform: translateX(-50%); } }
         .trial-banner {
             background: var(--secondary); padding: 80px 5%; border-radius: 40px;
             margin: 0 2% 80px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 30px;
@@ -214,13 +232,13 @@
         .trial-text h2 { font-size: clamp(2.5rem, 5vw, 3.5rem); font-weight: 900; color: var(--primary); line-height: 1.1; margin-bottom: 10px; letter-spacing: -2px;}
         .trial-text p { font-size: 1.1rem; color: #92400e; font-weight: 800; max-width: 500px;}
 
-        /* Contact & Footer */
+        /* Footer */
         footer { background: var(--primary); color: white; padding: 80px 5% 30px; position: relative; overflow: hidden; border-top: 8px solid var(--secondary);}
         .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 40px; margin-bottom: 50px; position: relative; z-index: 2;}
         .footer-brand h2 { color: var(--secondary); font-size: 2.2rem; font-weight: 900; margin-bottom: 15px; display: flex; align-items: center; gap: 12px; letter-spacing: -1px;}
         .footer-brand p { font-size: 0.95rem; line-height: 1.8; margin-bottom: 25px; max-width: 400px; font-weight: 500;}
         .social-icons { display: flex; gap: 12px; }
-        .social-icons a { width: 45px; height: 45px; border-radius: 12px; background: white; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.3rem; transition: 0.3s; border: 3px solid transparent;}
+        .social-icons a { width: 45px; height: 45px; border-radius: 10px; background: white; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.3rem; transition: 0.3s; border: 3px solid transparent;}
         .social-icons a:hover { background: var(--secondary); transform: translateY(-5px) rotate(10deg); border-color: white; box-shadow: 4px 4px 0 white;}
         
         .footer-title { color: var(--secondary); font-weight: 900; font-size: 1.2rem; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;}
@@ -266,7 +284,7 @@
             border-right: 5px solid var(--primary);
         }
         .auth-brand-panel h1 { font-size: 3.5rem; line-height: 1; margin-bottom: 20px; z-index: 2; position: relative; font-weight: 900; letter-spacing: -2px;}
-        .auth-brand-panel h1 span { color: var(--secondary); text-shadow: 3px 3px 0 var(--text);}
+        .auth-brand-panel h1 span { color: var(--secondary); text-shadow: 2px 2px 0 var(--text);}
         .auth-brand-panel p { color: rgba(255,255,255,0.9); z-index: 2; font-size: 1rem; line-height: 1.6; position: relative; font-weight: 500;}
         .floating-logo { max-width: 150px; margin-bottom: 25px; z-index: 2; position: relative; animation: float 3s ease-in-out infinite; filter: drop-shadow(5px 5px 0 var(--text));}
 
@@ -291,7 +309,7 @@
         .captcha-box input:focus { border-color: var(--primary); box-shadow: 3px 3px 0 var(--primary);}
 
         .tc-box { margin-bottom: 25px; font-size: 0.85rem; color: #475569; display: flex; align-items: flex-start; gap: 10px; font-weight: 600;}
-        .tc-box input { margin-top: 3px; cursor: pointer; width: 18px; height: 18px; accent-color: var(--primary);}
+        .tc-box input { margin-top: 3px; cursor: pointer; width: 16px; height: 16px; accent-color: var(--primary);}
         .tc-box span { color: var(--primary); font-weight: 900; cursor: pointer; border-bottom: 2px solid var(--secondary); transition: 0.2s;}
         .tc-box span:hover { background: var(--secondary); }
 
@@ -327,7 +345,7 @@
                 box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 9999;
             }
             .nav-links.active { right: 0; }
-            .nav-links a { color: white; font-size: 1.3rem; }
+            .nav-links a { color: white; font-size: 1.2rem; }
             .mobile-menu-btn { display: block; position: relative; z-index: 10000;}
             .mobile-menu-btn.text-white { color: white; }
 
@@ -335,7 +353,7 @@
             .shape-1, .shape-2 { display: none; }
             
             .section { padding: 80px 5%; }
-            .sim-section { padding: 60px 5%; border-radius: 25px; border-width: 3px; box-shadow: 8px 8px 0 var(--secondary);}
+            .sim-section { padding: 60px 5%; border-radius: 20px;}
             
             .trial-banner { flex-direction: column; text-align: center; border-radius: 25px; padding: 40px 20px;}
             
@@ -343,27 +361,28 @@
             .mockup-container {
                 transform: none !important; /* Disable 3D on Mobile */
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                border-width: 3px; padding: 10px; margin: 0;
+                border-width: 3px; padding: 8px; margin: 0;
             }
             .mockup-container.fullscreen-mode { padding: 0 !important; }
             .mockup-container.fullscreen-mode .mockup-body { border-radius: 0; grid-template-rows: auto 1fr; padding: 10px;}
             
-            .mockup-body { grid-template-columns: 1fr; padding: 15px; min-height: 400px;}
+            .mockup-body { display: flex; flex-direction: column; padding: 15px; min-height: auto;}
             .mockup-sidebar { 
                 flex-direction: row; overflow-x: auto; padding-bottom: 5px; 
                 border-width: 2px; box-shadow: 2px 2px 0 #e2e8f0; padding: 10px; margin-bottom: 10px;
+                gap: 10px;
             }
-            .mockup-sidebar-item { white-space: nowrap; flex-shrink: 0; font-size: 0.85rem; height: 40px; padding: 0 12px;}
+            .mockup-sidebar-item { white-space: nowrap; flex-shrink: 0; font-size: 0.8rem; height: 35px; padding: 0 10px;}
             .mockup-card-row { grid-template-columns: 1fr; }
             
             /* Fix Auth Container Mobile */
             .auth-container { flex-direction: column; width: 100%; border-radius: 20px; border-width: 3px; box-shadow: 8px 8px 0 rgba(0,0,0,0.5); margin-top: 30px; min-height: auto;}
-            .auth-brand-panel { padding: 40px 20px; text-align: center; align-items: center; border-bottom: 4px solid var(--primary); border-right: none;}
-            .auth-brand-panel h1 { font-size: 2.5rem; }
+            .auth-brand-panel { padding: 30px 20px; text-align: center; align-items: center; border-bottom: 4px solid var(--primary); border-right: none;}
+            .auth-brand-panel h1 { font-size: 2.2rem; }
             .form-panel { padding: 30px 20px; }
             .form-wrapper { position: relative; opacity: 1; visibility: visible; transform: none; display: none;}
             .form-wrapper.active { display: block; }
-            .close-auth-btn { top: 10px; right: 10px; width: 45px; height: 45px; font-size: 1.2rem;}
+            .close-auth-btn { top: 10px; right: 10px; width: 40px; height: 40px; font-size: 1.2rem;}
         }
     </style>
 </head>
@@ -422,6 +441,11 @@
     <!-- Interactive Simulation Section -->
     <section class="section sim-section" id="simulasi">
         <div class="sim-bg"></div>
+        
+        <!-- Decorative Background Icons -->
+        <i class="fa-solid fa-gear shape spin-slow" style="top: 10%; right: 5%; font-size: 4rem; color: var(--secondary); opacity: 0.5;"></i>
+        <i class="fa-solid fa-cube shape float-fast" style="bottom: 10%; left: 5%; font-size: 3rem; color: var(--green); opacity: 0.5;"></i>
+
         <div style="position: relative; z-index: 2; width: 100%; display: flex; flex-direction: column; align-items: center;">
             <h2 class="section-title reveal">Rasakan Pengalaman ERP Modern</h2>
             <p class="section-subtitle reveal">Coba simulasi interaktif dashboard di bawah ini. Jelajahi tab menu untuk melihat bagaimana kami menyajikan data organisasi Anda secara otomatis.</p>
@@ -434,8 +458,8 @@
                         <div class="mockup-dot"></div>
                     </div>
                     <div class="mockup-tools">
-                        <button class="fs-expand-btn" onclick="toggleFullscreenMockup()" title="Layar Penuh"><i class="fa-solid fa-expand" id="fs-icon"></i> <span class="hide-mobile">Perluas Layar</span></button>
-                        <button class="close-fs-btn" onclick="toggleFullscreenMockup()" title="Tutup Layar Penuh"><i class="fa-solid fa-compress"></i> <span class="hide-mobile">Tutup Fullscreen</span></button>
+                        <button class="mockup-btn fs-expand-btn" onclick="toggleFullscreenMockup()" title="Layar Penuh"><i class="fa-solid fa-expand" id="fs-icon"></i> <span class="hide-mobile">Perluas Layar</span></button>
+                        <button class="mockup-btn close-fs-btn" onclick="toggleFullscreenMockup()" title="Tutup Layar Penuh"><i class="fa-solid fa-compress"></i> <span class="hide-mobile">Tutup Fullscreen</span></button>
                     </div>
                 </div>
                 <div class="mockup-body">
@@ -451,7 +475,7 @@
                         <div class="mockup-tab-content active" id="mockup-tab-dash">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                                 <h3 style="color: var(--primary); font-weight: 900; font-size: 1.3rem; letter-spacing: -0.5px;">Overview Organisasi</h3>
-                                <button class="btn-auth-submit" style="width: auto; padding: 8px 15px; font-size: 0.8rem; box-shadow: 3px 3px 0 var(--primary);" onclick="simulateData()">Jalankan Simulasi <i class="fa-solid fa-play"></i></button>
+                                <button class="btn-auth-submit" style="width: auto; padding: 6px 15px; font-size: 0.8rem; box-shadow: 2px 2px 0 var(--primary);" onclick="simulateData()">Jalankan Simulasi <i class="fa-solid fa-play"></i></button>
                             </div>
                             <div class="mockup-card-row">
                                 <div class="m-card">
@@ -479,7 +503,7 @@
                         <div class="mockup-tab-content" id="mockup-tab-uang">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                                 <h3 style="color: var(--primary); font-weight: 900; font-size: 1.3rem; letter-spacing: -0.5px;">Manajemen RAB & Keuangan</h3>
-                                <button class="btn-auth-submit" style="width: auto; padding: 8px 15px; font-size: 0.8rem; box-shadow: 3px 3px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
+                                <button class="btn-auth-submit" style="width: auto; padding: 6px 15px; font-size: 0.8rem; box-shadow: 2px 2px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
                             </div>
                             <div class="m-table-container">
                                 <table class="m-table">
@@ -502,7 +526,7 @@
                         <div class="mockup-tab-content" id="mockup-tab-surat">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                                 <h3 style="color: var(--primary); font-weight: 900; font-size: 1.3rem; letter-spacing: -0.5px;">Arsip Surat Digital (E-Sign)</h3>
-                                <button class="btn-auth-submit" style="width: auto; padding: 8px 15px; font-size: 0.8rem; box-shadow: 3px 3px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
+                                <button class="btn-auth-submit" style="width: auto; padding: 6px 15px; font-size: 0.8rem; box-shadow: 2px 2px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
                             </div>
                             <div class="m-table-container">
                                 <table class="m-table">
@@ -525,7 +549,7 @@
                         <div class="mockup-tab-content" id="mockup-tab-absen">
                             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
                                 <h3 style="color: var(--primary); font-weight: 900; font-size: 1.3rem; letter-spacing: -0.5px;">Log Kehadiran Terbaru</h3>
-                                <button class="btn-auth-submit" style="width: auto; padding: 8px 15px; font-size: 0.8rem; box-shadow: 3px 3px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
+                                <button class="btn-auth-submit" style="width: auto; padding: 6px 15px; font-size: 0.8rem; box-shadow: 2px 2px 0 var(--primary);" onclick="simulateData()">Acak Data <i class="fa-solid fa-rotate"></i></button>
                             </div>
                             <div class="m-table-container">
                                 <table class="m-table">
@@ -554,7 +578,7 @@
     <section class="section" style="padding-top: 0;">
         <div class="trial-banner reveal">
             <div class="marquee-bg">
-                TRIAL GRATIS 30 HARI &bull; DAFTAR SEKARANG &bull; ERP MAHASISWA &bull; KAMPUS DIGITAL &bull; TRIAL GRATIS 30 HARI &bull; DAFTAR SEKARANG &bull; 
+                ERP MAHASISWA &bull; KAMPUS DIGITAL &bull; TRIAL GRATIS 30 HARI &bull; DAFTAR SEKARANG &bull; ERP MAHASISWA &bull; KAMPUS DIGITAL &bull; TRIAL GRATIS 30 HARI &bull; DAFTAR SEKARANG &bull; 
             </div>
             <div class="trial-text">
                 <h2>Siap Meroket?</h2>
@@ -697,7 +721,6 @@
         // -----------------------------
         // GLOBALS & UTILS
         // -----------------------------
-        // DEKLARASI GLOBAL showToast HARUS DI LUAR FUNGSI LAIN AGAR BISA DIAKSES OLEH SEMUA
         window.showToast = function(title, message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -726,11 +749,15 @@
         // -----------------------------
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('year').innerText = new Date().getFullYear();
-            initDummyChart();
+            
+            // JALANKAN OBSERVER ANIMASI SETELAH DOM SIAP
+            initScrollAnimations();
+            
+            const canvasEl = document.getElementById('dummyChart');
+            if(canvasEl) initDummyChart();
             generateCaptcha();
         });
 
-        // Navbar Scroll & Mobile Menu Effect
         const nav = document.getElementById('navbar');
         const navLinks = document.getElementById('nav-links');
         const menuIcon = document.getElementById('mobile-menu-icon');
@@ -750,6 +777,19 @@
                 menuIcon.classList.replace('fa-xmark', 'fa-bars');
                 document.querySelector('.mobile-menu-btn').classList.remove('text-white');
             }
+        }
+        
+        function initScrollAnimations() {
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if(entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' }); 
+            
+            reveals.forEach(el => observer.observe(el));
         }
 
         // -----------------------------
@@ -821,7 +861,7 @@
                 let rBadge = badges[Math.floor(Math.random() * badges.length)];
                 htmlUang += `<tr><td><strong>${rItem}</strong></td><td>Operasional Acara</td><td style="color:var(--primary); font-weight:800;">Rp ${rNom.toLocaleString('id-ID')}</td><td>${rBadge}</td></tr>`;
             }
-            tbodyUang.innerHTML = htmlUang;
+            if(tbodyUang) tbodyUang.innerHTML = htmlUang;
 
             // Tabel Surat
             const tbodySurat = document.getElementById('sim-table-surat');
@@ -833,7 +873,7 @@
                 let rBadge = badges[Math.floor(Math.random() * 2)];
                 htmlSurat += `<tr><td style="font-family:monospace; color:var(--primary); font-weight:bold;">0${num}/BEM/EXT/V/2026</td><td><strong>${rSurat}</strong></td><td>Hari ini</td><td>${rBadge}</td></tr>`;
             }
-            tbodySurat.innerHTML = htmlSurat;
+            if(tbodySurat) tbodySurat.innerHTML = htmlSurat;
             
             // Tabel Absen
             const tbodyAbsen = document.getElementById('sim-table-absen');
@@ -845,19 +885,16 @@
                 let m = Math.floor(Math.random() * 50) + 10;
                 htmlAbsen += `<tr><td><strong>${rName}</strong><br><span style="font-size:0.75rem; color:#64748b;">Staff Dept. Kominfo</span></td><td>Rapat Evaluasi Proker Bulanan</td><td style="font-family:monospace; font-weight:bold; color:var(--blue);">${h}:${m} WIB</td><td><span class="status-badge" style="color:#16a34a; border-color:#bbf7d0; background:#dcfce7;">Hadir Tepat Waktu</span></td></tr>`;
             }
-            tbodyAbsen.innerHTML = htmlAbsen;
+            if(tbodyAbsen) tbodyAbsen.innerHTML = htmlAbsen;
         }
 
         function simulateData() {
-            // Animate Numbers
             document.getElementById('sim-prog').innerText = Math.floor(Math.random() * 50) + 10;
             document.getElementById('sim-dana').innerText = (Math.floor(Math.random() * 50) + 40) + '%';
             document.getElementById('sim-hadir').innerText = (Math.floor(Math.random() * 20) + 80) + '%';
             
-            // Animate Tables
             generateDummyTables();
 
-            // Animate Chart
             if(dummyChartInstance) {
                 const newData = Array.from({length: 7}, () => Math.floor(Math.random() * 40) + 10);
                 dummyChartInstance.data.datasets[0].data = newData;
