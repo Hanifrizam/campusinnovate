@@ -18,50 +18,14 @@
             --green: #2ecc71; 
             --red: #e74c3c; 
             --blue: #3498db; 
-            --border: #e2e8f0;
         }
         
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; min-height: 100vh;}
         
-        body { 
-            background: var(--bg); 
-            display: flex; 
-            color: var(--text); 
-            overflow-x: hidden; 
-            min-height: 100vh;
-        }
-        
-        /* CUSTOM TOAST NOTIFICATION */
-        #toast-container { 
-            position: fixed; 
-            top: 30px; 
-            right: 20px; 
-            z-index: 100000; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-        }
-        
-        .toast { 
-            background: white; 
-            padding: 15px 25px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            font-weight: 600; 
-            font-size: 0.95rem; 
-            border-left: 5px solid var(--primary); 
-            transform: translateX(150%); 
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        
+        /* CUSTOM TOAST NOTIFICATION SYSTEM */
+        #toast-container { position: fixed; top: 30px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 0.95rem; border-left: 5px solid var(--primary); transform: translateX(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .toast.show { transform: translateX(0); }
         .toast i { font-size: 1.3rem; }
         .toast.success { border-color: var(--green); color: #166534; }
@@ -71,217 +35,41 @@
         .toast.info { border-color: var(--blue); color: var(--blue); }
         .toast.info i { color: var(--blue); }
         
-        /* SIDEBAR */
-        .sidebar { 
-            width: 270px; 
-            background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); 
-            height: 100vh; 
-            padding: 30px 20px; 
-            color: var(--white); 
-            position: fixed; 
-            box-shadow: 5px 0 20px rgba(0,0,0,0.05); 
-            z-index: 100; 
-            overflow-y: auto; 
-            transition: 0.3s;
-        }
+        /* SIDEBAR NAVIGATION */
+        .sidebar { width: 270px; background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); height: 100vh; padding: 30px 20px; color: var(--white); position: fixed; box-shadow: 5px 0 20px rgba(0,0,0,0.05); z-index: 100; overflow-y: auto; transition: 0.3s;}
+        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.6rem; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.5px;}
+        .sidebar-subtitle { font-size: 0.75rem; color: #cbd5e1; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 1px;}
         
-        .sidebar h2 { 
-            color: var(--secondary); 
-            margin-bottom: 5px; 
-            font-size: 1.6rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-weight: 800; 
-            letter-spacing: -0.5px;
-        }
+        .nav-item { padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; color: #e2e8f0;}
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--white); transform: translateX(5px); }
+        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); font-weight: 800;}
         
-        .sidebar-subtitle { 
-            font-size: 0.75rem; 
-            color: #cbd5e1; 
-            margin-bottom: 30px; 
-            padding-bottom: 20px; 
-            border-bottom: 1px solid rgba(255,255,255,0.1); 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-        }
+        /* MAIN CONTENT AREA */
+        .main-content { margin-left: 270px; padding: 40px; width: calc(100% - 270px); min-height: 100vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; background: white; padding: 25px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);}
+        .header h1 { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px;}
+        .admin-badge { background: rgba(10,48,85,0.05); color: var(--primary); padding: 10px 20px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;}
         
-        .nav-item { 
-            padding: 14px 18px; 
-            margin-bottom: 10px; 
-            border-radius: 12px; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
-            font-weight: 600; 
-            font-size: 0.95rem; 
-            color: #e2e8f0;
-        }
-        
-        .nav-item:hover { 
-            background: rgba(255,255,255,0.1); 
-            color: var(--white); 
-            transform: translateX(5px); 
-        }
-        
-        .nav-item.active { 
-            background: var(--secondary); 
-            color: var(--primary); 
-            box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); 
-            font-weight: 800;
-        }
-        
-        /* MAIN CONTENT */
-        .main-content { 
-            margin-left: 270px; 
-            padding: 40px; 
-            width: calc(100% - 270px); 
-            min-height: 100vh; 
-        }
-        
-        .header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 35px; 
-            background: white; 
-            padding: 25px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
-        }
-        
-        .header h1 { 
-            font-size: 1.8rem; 
-            font-weight: 800; 
-            color: var(--primary); 
-            margin: 0; 
-            letter-spacing: -0.5px;
-        }
-        
-        .admin-badge { 
-            background: rgba(10,48,85,0.05); 
-            color: var(--primary); 
-            padding: 10px 20px; 
-            border-radius: 30px; 
-            font-weight: 800; 
-            font-size: 0.95rem; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px;
-        }
-        
-        /* VIEW SECTIONS */
-        .view-section { 
-            display: none; 
-            animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        }
-        
-        .view-section.active { 
-            display: block; 
-        }
-        
-        @keyframes fadeUp { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        /* VIEW SECTIONS MODIFIER */
+        .view-section { display: none; animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .view-section.active { display: block; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* CARDS & GRIDS */
-        .stats-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
-            gap: 25px; 
-            margin-bottom: 35px; 
-        }
+        /* CARDS & GRIDS COMPONENTS */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; margin-bottom: 35px; }
+        .stat-card { background: var(--white); padding: 35px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-bottom: 5px solid var(--primary); transition: 0.3s; position: relative; overflow: hidden;}
+        .stat-card::after { content: '\f201'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: -15px; bottom: -20px; font-size: 7rem; color: var(--primary); opacity: 0.03; pointer-events: none;}
+        .stat-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.08);}
+        .stat-card h3 { color: #64748b; font-size: 1.05rem; margin-bottom: 15px; font-weight: 700;}
+        .stat-card p { font-size: 3rem; font-weight: 800; color: var(--primary); line-height: 1;}
         
-        .stat-card { 
-            background: var(--white); 
-            padding: 35px 30px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
-            border-bottom: 5px solid var(--primary); 
-            transition: 0.3s; 
-            position: relative; 
-            overflow: hidden;
-        }
+        .panel { background: var(--white); padding: 35px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); overflow-x: auto; margin-bottom: 30px;}
+        .panel h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
         
-        .stat-card::after { 
-            content: '\f201'; 
-            font-family: 'Font Awesome 6 Free'; 
-            font-weight: 900; 
-            position: absolute; 
-            right: -15px; 
-            bottom: -20px; 
-            font-size: 7rem; 
-            color: var(--primary); 
-            opacity: 0.03; 
-            pointer-events: none;
-        }
-        
-        .stat-card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-        }
-        
-        .stat-card h3 { 
-            color: #64748b; 
-            font-size: 1.05rem; 
-            margin-bottom: 15px; 
-            font-weight: 700;
-        }
-        
-        .stat-card p { 
-            font-size: 3rem; 
-            font-weight: 800; 
-            color: var(--primary); 
-            line-height: 1;
-        }
-        
-        .panel { 
-            background: var(--white); 
-            padding: 35px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03); 
-            overflow-x: auto; 
-            margin-bottom: 30px;
-        }
-        
-        .panel h2 { 
-            color: var(--primary); 
-            font-size: 1.4rem; 
-            font-weight: 800; 
-            margin-bottom: 10px; 
-            display: flex; 
-            align-items: center; 
-            gap: 10px;
-        }
-        
-        /* TABLES */
-        table { 
-            width: 100%; 
-            border-collapse: separate; 
-            border-spacing: 0; 
-            margin-top: 15px; 
-            min-width: 800px; 
-        }
-        
-        th, td { 
-            padding: 18px 15px; 
-            text-align: left; 
-            font-size: 0.95rem; 
-        }
-        
-        th { 
-            background: #f8fafc; 
-            color: var(--primary); 
-            font-weight: 800; 
-            text-transform: uppercase; 
-            font-size: 0.8rem; 
-            letter-spacing: 0.5px; 
-            border-bottom: 2px solid #e2e8f0;
-        }
-        
+        /* TABLES STYLING */
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; min-width: 800px; }
+        th, td { padding: 18px 15px; text-align: left; font-size: 0.95rem; }
+        th { background: #f8fafc; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;}
         th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
         th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
         td { border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 500;}
@@ -304,20 +92,10 @@
         .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fde68a;}
         .badge-superadmin { background: #fef08a; color: #b45309; border: 1px solid #fde047;}
 
-        /* MODAL */
-        .modal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
-            display: flex; align-items: center; justify-content: center; 
-            opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; 
-        }
+        /* MODAL POPUPS */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 48, 85, 0.8); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; z-index: 10000; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-content { 
-            background: var(--white); width: 95%; max-width: 650px; 
-            border-radius: 25px; padding: 40px; 
-            transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;
-        }
+        .modal-content { background: var(--white); width: 95%; max-width: 650px; border-radius: 25px; padding: 40px; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto;}
         .modal-overlay.active .modal-content { transform: scale(1) translateY(0); }
         .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px;}
         .modal-header h2 { color: var(--primary); font-size: 1.6rem; font-weight: 800; line-height: 1.2;}
@@ -360,16 +138,14 @@
     <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
+    <!-- SIDEBAR NAV -->
     <div class="sidebar">
         <h2><i class="fa-solid fa-server"></i> CI Super</h2>
         <div class="sidebar-subtitle">Panel Kontrol Utama</div>
         
         <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
         <div class="nav-item" onclick="switchMenu('requests')"><i class="fa-solid fa-user-clock"></i> Permintaan Registrasi</div>
-        
-        <!-- MENU BARU: MANAJEMEN PENGGUNA (USERS) -->
         <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users-gear"></i> Manajemen Pengguna</div>
-        
         <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
         <div class="nav-item" onclick="switchMenu('server')"><i class="fa-solid fa-satellite-dish"></i> Status Server & Web</div>
         <div class="nav-item" onclick="switchMenu('analytics')"><i class="fa-solid fa-users-rays"></i> Analitik Pengguna</div>
@@ -377,6 +153,7 @@
         <div class="nav-item" style="margin-top: 60px; background: rgba(231, 76, 60, 0.1); color: var(--red); justify-content: center;" onclick="handleLogout()"><i class="fa-solid fa-power-off"></i> Keluar Sistem</div>
     </div>
 
+    <!-- MAIN BODY -->
     <div class="main-content">
         <div class="header">
             <h1>Sistem Monitoring Global</h1>
@@ -459,7 +236,7 @@
                 </div>
 
                 <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; color: #92400e; font-weight: 500;">
-                    <i class="fa-solid fa-triangle-exclamation"></i> <b>Catatan Sistem:</b> Menghapus akses pengguna akan melenyapkan izin login dan ID referensi mereka. Mereka tidak akan bisa masuk ke sistem meskipun email mereka pernah terdaftar.
+                    <i class="fa-solid fa-triangle-exclamation"></i> <b>Catatan Sistem:</b> Menghapus akses pengguna akan melenyapkan izin login secara permanen dan membersihkan data eksistensi pengguna dari seluruh referensi relasional database.
                 </div>
                 
                 <div style="overflow-x: auto;">
@@ -843,8 +620,8 @@
                 return;
             }
 
-            // Supabase API Rest Frontend tidak bisa mengakses email/password dari auth.users secara bebas.
-            // Strategi: Kita mencoba menarik nama dari workspace_members.
+            // MENGAMBIL DATA NAMA USER: Kita mengkombinasikan data dari `workspace_members` 
+            // ATAU mengambil dari `registration_requests` yang telah di-approve
             const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
             let nameMap = {};
             if(membersInfo) {
@@ -897,7 +674,7 @@
                             </select>
                         </td>
                         <td style="text-align: center;">
-                            <button class="btn-action btn-del" ${ur.role === 'superadmin' ? 'disabled style="opacity:0.5;"' : ''} onclick="revokeUserAccess('${ur.user_id}')" title="Cabut Izin Akses & Hapus Riwayat">
+                            <button class="btn-action btn-del" ${ur.role === 'superadmin' ? 'disabled style="opacity:0.5;"' : ''} onclick="revokeUserAccess('${ur.user_id}')" title="Cabut Izin Akses & Hapus Riwayat secara total">
                                 <i class="fa-solid fa-user-slash"></i> Cabut Akses
                             </button>
                         </td>
@@ -929,22 +706,44 @@
             loadDashboardData(); // Refresh statistik angka admin/user di dashboard
         }
 
+        // PERBAIKAN FUNGSI REVOKE USER ACCESS YANG LEBIH AGRESIF (CASCADE DELETE PADA FRONTEND)
         async function revokeUserAccess(userId) {
-            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace akan ikut lenyap. Lanjutkan?")) {
-                showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
+            if(confirm("TINDAKAN SANGAT KRITIS: Anda akan menghapus hak akses pengguna ini secara paksa. Data keanggotaannya di seluruh workspace (termasuk Workspace miliknya jika ia Admin) akan ikut lenyap. Lanjutkan?")) {
                 
-                // Menghapus data dari user_roles (Akses login utama frontend reference)
-                const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
+                // Mencegah double click
+                const btnList = document.querySelectorAll('.btn-del');
+                btnList.forEach(b => b.disabled = true);
                 
-                // Menghapus dari workspace_members jika ada
-                await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
+                showToast("Sistem Bekerja", "Mengeksekusi perintah pencabutan akses ke server...", "info");
+                
+                try {
+                    // 1. Hapus keanggotaan dari semua workspace_members (agar lepas dari referensi org)
+                    await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
 
-                if(roleErr) {
-                    showToast("Penghapusan Gagal", roleErr.message, "error");
-                } else {
-                    showToast("Akses Dicabut", "Pengguna tersebut dihilangkan dari tabel referensi sistem.", "success");
+                    // 2. Hapus absensi / attendances miliknya
+                    await supabaseClient.from('attendances').delete().eq('user_id', userId);
+
+                    // 3. Jika dia pembuat workspace (Admin), hapus workspacenya agar tidak jadi zombie data
+                    // Proses ini juga akan otomatis memusnahkan landing_pages, kpi, dll (Karena ON DELETE CASCADE di database)
+                    await supabaseClient.from('workspaces').delete().eq('admin_id', userId);
+
+                    // 4. Terakhir, hapus hak akses mutlak dari tabel user_roles.
+                    // Saat row ini dihapus, skrip index.html akan otomatis menolak mereka saat mencoba login.
+                    const { error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId);
+
+                    if(roleErr) throw roleErr;
+
+                    showToast("Akses Berhasil Dicabut", "Pengguna tersebut telah dilenyapkan dari referensi aplikasi secara permanen.", "success");
+                    
+                    // Refresh View
                     loadAllUsersData();
                     loadDashboardData();
+                } catch (err) {
+                    console.error(err);
+                    showToast("Gagal Menghapus Akses", err.message + " (Cek Policy RLS Supabase Anda)", "error");
+                } finally {
+                    const btnList = document.querySelectorAll('.btn-del');
+                    btnList.forEach(b => b.disabled = false);
                 }
             }
         }
