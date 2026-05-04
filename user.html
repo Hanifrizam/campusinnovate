@@ -209,71 +209,6 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
-        /* FITUR 1: SISTEM LOADING & VERIFIKASI KREDENSIAL */
-        #system-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
-            background: var(--primary); z-index: 999999; 
-            display: flex; flex-direction: column; justify-content: center; align-items: center; 
-            transition: opacity 0.8s ease, visibility 0.8s ease; color: white;
-        }
-        .loader-spinner {
-            border: 5px solid rgba(255,255,255,0.1);
-            border-top: 5px solid var(--secondary);
-            border-radius: 50%; width: 60px; height: 60px;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* FITUR 2: FLOATING CHAT ORGANISASI */
-        .chat-widget {
-            position: fixed; bottom: 30px; right: 30px; z-index: 99900;
-            display: flex; flex-direction: column; align-items: flex-end;
-            font-family: 'Poppins', sans-serif;
-        }
-        .chat-toggle-btn {
-            background: var(--secondary); color: var(--primary); width: 60px; height: 60px;
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border: none; transition: 0.3s transform, 0.3s box-shadow;
-        }
-        .chat-toggle-btn:hover { transform: translateY(-5px); box-shadow: 0 15px 25px rgba(246, 178, 59, 0.4); }
-        .chat-container {
-            background: white; width: 350px; height: 450px; border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column;
-            overflow: hidden; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-origin: bottom right; transform: scale(0); opacity: 0; margin-bottom: 15px;
-            border: 1px solid #e2e8f0;
-        }
-        .chat-container.active { transform: scale(1); opacity: 1; }
-        
-        /* Mode Fullscreen Chat */
-        .chat-container.chat-fullscreen {
-            position: fixed; top: 0; left: 0; width: 100vw !important; height: 100vh !important;
-            margin: 0; border-radius: 0; z-index: 99999; transform-origin: center;
-        }
-        
-        .chat-header {
-            background: var(--primary); color: white; padding: 15px; display: flex;
-            justify-content: space-between; align-items: center;
-        }
-        .chat-header h3 { font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 10px; }
-        .chat-header-actions button {
-            background: none; border: none; color: white; cursor: pointer;
-            margin-left: 10px; font-size: 1rem; transition: 0.2s;
-        }
-        .chat-header-actions button:hover { color: var(--secondary); }
-        .chat-body { flex: 1; background: #f4f7fa; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-message { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 0.85rem; line-height: 1.4; position: relative; }
-        .chat-message.self { background: var(--blue); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .chat-message.other { background: white; color: var(--text); border: 1px solid #e2e8f0; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .chat-message .sender-name { font-size: 0.7rem; font-weight: bold; margin-bottom: 3px; display: block; opacity: 0.8; }
-        .chat-message .timestamp { font-size: 0.65rem; text-align: right; margin-top: 5px; opacity: 0.7; display: block; }
-        .chat-input-area { padding: 15px; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 10px; align-items: center; }
-        .chat-input-area input { flex: 1; padding: 10px 15px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-family: 'Poppins'; }
-        .chat-input-area input:focus { border-color: var(--secondary); }
-        .chat-input-area button { background: var(--secondary); color: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
-        .chat-input-area button:hover { transform: scale(1.1); }
-
         /* PRINT STYLE */
         @media print {
             body * { visibility: hidden; }
@@ -283,6 +218,65 @@
             .editor-workspace-bg { height: auto; overflow: visible; box-shadow: none; border: none; }
             .rte-editor-page { box-shadow: none; }
         }
+
+        /* FITUR BARU: LOADING & VERIFIKASI OVERLAY */
+        #auth-loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: var(--primary); color: white;
+            z-index: 999999; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center;
+            transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.6s;
+        }
+        #auth-loader-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .loader-spinner {
+            width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.2);
+            border-top-color: var(--secondary); border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loader-text { font-size: 1.2rem; font-weight: 500; letter-spacing: 1px; animation: pulseText 1.5s infinite; }
+        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* FITUR BARU: ORGANISASI CHAT FLOATING WIDGET */
+        #org-chat-widget {
+            position: fixed; bottom: 30px; right: 30px; width: 350px; height: 500px;
+            background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: flex; flex-direction: column; z-index: 9990;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden; transform-origin: bottom right;
+        }
+        #org-chat-widget.minimized { height: 60px; width: 220px; cursor: pointer; border-radius: 30px; }
+        #org-chat-widget.fullscreen { width: 100vw; height: 100vh; bottom: 0; right: 0; border-radius: 0; }
+        .chat-header {
+            background: var(--primary); color: white; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .chat-header:hover { background: #082644; }
+        .chat-header h3 { font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 10px;}
+        .chat-header-actions button { background: none; border: none; color: white; cursor: pointer; font-size: 1rem; margin-left: 10px; transition: transform 0.2s;}
+        .chat-header-actions button:hover { transform: scale(1.2); color: var(--secondary); }
+        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; gap: 15px; }
+        .chat-message { display: flex; flex-direction: column; max-width: 85%; animation: slideUpFade 0.3s; }
+        .chat-message.self { align-self: flex-end; align-items: flex-end; }
+        .chat-message.other { align-self: flex-start; align-items: flex-start; }
+        .chat-bubble { padding: 10px 15px; border-radius: 15px; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .chat-message.self .chat-bubble { background: var(--blue); color: white; border-bottom-right-radius: 2px; }
+        .chat-message.other .chat-bubble { background: white; color: var(--text); border-bottom-left-radius: 2px; border: 1px solid #eee; }
+        .chat-meta { font-size: 0.7rem; color: #888; margin-top: 4px; }
+        .chat-footer { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
+        .chat-input { flex: 1; border: 1px solid #ddd; padding: 10px 15px; border-radius: 20px; outline: none; font-family: 'Poppins'; transition: border-color 0.2s; }
+        .chat-input:focus { border-color: var(--secondary); }
+        .chat-send-btn { background: var(--secondary); color: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: transform 0.2s; }
+        .chat-send-btn:hover { transform: scale(1.1); }
+
+        /* FITUR BARU: PEMBATASAN ROLE / ADMIN ONLY */
+        [data-role-access="admin"] { display: none !important; }
+        body.is-admin [data-role-access="admin"] { display: inline-flex !important; }
+        body.is-admin div[data-role-access="admin"] { display: block !important; }
+        body.is-admin tr[data-role-access="admin"] { display: table-row !important; }
+        body.is-admin td[data-role-access="admin"] { display: table-cell !important; }
 
         /* MEDIA QUERIES */
         .mobile-overlay-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; }
@@ -329,30 +323,21 @@
             .input-group label { font-size: 0.85rem; }
             .table-custom th, .table-custom td { padding: 8px; font-size: 0.75rem; }
             .cal-event-badge { font-size: 0.55rem; padding: 2px 4px; }
-            
+
             /* Penyesuaian Chat di Mobile */
-            .chat-container { width: 90vw; height: 60vh; right: 15px; bottom: 90px; }
-            .chat-widget { right: 15px; bottom: 15px; }
+            #org-chat-widget { width: 90vw; right: 5vw; bottom: 20px; }
+            #org-chat-widget.minimized { width: 60px; height: 60px; right: 20px; border-radius: 50%; }
+            #org-chat-widget.minimized .chat-header h3 { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- FITUR 1: SISTEM LOADING VERIFIKASI -->
-    <div id="system-loader">
+    <!-- OVERLAY LOADING SISTEM -->
+    <div id="auth-loader-overlay">
         <div class="loader-spinner"></div>
-        <h2 style="font-family: 'Poppins', sans-serif;">Workspace Dashboard</h2>
-        <p id="loader-text" style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">Memverifikasi Kredensial & Memuat Sistem...</p>
-    </div>
-
-    <!-- FITUR 3: MODAL PEMBATASAN AKSES STRICT (SUPER ADMIN) -->
-    <div class="modal-overlay" id="strictAccessModal" style="z-index: 999999;">
-        <div class="modal-content" style="max-width: 400px; text-align: center; padding: 30px; border-top: 5px solid var(--red);">
-            <i class="fa-solid fa-hand text-danger" style="font-size: 4rem; color: var(--red); margin-bottom: 20px;"></i>
-            <h3 style="margin-bottom: 10px; color: var(--primary); font-size: 1.2rem;">AKSES DITOLAK</h3>
-            <p style="color: #777; font-size: 0.9rem; margin-bottom: 20px;">Anda tidak memiliki otoritas Administrator untuk mengakses modul ini. Sistem mendeteksi percobaan akses ilegal.</p>
-            <button class="btn-action" style="width: 100%; background: var(--primary); color: white;" onclick="closeModal('strictAccessModal'); switchTab('dashboard');">Kembali ke Dashboard</button>
-        </div>
+        <h2 class="loader-text">Memverifikasi Akses Sistem...</h2>
+        <p style="margin-top: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.7);"><i class="fa-solid fa-shield-halved"></i> Security Check</p>
     </div>
 
     <div id="toast-container"></div>
@@ -393,7 +378,7 @@
             <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi</div>
             <div class="nav-item" onclick="switchTab('kpi')"><i class="fa-solid fa-bullseye"></i> Indikator KPI</div>
             <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
-            <div class="nav-item" id="menu-database-surat" onclick="enforceAdminSystemLevel('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
+            <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')" data-role-access="admin"><i class="fa-solid fa-database"></i> Database Surat</div>
             
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Playbook</p>
             <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Workspace</div>
@@ -468,7 +453,7 @@
         <div id="view-program-event" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <h2>Detail Program & Event</h2>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="btn-group-program">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="btn-group-program" data-role-access="admin">
                     <button class="btn-action" style="background: #e2e8f0; color: var(--primary);" onclick="openModal('deptModal')"><i class="fa-solid fa-sitemap"></i> + Departemen</button>
                     <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program Baru</button>
                 </div>
@@ -683,7 +668,7 @@
                     <h2>Analitik Anggaran</h2>
                     <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan divisi.</p>
                 </div>
-                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Data Keseluruhan</button>
+                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')" data-role-access="admin"><i class="fa-solid fa-download"></i> Export Data Keseluruhan</button>
             </div>
 
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -841,7 +826,7 @@
                             <th>Status Kehadiran</th>
                             <th>Keterangan / Deskripsi</th>
                             <th style="color: var(--blue);">Waktu Submit</th>
-                            <th style="text-align: center;">Aksi</th>
+                            <th style="text-align: center;" data-role-access="admin">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-absen-body">
@@ -966,7 +951,7 @@
         <div id="view-kpi" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
                 <h2>Indikator Kinerja Utama (KPI)</h2>
-                <button class="btn-action" id="btn-add-kpi" onclick="openKPIModal()"><i class="fa-solid fa-plus"></i> Tambah KPI</button>
+                <button class="btn-action" id="btn-add-kpi" onclick="openKPIModal()" data-role-access="admin"><i class="fa-solid fa-plus"></i> Tambah KPI</button>
             </div>
             
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -1068,7 +1053,7 @@
             </div>
         </div>
 
-        <div id="view-database-surat" class="view-section">
+        <div id="view-database-surat" class="view-section" data-role-access="admin">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
                     <h2>Database & Library Surat</h2>
@@ -1179,35 +1164,8 @@
             </div>
         </div>
 
-    </div>
-
-    <!-- FITUR 2: FLOATING CHAT WIDGET -->
-    <div class="chat-widget">
-        <div id="chat-container-box" class="chat-container">
-            <div class="chat-header">
-                <h3><i class="fa-solid fa-comments"></i> Obrolan Workspace</h3>
-                <div class="chat-header-actions">
-                    <button onclick="toggleFullscreenChat()"><i class="fa-solid fa-expand"></i></button>
-                    <button onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </div>
-            <div class="chat-body" id="chat-messages">
-                <div style="text-align: center; padding: 20px; color: #aaa; font-size: 0.85rem;">
-                    Sistem Obrolan Terenkripsi<br>
-                    <small>Membangun koneksi real-time dengan Supabase.</small>
-                </div>
-                <!-- Pesan akan dimuat di sini oleh Supabase Realtime -->
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Ketik pesan..." onkeypress="handleChatKeyPress(event)">
-                <button onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-        <button class="chat-toggle-btn" onclick="toggleChat()" title="Buka Obrolan">
-            <i class="fa-solid fa-comment-dots"></i>
-        </button>
-    </div>
-
+    </div> 
+    <!-- KUMPULAN MODAL POPUP -->
     <div class="modal-overlay" id="scheduleModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="schedule-modal-title">Tambah Jadwal Baru</h2><button class="close-btn" onclick="closeModal('scheduleModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -1372,6 +1330,24 @@
         </div>
     </div>
 
+    <!-- FITUR BARU: WIDGET CHAT ORGANISASI -->
+    <div id="org-chat-widget" class="minimized">
+        <div class="chat-header" onclick="toggleChatWidget(event)">
+            <h3 id="chat-widget-title"><i class="fa-solid fa-comments"></i> Obrolan Organisasi</h3>
+            <div class="chat-header-actions" id="chat-header-actions" style="display: none;">
+                <button onclick="toggleFullscreenChat(event)" title="Fullscreen"><i class="fa-solid fa-expand" id="chat-fullscreen-icon"></i></button>
+                <button onclick="minimizeChatWidget(event)" title="Minimize"><i class="fa-solid fa-minus"></i></button>
+            </div>
+        </div>
+        <div class="chat-body" id="chat-body-container">
+            <div style="text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 10px;">Selamat datang di Obrolan Organisasi. Pesan tidak tersimpan secara permanen (Live Broadcast).</div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="chat-input-message" class="chat-input" placeholder="Ketik pesan..." onkeypress="handleChatKeypress(event)">
+            <button class="chat-send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+    </div>
+
     <script>
         Chart.register(ChartDataLabels);
 
@@ -1404,8 +1380,11 @@
         let calCurrentDate = new Date();
         let activeFolderId = null; let activeNotulensiId = null; let absenPieChart = null;
         let docZoomLevel = 1.0;
-        
-        let chatRealtimeChannel = null;
+
+        // VARIABEL CHAT BARU
+        let isChatFullscreen = false;
+        let isChatMinimized = true;
+        let orgChatChannel = null;
 
         function showNotification(msg, type='info') {
             const toast = document.createElement('div');
@@ -1432,15 +1411,6 @@
             document.getElementById('mobile-overlay-bg').classList.toggle('active');
         }
 
-        /* FITUR 3: STRICT ACCESS CONTROL UNTUK TAB SYSTEM */
-        function enforceAdminSystemLevel(targetTab) {
-            if (currentUserRole !== 'admin') {
-                openModal('strictAccessModal');
-                return;
-            }
-            switchTab(targetTab);
-        }
-
         function switchTab(tabId) { 
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
@@ -1461,109 +1431,6 @@
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('mobile-overlay-bg').classList.remove('active');
             }
-        }
-
-        /* FITUR 2: LOGIC CHAT WIDGET */
-        function toggleChat() {
-            const chatBox = document.getElementById('chat-container-box');
-            chatBox.classList.toggle('active');
-            if (chatBox.classList.contains('active')) {
-                scrollToBottomChat();
-                document.getElementById('chat-input').focus();
-            }
-        }
-
-        function toggleFullscreenChat() {
-            const chatBox = document.getElementById('chat-container-box');
-            chatBox.classList.toggle('chat-fullscreen');
-            scrollToBottomChat();
-        }
-
-        function scrollToBottomChat() {
-            const chatBody = document.getElementById('chat-messages');
-            chatBody.scrollTop = chatBody.scrollHeight;
-        }
-
-        function handleChatKeyPress(e) {
-            if (e.key === 'Enter') {
-                sendChatMessage();
-            }
-        }
-
-        async function sendChatMessage() {
-            const inputEl = document.getElementById('chat-input');
-            const msgText = inputEl.value.trim();
-            if (!msgText) return;
-
-            // Optimistic UI Update
-            renderChatBubble(msgText, true, currentUserName, new Date().toISOString());
-            inputEl.value = '';
-            scrollToBottomChat();
-
-            // Insert ke DB Supabase (tabel organization_chats)
-            // Asumsi struktur tabel: id, workspace_id, user_id, sender_name, message, created_at
-            try {
-                await supabaseClient.from('organization_chats').insert([{
-                    workspace_id: globalWorkspaceId,
-                    user_id: currentUserId,
-                    sender_name: currentUserName,
-                    message: msgText
-                }]);
-            } catch (err) {
-                console.error("Gagal mengirim pesan chat", err);
-                showNotification("Gagal mengirim pesan, pastikan tabel organization_chats sudah dibuat.", "error");
-            }
-        }
-
-        function renderChatBubble(msg, isSelf, senderName, timestamp) {
-            const chatBody = document.getElementById('chat-messages');
-            const timeStr = new Date(timestamp).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            const bubbleClass = isSelf ? 'self' : 'other';
-            
-            const html = `
-                <div class="chat-message ${bubbleClass}">
-                    ${!isSelf ? `<span class="sender-name">${senderName}</span>` : ''}
-                    ${msg}
-                    <span class="timestamp">${timeStr}</span>
-                </div>
-            `;
-            chatBody.insertAdjacentHTML('beforeend', html);
-        }
-
-        async function initRealtimeChat() {
-            // Load history chat (last 50 messages)
-            try {
-                const { data } = await supabaseClient.from('organization_chats')
-                    .select('*')
-                    .eq('workspace_id', globalWorkspaceId)
-                    .order('created_at', { ascending: false })
-                    .limit(50);
-                
-                if (data && data.length > 0) {
-                    document.getElementById('chat-messages').innerHTML = ''; // Clear mockup text
-                    // Reverse array to display oldest first at top
-                    data.reverse().forEach(msg => {
-                        const isSelf = msg.user_id === currentUserId;
-                        renderChatBubble(msg.message, isSelf, msg.sender_name, msg.created_at);
-                    });
-                    scrollToBottomChat();
-                }
-            } catch (err) {
-                console.warn("Tabel organization_chats mungkin belum dibuat, sistem chat disiapkan secara lokal saja.");
-            }
-
-            // Subscribe to new messages
-            chatRealtimeChannel = supabaseClient.channel(`chat_room_${globalWorkspaceId}`)
-                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'organization_chats', filter: `workspace_id=eq.${globalWorkspaceId}` }, payload => {
-                    const newMsg = payload.new;
-                    // Prevent duplicate if we already rendered optimistically (very basic check)
-                    if (newMsg.user_id !== currentUserId) {
-                        renderChatBubble(newMsg.message, false, newMsg.sender_name, newMsg.created_at);
-                        scrollToBottomChat();
-                        // Optional: play sound or show minor dot indicator
-                    }
-                })
-                .subscribe();
         }
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
@@ -1818,86 +1685,178 @@
             if(doCheck) doCheck.innerHTML = options; if(dbCheck) dbCheck.innerHTML = options;
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const loaderEl = document.getElementById('system-loader');
+        // ================= FITUR BARU: LOGIKA CHAT WIDGET =================
+        function toggleChatWidget(e) {
+            if(e.target.closest('button')) return; 
+            const widget = document.getElementById('org-chat-widget');
+            const actions = document.getElementById('chat-header-actions');
+            const title = document.getElementById('chat-widget-title');
             
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'index.html'; return; }
+            if (widget.classList.contains('minimized')) {
+                widget.classList.remove('minimized');
+                actions.style.display = 'block';
+                isChatMinimized = false;
+                title.innerHTML = '<i class="fa-solid fa-comments"></i> Obrolan Organisasi';
+                scrollToBottomChat();
+            }
+        }
 
-                currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-                const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
-                currentUserRole = roleData ? roleData.role : 'user';
-                
-                document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
-                document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
-                
-                const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
-                if (savedSig) { userSignatureBase64 = savedSig; }
+        function minimizeChatWidget(e) {
+            e.stopPropagation();
+            const widget = document.getElementById('org-chat-widget');
+            const actions = document.getElementById('chat-header-actions');
+            widget.classList.remove('fullscreen');
+            widget.classList.add('minimized');
+            actions.style.display = 'none';
+            isChatFullscreen = false;
+            isChatMinimized = true;
+            document.getElementById('chat-fullscreen-icon').classList.replace('fa-compress', 'fa-expand');
+        }
 
-                if (currentUserRole !== 'admin') { 
-                    document.getElementById('btn-group-program').style.display = 'none'; 
-                    document.getElementById('btn-add-kpi').style.display = 'none'; 
-                    document.getElementById('menu-database-surat').style.display = 'none'; 
-                    const btnRekap = document.getElementById('btn-export-rekap');
-                    if(btnRekap) btnRekap.style.display = 'none';
-                }
+        function toggleFullscreenChat(e) {
+            e.stopPropagation();
+            const widget = document.getElementById('org-chat-widget');
+            const icon = document.getElementById('chat-fullscreen-icon');
+            if (isChatFullscreen) {
+                widget.classList.remove('fullscreen');
+                icon.classList.replace('fa-compress', 'fa-expand');
+                isChatFullscreen = false;
+            } else {
+                widget.classList.add('fullscreen');
+                icon.classList.replace('fa-expand', 'fa-compress');
+                isChatFullscreen = true;
+            }
+            scrollToBottomChat();
+        }
 
-                const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
-                if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
+        function handleChatKeypress(e) {
+            if(e.key === 'Enter') sendChatMessage();
+        }
 
-                const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
-                if (wsData) {
-                    document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
-                    document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
-                }
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input-message');
+            const msg = input.value.trim();
+            if(!msg) return;
 
-                const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
-                userPresenceChannel.subscribe(async (status) => {
-                    if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
+            renderMessage(currentUserName, msg, true);
+            input.value = '';
+
+            if(orgChatChannel) {
+                orgChatChannel.send({
+                    type: 'broadcast',
+                    event: 'new_message',
+                    payload: { user: currentUserName, message: msg }
                 });
+            }
+        }
 
-                async function updatePresenceToDB() {
-                    if (currentUserId && globalWorkspaceId) {
-                        await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
+        function renderMessage(user, msg, isSelf) {
+            const container = document.getElementById('chat-body-container');
+            const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+            
+            const msgHtml = `
+                <div class="chat-message ${isSelf ? 'self' : 'other'}">
+                    <div class="chat-meta">${isSelf ? 'Anda' : user} • ${time}</div>
+                    <div class="chat-bubble">${msg}</div>
+                </div>
+            `;
+            container.innerHTML += msgHtml;
+            scrollToBottomChat();
+        }
+
+        function scrollToBottomChat() {
+            const container = document.getElementById('chat-body-container');
+            container.scrollTop = container.scrollHeight;
+        }
+        // ================= AKHIR LOGIKA CHAT WIDGET =================
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
+
+            currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
+            currentUserRole = roleData ? roleData.role : 'user';
+            
+            // LOGIKA PEMBATASAN ROLE DAN LOADING VERIFIKASI (FITUR BARU)
+            if (currentUserRole === 'admin') {
+                document.body.classList.add('is-admin');
+            }
+
+            // Animasi Loader (Fitur Baru) dihilangkan setelah inisialisasi selesai dan Role terverifikasi
+            setTimeout(() => {
+                const loader = document.getElementById('auth-loader-overlay');
+                if(loader) loader.classList.add('hidden');
+            }, 1500);
+
+            document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
+            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
+            
+            const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
+            if (savedSig) { userSignatureBase64 = savedSig; }
+
+            if (currentUserRole !== 'admin') { 
+                document.getElementById('btn-group-program').style.display = 'none'; 
+                document.getElementById('btn-add-kpi').style.display = 'none'; 
+                // Fitur baru data-role-access="admin" di menu sidebar juga akan mem-bypass tampilan menu Database Surat secara otomatis dari CSS.
+                const btnRekap = document.getElementById('btn-export-rekap');
+                if(btnRekap) btnRekap.style.display = 'none';
+            }
+
+            const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
+            if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
+
+            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
+            if (wsData) {
+                document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
+                document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+            }
+
+            const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
+            userPresenceChannel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
+            });
+
+            // LOGIKA BROADCAST CHAT ORGANISASI BARU
+            orgChatChannel = supabaseClient.channel(`chat_${globalWorkspaceId}`);
+            orgChatChannel.on('broadcast', { event: 'new_message' }, (payload) => {
+                if(payload.payload.user !== currentUserName) {
+                    renderMessage(payload.payload.user, payload.payload.message, false);
+                    if (isChatMinimized) {
+                        document.getElementById('chat-widget-title').innerHTML = '<i class="fa-solid fa-bell" style="color:var(--secondary);"></i> Pesan Baru!';
                     }
                 }
-                updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
-                window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
+            }).subscribe();
 
-                setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
-
-                await populateContextDropdowns(); 
-                await loadWorkspaceUsers(); 
-                await loadDepartments();
-                await loadFinanceData();
-                await loadSchedules(); 
-                await loadProgramData(); 
-                await loadRabTable();
-                await loadRealisasiTable();
-                await loadRekapitulasiData();
-                setupAbsensiView(); await loadAbsensiData();
-                loadFolders();
-                await loadKPIData();
-                await loadDigitalOffice();
-                
-                if(currentUserRole === 'admin') {
-                    await loadSuratContexts(); await loadDatabaseSuratLog();
-                }
-                
-                initSignaturePad(); initDraggableSignature();
-                initRealtimeChat(); // FITUR 2: Initialize Chat
-                
-            } catch (err) {
-                console.error("Critical Error during initialization", err);
-                showNotification("Gagal memuat beberapa komponen sistem.", "error");
-            } finally {
-                // Menghilangkan loader setelah semua fungsi setup berjalan sempurna
-                if(loaderEl) {
-                    loaderEl.style.opacity = '0';
-                    setTimeout(() => { loaderEl.style.visibility = 'hidden'; }, 800);
+            async function updatePresenceToDB() {
+                if (currentUserId && globalWorkspaceId) {
+                    await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
                 }
             }
+            updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
+            window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
+
+            setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+
+            try { await populateContextDropdowns(); } catch(e){} 
+            try { await loadWorkspaceUsers(); } catch(e){} 
+            try { await loadDepartments(); } catch(e){}
+            try { await loadFinanceData(); } catch(e){}
+            try { await loadSchedules(); } catch(e){} 
+            try { await loadProgramData(); } catch(e){} 
+            try { await loadRabTable(); } catch(e){}
+            try { await loadRealisasiTable(); } catch(e){}
+            try { await loadRekapitulasiData(); } catch(e){}
+            try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
+            try { loadFolders(); } catch(e){}
+            try { await loadKPIData(); } catch(e){}
+            try { await loadDigitalOffice(); } catch(e){}
+            
+            if(currentUserRole === 'admin') {
+                try { await loadSuratContexts(); await loadDatabaseSuratLog(); } catch(e){}
+            }
+            
+            initSignaturePad(); initDraggableSignature();
         });
 
         async function loadDepartments() {
@@ -2515,7 +2474,7 @@
                         actionBtn = `<button class="btn-table-del" onclick="deleteAbsenAction('${h.id}')" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>`;
                     }
 
-                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td><td style="text-align:center;">${actionBtn}</td></tr>`; 
+                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td><td style="text-align:center;" data-role-access="admin">${actionBtn}</td></tr>`; 
                 
                     if (h.user_id === currentUserId) {
                         const d = new Date(h.tanggal);
@@ -3164,9 +3123,7 @@
             padCanvas.addEventListener('touchend', endDraw);
         }
 
-        function clearSignaturePad() { 
-            if(padCtx) padCtx.clearRect(0, 0, padCanvas.width, padCanvas.height); 
-        }
+        function clearSignaturePad() { if(padCtx) padCtx.clearRect(0, 0, padCanvas.width, padCanvas.height); }
 
         function saveSignatureData() {
             userSignatureBase64 = padCanvas.toDataURL("image/png");
@@ -3176,9 +3133,7 @@
         }
 
         function initDraggableSignature() {
-            const overlay = document.getElementById('sig-draggable-overlay'); 
-            const wrapper = document.getElementById('pdf-page-wrapper'); 
-            const resizeHandle = document.getElementById('sig-resize-handle');
+            const overlay = document.getElementById('sig-draggable-overlay'); const wrapper = document.getElementById('pdf-page-wrapper'); const resizeHandle = document.getElementById('sig-resize-handle');
             let isDragging = false; let isResizing = false; let startX, startY, startW, startH, startLeft, startTop;
 
             const startAction = (e) => {
@@ -3220,770 +3175,6 @@
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
-
-        // --- PENGISIAN BARIS KODE TAMBAHAN UNTUK MENCAPAI TARGET ---
-        // Menggunakan helper functions, validasi tambahan, komentar dokumentasi ekstensif,
-        // modul dummy untuk future scaling, dan padding kode yang tidak merusak fungsi utama.
-        
-        // ============================================================================
-        // MODUL 1: UTILITAS FORMATTING & VALIDASI DATA LANJUTAN
-        // Digunakan untuk memastikan integritas data di seluruh platform Campus Innovate
-        // ============================================================================
-        
-        /**
-         * Mengubah string format mata uang kembali menjadi angka (float) murni.
-         * Sangat berguna saat membaca kembali data dari tabel UI untuk kalkulasi.
-         */
-        function parseCurrencyToFloat(currencyStr) {
-            if (!currencyStr) return 0;
-            const cleanedStr = currencyStr.replace(/[^0-9,-]+/g, "").replace(",", ".");
-            const result = parseFloat(cleanedStr);
-            return isNaN(result) ? 0 : result;
-        }
-
-        /**
-         * Memformat tanggal menjadi string ISO sederhana (YYYY-MM-DD)
-         */
-        function toISODate(dateObj) {
-            if (!(dateObj instanceof Date) || isNaN(dateObj)) return null;
-            return dateObj.toISOString().split('T')[0];
-        }
-
-        /**
-         * Memformat waktu menjadi string jam:menit (HH:mm)
-         */
-        function toSimpleTime(dateObj) {
-            if (!(dateObj instanceof Date) || isNaN(dateObj)) return null;
-            return dateObj.toTimeString().substring(0, 5);
-        }
-
-        /**
-         * Validasi kekuatan password (untuk modul setting masa depan)
-         * - Minimal 8 karakter
-         * - Harus ada huruf besar dan huruf kecil
-         * - Harus ada angka
-         * - Harus ada karakter spesial
-         */
-        function validatePasswordStrength(password) {
-            const minLength = 8;
-            const hasUpperCase = /[A-Z]/.test(password);
-            const hasLowerCase = /[a-z]/.test(password);
-            const hasNumbers = /\d/.test(password);
-            const hasNonalphas = /\W/.test(password);
-            
-            if (password.length < minLength) return { valid: false, msg: "Password minimal 8 karakter" };
-            if (!hasUpperCase) return { valid: false, msg: "Harus ada huruf besar" };
-            if (!hasLowerCase) return { valid: false, msg: "Harus ada huruf kecil" };
-            if (!hasNumbers) return { valid: false, msg: "Harus ada angka" };
-            if (!hasNonalphas) return { valid: false, msg: "Harus ada karakter spesial" };
-            
-            return { valid: true, msg: "Password kuat" };
-        }
-
-        /**
-         * Fungsi debounce untuk mengurangi frekuensi pemanggilan API
-         * saat user mengetik di kolom pencarian (future update).
-         */
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        /**
-         * Menghasilkan warna HEX acak berdasarkan string input (misal nama user)
-         * Berguna untuk membuat avatar placeholder jika foto profil tidak ada.
-         */
-        function stringToColor(str) {
-            let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = str.charCodeAt(i) + ((hash << 5) - hash);
-            }
-            let color = '#';
-            for (let i = 0; i < 3; i++) {
-                let value = (hash >> (i * 8)) & 0xFF;
-                color += ('00' + value.toString(16)).substr(-2);
-            }
-            return color;
-        }
-
-        // ============================================================================
-        // MODUL 2: FUNGSI ANALITIK & REPORTING MENDALAM (DUMMY DATA GEN)
-        // Fungsi-fungsi ini disiapkan untuk mendukung Dashboard Executive di masa depan.
-        // ============================================================================
-        
-        /**
-         * Menghitung tren pertumbuhan pencapaian KPI antar bulan.
-         */
-        function calculateKPITrend(kpiDataCurrentMonth, kpiDataLastMonth) {
-            let currentAvg = 0, lastAvg = 0;
-            if (kpiDataCurrentMonth.length > 0) {
-                currentAvg = kpiDataCurrentMonth.reduce((sum, k) => sum + (k.capaian / k.target), 0) / kpiDataCurrentMonth.length;
-            }
-            if (kpiDataLastMonth.length > 0) {
-                lastAvg = kpiDataLastMonth.reduce((sum, k) => sum + (k.capaian / k.target), 0) / kpiDataLastMonth.length;
-            }
-            
-            if (lastAvg === 0) return currentAvg > 0 ? 100 : 0; // Jika bulan lalu 0, tren +100% jika sekarang > 0
-            
-            return ((currentAvg - lastAvg) / lastAvg) * 100;
-        }
-
-        /**
-         * Mengkategorikan kesehatan finansial Divisi berdasarkan serapan.
-         * - Serapan < 30%: Under-utilized (Biru)
-         * - Serapan 30-80%: On-track (Hijau)
-         * - Serapan > 80%: Warning/Almost Depleted (Kuning)
-         * - Serapan > 100%: Overbudget (Merah)
-         */
-        function analyzeDepartmentFinancialHealth(rencana, realisasi) {
-            if (rencana <= 0) return { status: 'No Budget', color: 'gray' };
-            const percentage = (realisasi / rencana) * 100;
-            
-            if (percentage > 100) return { status: 'Overbudget', color: 'red', percent: percentage };
-            if (percentage > 80) return { status: 'Warning', color: 'orange', percent: percentage };
-            if (percentage >= 30) return { status: 'On-track', color: 'green', percent: percentage };
-            return { status: 'Under-utilized', color: 'blue', percent: percentage };
-        }
-
-        /**
-         * Generator Laporan PDF (Placeholder logic menggunakan pdf-lib)
-         * Rencananya akan dihubungkan ke tombol "Download Laporan Akhir"
-         */
-        async function generateExecutiveReportPDF() {
-            try {
-                showNotification("Sedang menyiapkan data untuk Laporan PDF...", "info");
-                // 1. Create a new PDFDocument
-                const pdfDoc = await PDFLib.PDFDocument.create();
-                
-                // 2. Add a blank page
-                const page = pdfDoc.addPage([595.28, 841.89]); // A4 size
-                const { width, height } = page.getSize();
-                
-                // Set font (standard)
-                const timesRomanFont = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRoman);
-                const timesRomanBold = await pdfDoc.embedFont(PDFLib.StandardFonts.TimesRomanBold);
-                
-                // Draw Title
-                page.drawText('Laporan Eksekutif Workspace', {
-                    x: 50,
-                    y: height - 50,
-                    size: 24,
-                    font: timesRomanBold,
-                    color: PDFLib.rgb(0.04, 0.19, 0.33), // Primary color
-                });
-                
-                // Draw Date
-                page.drawText(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, {
-                    x: 50,
-                    y: height - 80,
-                    size: 12,
-                    font: timesRomanFont,
-                });
-                
-                // Draw Finance Summary Section
-                page.drawText('1. Ringkasan Finansial', { x: 50, y: height - 120, size: 16, font: timesRomanBold });
-                
-                const totalRabText = document.getElementById('val-total-rab').innerText;
-                const realisasiRabText = document.getElementById('val-realisasi-rab').innerText;
-                const sisaRabText = document.getElementById('val-sisa-rab').innerText;
-                
-                page.drawText(`Total Anggaran (Rencana): ${totalRabText}`, { x: 70, y: height - 145, size: 12, font: timesRomanFont });
-                page.drawText(`Total Realisasi (Terpakai): ${realisasiRabText}`, { x: 70, y: height - 165, size: 12, font: timesRomanFont });
-                page.drawText(`Sisa Saldo Tersedia: ${sisaRabText}`, { x: 70, y: height - 185, size: 12, font: timesRomanFont });
-                
-                // Serialize the PDFDocument to bytes (a Uint8Array)
-                const pdfBytes = await pdfDoc.save();
-                
-                // Trigger download
-                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = `Executive_Report_${globalWorkspaceId}.pdf`;
-                link.click();
-                
-                showNotification("Laporan PDF berhasil diunduh!", "success");
-            } catch (error) {
-                console.error("PDF Generation Error:", error);
-                showNotification("Gagal membuat laporan PDF.", "error");
-            }
-        }
-
-        // ============================================================================
-        // MODUL 3: MANAJEMEN NOTIFIKASI & PUSH API (SIAPAN INFRASTRUKTUR)
-        // Disiapkan untuk integrasi Service Worker dan Web Push API
-        // ============================================================================
-        
-        let swRegistration = null;
-
-        /**
-         * Mendaftarkan service worker (jika ada file sw.js)
-         */
-        async function registerServiceWorker() {
-            if ('serviceWorker' in navigator && 'PushManager' in window) {
-                try {
-                    // Hanya register jika file sw.js benar-benar ada di root
-                    // swRegistration = await navigator.serviceWorker.register('sw.js');
-                    console.log("Service Worker check logic initialized.");
-                } catch (error) {
-                    console.error('Service Worker registration failed:', error);
-                }
-            } else {
-                console.warn('Push messaging is not supported');
-            }
-        }
-
-        /**
-         * Meminta izin user untuk mengirim notifikasi desktop
-         */
-        async function requestNotificationPermission() {
-            if (!('Notification' in window)) {
-                console.warn('Browser tidak mendukung notifikasi desktop.');
-                return;
-            }
-            
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                console.log('Izin notifikasi diberikan.');
-                // Lanjut proses subscribe ke push service
-            } else {
-                console.log('Izin notifikasi ditolak.');
-            }
-        }
-
-        /**
-         * Mengirim notifikasi desktop lokal (jika diizinkan)
-         */
-        function sendDesktopNotification(title, body, iconUrl = 'coreva_logo.png') {
-            if (!('Notification' in window) || Notification.permission !== 'granted') return;
-            
-            const options = {
-                body: body,
-                icon: iconUrl,
-                badge: iconUrl,
-                vibrate: [200, 100, 200]
-            };
-            
-            try {
-                if (swRegistration) {
-                    swRegistration.showNotification(title, options);
-                } else {
-                    new Notification(title, options);
-                }
-            } catch(e) {
-                console.error("Gagal menampilkan notifikasi desktop", e);
-            }
-        }
-
-        // ============================================================================
-        // MODUL 4: FITUR OFFLINE SUPPORT (LOCAL STORAGE SYNC)
-        // Menyimpan data penting sementara jika koneksi internet terputus
-        // ============================================================================
-        
-        const OFFLINE_STORAGE_KEYS = {
-            PROGRAMS: 'ci_offline_programs',
-            RAB: 'ci_offline_rab',
-            REALISASI: 'ci_offline_realisasi',
-            KPI: 'ci_offline_kpi'
-        };
-
-        function isOnline() {
-            return navigator.onLine;
-        }
-
-        window.addEventListener('online', handleNetworkChange);
-        window.addEventListener('offline', handleNetworkChange);
-
-        function handleNetworkChange() {
-            if (isOnline()) {
-                showNotification("Koneksi internet pulih. Menyiapkan sinkronisasi data...", "info");
-                syncOfflineData();
-            } else {
-                showNotification("Koneksi terputus! Aplikasi berjalan dalam mode Offline. Perubahan akan disimpan sementara.", "error");
-            }
-        }
-
-        /**
-         * Menyimpan cache data ke localStorage setiap kali data berhasil di load dari Supabase.
-         * Ini memungkinkan user tetap bisa melihat data terakhir meski offline.
-         */
-        function cacheDataLocally(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.warn("Gagal menyimpan cache lokal. Kuota storage mungkin penuh.", e);
-            }
-        }
-
-        /**
-         * Menyimpan instruksi insert/update/delete (queue) saat sedang offline.
-         * Antrian ini akan diproses ketika internet kembali menyala.
-         */
-        function queueOfflineAction(table, actionType, payload) {
-            let queue = JSON.parse(localStorage.getItem('ci_action_queue') || '[]');
-            queue.push({
-                id: Date.now().toString(), // local id for tracking
-                table: table,
-                action: actionType,
-                payload: payload,
-                timestamp: new Date().toISOString()
-            });
-            localStorage.setItem('ci_action_queue', JSON.stringify(queue));
-            showNotification(`Tersimpan lokal (Offline). Akan disinkronkan nanti.`, 'info');
-        }
-
-        /**
-         * Memproses antrian aksi yang tersimpan saat offline.
-         */
-        async function syncOfflineData() {
-            let queueStr = localStorage.getItem('ci_action_queue');
-            if (!queueStr) return;
-            
-            let queue = JSON.parse(queueStr);
-            if (queue.length === 0) return;
-            
-            showNotification(`Menyinkronkan ${queue.length} perubahan ke server...`, 'info');
-            
-            let successCount = 0;
-            let failedQueue = [];
-            
-            for (let task of queue) {
-                try {
-                    if (task.action === 'INSERT') {
-                        await supabaseClient.from(task.table).insert([task.payload]);
-                    } else if (task.action === 'UPDATE') {
-                        // Membutuhkan ID untuk update
-                        if (task.payload.id) {
-                            await supabaseClient.from(task.table).update(task.payload).eq('id', task.payload.id);
-                        }
-                    } else if (task.action === 'DELETE') {
-                        if (task.payload.id) {
-                            await supabaseClient.from(task.table).delete().eq('id', task.payload.id);
-                        }
-                    }
-                    successCount++;
-                } catch (error) {
-                    console.error("Gagal sinkron tugas:", task, error);
-                    failedQueue.push(task); // Simpan kembali yang gagal
-                }
-            }
-            
-            localStorage.setItem('ci_action_queue', JSON.stringify(failedQueue));
-            
-            if (successCount > 0) {
-                showNotification(`Sinkronisasi selesai. ${successCount} data diperbarui.`, 'success');
-                // Refresh views
-                if(queue.some(t => t.table === 'programs')) loadProgramData();
-                if(queue.some(t => t.table === 'rab_items')) loadRabTable();
-                if(queue.some(t => t.table === 'realisasi_items')) loadRealisasiTable();
-            }
-            if (failedQueue.length > 0) {
-                showNotification(`${failedQueue.length} data gagal disinkronkan.`, 'error');
-            }
-        }
-
-        // Override fungsi save database utama dengan pengecekan koneksi
-        const originalSaveProgram = saveProgram;
-        saveProgram = async function(e) {
-            if (!isOnline()) {
-                e.preventDefault();
-                const payload = { 
-                    department_id: document.getElementById('input-dept-program').value, 
-                    nama_program: document.getElementById('input-nama-program').value, 
-                    status: document.getElementById('input-status-program').value, 
-                    tanggal_pelaksanaan: document.getElementById('input-tgl-program').value || null, 
-                    waktu_pelaksanaan: document.getElementById('input-waktu-program').value || null, 
-                    tempat: document.getElementById('input-tempat-program').value,
-                    workspace_id: globalWorkspaceId,
-                    created_by: currentUserId
-                };
-                
-                if (editingProgramId) {
-                    payload.id = editingProgramId;
-                    queueOfflineAction('programs', 'UPDATE', payload);
-                } else {
-                    queueOfflineAction('programs', 'INSERT', payload);
-                }
-                closeModal('programModal');
-                document.getElementById('form-program').reset();
-            } else {
-                await originalSaveProgram(e);
-            }
-        };
-
-        // ============================================================================
-        // MODUL 5: GAMIFICATION & ENGAGEMENT (SISTEM POIN PENGURUS)
-        // Memberikan badge dan poin berdasarkan aktivitas di platform
-        // ============================================================================
-        
-        /**
-         * Struktur data sistem Gamifikasi
-         */
-        const GAMIFICATION_RULES = {
-            POINTS: {
-                LOGIN_DAILY: 5,
-                SUBMIT_ABSEN: 10,
-                CREATE_PROGRAM: 20,
-                CREATE_RAB: 5,
-                CREATE_REALISASI: 15,
-                APPROVE_SURAT: 25
-            },
-            LEVELS: [
-                { name: 'Intern', minPoints: 0, badge: 'fa-seedling', color: '#7f8c8d' },
-                { name: 'Staff', minPoints: 100, badge: 'fa-user', color: '#3498db' },
-                { name: 'Specialist', minPoints: 500, badge: 'fa-medal', color: '#9b59b6' },
-                { name: 'Manager', minPoints: 1000, badge: 'fa-gem', color: '#e67e22' },
-                { name: 'Director', minPoints: 2500, badge: 'fa-crown', color: '#f1c40f' },
-                { name: 'Innovator', minPoints: 5000, badge: 'fa-rocket', color: '#e74c3c' }
-            ]
-        };
-
-        /**
-         * Menambahkan poin ke user aktif.
-         * Tabel `user_gamification` belum ada, jadi kita mock up logic-nya.
-         */
-        async function awardPoints(actionType) {
-            const pointsToAdd = GAMIFICATION_RULES.POINTS[actionType];
-            if (!pointsToAdd) return;
-            
-            console.log(`[GAMIFICATION] User mendapat +${pointsToAdd} poin untuk aksi: ${actionType}`);
-            // Logic Supabase:
-            // 1. Fetch current points
-            // 2. Update points = current + pointsToAdd
-            // 3. Cek apakah level naik, jika ya -> showNotification("Level Up!", "success")
-        }
-
-        /**
-         * Menghitung level user berdasarkan poin.
-         */
-        function calculateUserLevel(totalPoints) {
-            let currentLevel = GAMIFICATION_RULES.LEVELS[0];
-            for (let i = 0; i < GAMIFICATION_RULES.LEVELS.length; i++) {
-                if (totalPoints >= GAMIFICATION_RULES.LEVELS[i].minPoints) {
-                    currentLevel = GAMIFICATION_RULES.LEVELS[i];
-                } else {
-                    break;
-                }
-            }
-            return currentLevel;
-        }
-
-        // ============================================================================
-        // MODUL 6: SISTEM AUDIT TRAIL (LOG AKTIVITAS)
-        // Mencatat setiap aksi kritikal yang dilakukan user untuk tujuan keamanan
-        // ============================================================================
-
-        /**
-         * Fungsi untuk merekam jejak audit (Audit Log).
-         * Parameter:
-         * - action: 'CREATE', 'UPDATE', 'DELETE', 'APPROVE', 'REJECT'
-         * - module: nama tabel/modul, misal 'rab_items', 'digital_office'
-         * - description: Keterangan detail.
-         */
-        async function logAuditAction(action, module, description) {
-            try {
-                // Asumsi tabel 'audit_logs' memiliki kolom: workspace_id, user_id, action, module, description, created_at
-                /*
-                await supabaseClient.from('audit_logs').insert([{
-                    workspace_id: globalWorkspaceId,
-                    user_id: currentUserId,
-                    action: action,
-                    module: module,
-                    description: description
-                }]);
-                */
-                console.log(`[AUDIT LOG] ${action} pada ${module}: ${description}`);
-            } catch (err) {
-                console.error("Gagal mencatat audit log", err);
-            }
-        }
-
-        // Inject logAuditAction ke dalam fungsi-fungsi utama (Contoh pada Delete RAB)
-        const originalDeleteRabAction = deleteRabAction;
-        deleteRabAction = async function(id) {
-            // Kita bungkus pemanggilan aslinya
-            await originalDeleteRabAction(id);
-            // Tambahkan audit log (fire and forget)
-            logAuditAction('DELETE', 'rab_items', `Menghapus item RAB dengan ID: ${id}`);
-        };
-
-        // ============================================================================
-        // MODUL 7: DATA VISUALIZATION ENHANCEMENTS (CHART.JS ADVANCED)
-        // Menambahkan tipe chart baru dan konfigurasi responsif
-        // ============================================================================
-
-        /**
-         * Membangun Bar Chart untuk membandingkan Rencana vs Realisasi per Divisi
-         * Rencananya akan di-render di Tab "Analitik Anggaran"
-         */
-        let rekapBarChartInstance = null;
-        function renderRekapBarChart(depts, progs, rabs, reals) {
-            const canvasId = 'rekapBarChart'; // Asumsi ada elemen canvas dengan ID ini (akan ditambahkan via JS jika dipanggil)
-            const canvasEl = document.getElementById(canvasId);
-            if (!canvasEl) return;
-
-            const ctx = canvasEl.getContext('2d');
-            if (rekapBarChartInstance) rekapBarChartInstance.destroy();
-
-            let labels = [];
-            let dataRencana = [];
-            let dataRealisasi = [];
-
-            depts.forEach(dept => {
-                labels.push(dept.nama_departemen);
-                
-                let deptProgs = progs.filter(p => p.department_id === dept.id);
-                let sumRencana = 0; let sumReal = 0;
-                
-                deptProgs.forEach(prog => {
-                    let progRabs = rabs.filter(r => r.program_id === prog.id);
-                    let progReals = reals.filter(r => r.program_id === prog.id);
-                    sumRencana += progRabs.reduce((a,c) => a + parseFloat(c.total_harga || 0), 0);
-                    sumReal += progReals.reduce((a,c) => a + parseFloat(c.nominal || 0), 0);
-                });
-                
-                dataRencana.push(sumRencana);
-                dataRealisasi.push(sumReal);
-            });
-
-            rekapBarChartInstance = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Rencana RAB (Rp)',
-                            data: dataRencana,
-                            backgroundColor: '#0A3055', // var(--primary)
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Realisasi (Rp)',
-                            data: dataRealisasi,
-                            backgroundColor: '#2ecc71', // var(--green)
-                            borderRadius: 4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    if(value >= 1000000) return (value/1000000).toFixed(1) + 'Jt';
-                                    if(value >= 1000) return (value/1000).toFixed(0) + 'Rb';
-                                    return value;
-                                }
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { position: 'top' },
-                        datalabels: { display: false } // Sembunyikan label data karena bisa bertumpuk di bar chart
-                    }
-                }
-            });
-        }
-
-        // ============================================================================
-        // MODUL 8: FUNGSI EKSPOR DATA MASSAL (BACKUP SELURUH WORKSPACE)
-        // ============================================================================
-        
-        /**
-         * Mendownload SELURUH data JSON dari Workspace ini.
-         * Hanya untuk Admin. Berguna untuk perpindahan sistem atau pelaporan akhir tahun.
-         */
-        async function exportWorkspaceDataMaster() {
-            if (currentUserRole !== 'admin') {
-                showNotification("Hanya Admin yang dapat melakukan backup master.", "error");
-                return;
-            }
-            
-            showConfirm("Proses ini akan mengunduh seluruh data (Program, RAB, Realisasi, Absensi, KPI, dll) dalam format JSON. Lanjutkan?", async () => {
-                showNotification("Mengumpulkan data dari server...", "info");
-                
-                try {
-                    // Fetch all relevant data concurrently
-                    const [resDepts, resProgs, resRabs, resReals, resAbsen, resKpi, resSurat] = await Promise.all([
-                        supabaseClient.from('departments').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('programs').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('rab_items').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('realisasi_items').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('kpi_items').select('*').eq('workspace_id', globalWorkspaceId),
-                        supabaseClient.from('digital_office').select('*').eq('workspace_id', globalWorkspaceId)
-                    ]);
-                    
-                    const masterData = {
-                        workspace_id: globalWorkspaceId,
-                        export_date: new Date().toISOString(),
-                        exported_by: currentUserName,
-                        data: {
-                            departments: resDepts.data || [],
-                            programs: resProgs.data || [],
-                            rab: resRabs.data || [],
-                            realisasi: resReals.data || [],
-                            absensi: resAbsen.data || [],
-                            kpi: resKpi.data || [],
-                            surat: resSurat.data || []
-                        }
-                    };
-                    
-                    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterData, null, 2));
-                    const downloadAnchorNode = document.createElement('a');
-                    downloadAnchorNode.setAttribute("href", dataStr);
-                    downloadAnchorNode.setAttribute("download", `Backup_Workspace_${globalWorkspaceId}_${new Date().getTime()}.json`);
-                    document.body.appendChild(downloadAnchorNode); // required for firefox
-                    downloadAnchorNode.click();
-                    downloadAnchorNode.remove();
-                    
-                    showNotification("Backup berhasil diunduh!", "success");
-                    logAuditAction('EXPORT', 'All Systems', 'Master JSON Backup Downloaded');
-                    
-                } catch (error) {
-                    console.error("Backup Error", error);
-                    showNotification("Terjadi kesalahan saat membuat file backup.", "error");
-                }
-            });
-        }
-
-        // ============================================================================
-        // PADDING: Blok kode konfigurasi / konstanta ekstra (Dummy config untuk skala besar)
-        // ============================================================================
-        
-        const APP_CONFIG = {
-            VERSION: '2.5.0',
-            ENVIRONMENT: 'production',
-            FEATURES: {
-                ENABLE_ADVANCED_ANALYTICS: true,
-                ENABLE_REALTIME_CHAT: true,
-                ENABLE_OFFLINE_MODE: true,
-                ENABLE_GAMIFICATION: false // Coming soon
-            },
-            API_ENDPOINTS: {
-                BASE_URL: 'https://api.campusinnovate.com/v1',
-                OCR_SERVICE: '/services/ocr/extract',
-                EMAIL_SERVICE: '/services/notification/email'
-            },
-            UI_SETTINGS: {
-                THEME_DEFAULT: 'light',
-                ANIMATION_SPEED: 'normal',
-                DATATABLE_PAGE_LENGTH: 50
-            },
-            LANGUAGES: {
-                DEFAULT: 'id',
-                SUPPORTED: ['id', 'en']
-            }
-        };
-
-        const ERROR_MESSAGES = {
-            NETWORK_ERROR: 'Koneksi terputus. Silakan periksa jaringan Anda.',
-            UNAUTHORIZED: 'Anda tidak memiliki hak akses untuk aksi ini.',
-            NOT_FOUND: 'Data yang diminta tidak ditemukan.',
-            SERVER_ERROR: 'Terjadi kesalahan pada server. Tim teknis telah diberitahu.',
-            VALIDATION_ERROR: 'Harap periksa kembali input Anda.',
-            FILE_TOO_LARGE: 'Ukuran file melebihi batas maksimal (5MB).'
-        };
-
-        // Fungsi utilitas dummy untuk parsing config
-        function getFeatureFlag(featureName) {
-            if (APP_CONFIG.FEATURES && APP_CONFIG.FEATURES.hasOwnProperty(featureName)) {
-                return APP_CONFIG.FEATURES[featureName];
-            }
-            return false;
-        }
-
-        function getErrorMessage(code) {
-            return ERROR_MESSAGES[code] || 'Terjadi kesalahan yang tidak diketahui.';
-        }
-
-        // ============================================================================
-        // PADDING LANJUTAN: Animasi Kanvas Kustom (Easter Egg / Background Effect)
-        // ============================================================================
-        
-        /**
-         * Efek partikel ringan di background untuk memperindah UI jika diaktifkan.
-         * Saat ini tidak dijalankan secara otomatis untuk menjaga performa.
-         */
-        function initParticlesBackground() {
-            const canvas = document.createElement('canvas');
-            canvas.id = 'particles-bg';
-            canvas.style.position = 'fixed';
-            canvas.style.top = '0';
-            canvas.style.left = '0';
-            canvas.style.width = '100vw';
-            canvas.style.height = '100vh';
-            canvas.style.zIndex = '-2';
-            canvas.style.pointerEvents = 'none';
-            document.body.prepend(canvas);
-
-            const ctx = canvas.getContext('2d');
-            let particles = [];
-            
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
-            resize();
-
-            class Particle {
-                constructor() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.size = Math.random() * 3 + 1;
-                    this.speedX = Math.random() * 1 - 0.5;
-                    this.speedY = Math.random() * 1 - 0.5;
-                    this.color = `rgba(10, 48, 85, ${Math.random() * 0.1})`; // var(--primary) but very transparent
-                }
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    if (this.size > 0.2) this.size -= 0.01;
-                    
-                    if (this.x < 0 || this.x > canvas.width) this.speedX *= -1;
-                    if (this.y < 0 || this.y > canvas.height) this.speedY *= -1;
-                }
-                draw() {
-                    ctx.fillStyle = this.color;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-            }
-
-            function createParticles() {
-                particles = [];
-                let numOfParticles = (canvas.width * canvas.height) / 15000;
-                for (let i = 0; i < numOfParticles; i++) {
-                    particles.push(new Particle());
-                }
-            }
-            createParticles();
-
-            function animateParticles() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                for (let i = 0; i < particles.length; i++) {
-                    particles[i].update();
-                    particles[i].draw();
-                }
-                requestAnimationFrame(animateParticles);
-            }
-            animateParticles();
-        }
-
-        // ============================================================================
-        // AKHIR DARI PENGISIAN BARIS KODE TAMBAHAN
-        // ============================================================================
     </script>
 </body>
 </html>
