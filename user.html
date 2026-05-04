@@ -3011,7 +3011,7 @@
                 if (isResizing) {
                     let newWidth = startW + (clientX - startX); let newHeight = startH + (clientY - startY);
                     if (newWidth < 50) newWidth = 50; if (newHeight < 25) newHeight = 25;
-                    if (overlay.offsetLeft + newWidth > wrapper.offsetWidth) newWidth = wrapper.offsetWidth - overlay.offsetLeft;
+                    if (overlay.offsetLeft + newWidth > wrapper.offsetWidthI ) newWidth = wrapper.offsetWidth - overlay.offsetLeft;
                     if (overlay.offsetTop + newHeight > wrapper.offsetHeight) newHeight = wrapper.offsetHeight - overlay.offsetTop;
                     overlay.style.width = newWidth + 'px'; overlay.style.height = newHeight + 'px';
                 } else if (isDragging) {
@@ -3024,13 +3024,40 @@
                 }
             };
             const stopAction = () => { isDragging = false; isResizing = false; };
-            overlay.addEventListener('mousedown', startAction); document.addEventListener('mousemove', doAction); document.addEventListener('mouseup', stopAction);
-            overlay.addEventListener('touchstart', startAction, { passive: false }); document.addEventListener('touchmove', doAction, { passive: false }); document.addEventListener('touchend', stopAction);
+            
+            overlay.addEventListener('mousedown', startAction); 
+            document.addEventListener('mousemove', doAction); 
+            document.addEventListener('mouseup', stopAction);
+            
+            overlay.addEventListener('touchstart', startAction, { passive: false }); 
+            document.addEventListener('touchmove', doAction, { passive: false }); 
+            document.addEventListener('touchend', stopAction);
         }
 
-        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
-        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
-        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+        // Fungsi Global Modal & Logout
+        function openModal(modalId) { 
+            document.getElementById(modalId).classList.add('active'); 
+        }
+        
+        function closeModal(modalId) { 
+            document.getElementById(modalId).classList.remove('active'); 
+        }
+        
+        async function handleLogout() { 
+            showConfirm("Apakah Anda yakin ingin keluar dari Workspace?", async () => {
+                const loader = document.getElementById('initial-loader');
+                const loaderText = document.getElementById('loader-text');
+                
+                if(loader && loaderText) {
+                    loaderText.innerText = "Keluar dari sistem...";
+                    loader.style.display = 'flex';
+                    loader.style.opacity = '1';
+                }
+                
+                await supabaseClient.auth.signOut(); 
+                window.location.href = 'index.html'; 
+            });
+        }
     </script>
 </body>
 </html>
