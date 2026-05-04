@@ -47,10 +47,7 @@
         @keyframes slideInToast { to { transform: translateX(0); } }
         @keyframes fadeOutToast { to { opacity: 0; transform: translateY(-20px); visibility: hidden; } }
 
-        /* ==========================================
-           LAYOUT STRUKTUR (TEAMS CLONE)
-           ========================================== */
-        
+        /* SIDEBAR KIRI */
         .app-sidebar { width: 70px; background: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; align-items: center; padding: 15px 0; z-index: 100; }
         .app-sidebar .logo { width: 40px; height: 40px; border-radius: 8px; background: var(--primary); color: var(--secondary); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-bottom: 30px; cursor: pointer; }
         .nav-icon { width: 50px; height: 50px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted); cursor: pointer; transition: 0.2s; border-radius: 10px; margin-bottom: 10px; text-decoration: none; position: relative; }
@@ -58,11 +55,11 @@
         .nav-icon.active { color: var(--primary); border-left: 3px solid var(--primary); border-radius: 0 10px 10px 0; background: #f1f5f9;}
         .nav-icon i { font-size: 1.3rem; margin-bottom: 3px;}
         .nav-icon span { font-size: 0.6rem; font-weight: 700; }
-        .nav-icon .badge { position: absolute; top: 5px; right: 8px; background: var(--red); color: white; font-size: 0.5rem; padding: 2px 5px; border-radius: 10px; font-weight: bold; border: 2px solid white;}
 
         .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; gap: 15px;}
         .profile-avatar-mini { width: 35px; height: 35px; border-radius: 50%; background: var(--secondary); color: var(--primary); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 1.2rem; cursor: pointer; border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1);}
 
+        /* PANEL LIST CHAT */
         .chat-list-panel { width: 320px; background: var(--bg-app); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 90; }
         .chat-list-header { padding: 20px; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); }
         .chat-list-header h2 { font-size: 1.4rem; font-weight: 900; color: var(--primary); display: flex; justify-content: space-between; align-items: center;}
@@ -92,9 +89,9 @@
         .chat-item-name { font-weight: 800; font-size: 0.95rem; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center;}
         .chat-item-time { font-size: 0.7rem; font-weight: 600; color: #94a3b8; }
         .chat-item-preview { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; display: flex; align-items: center; gap: 5px;}
-        .unread-count { background: var(--primary); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: bold;}
         .admin-badge { color: var(--secondary); font-size: 0.8rem; }
 
+        /* AREA CHAT UTAMA */
         .chat-main-area { flex: 1; background: var(--bg-panel); display: flex; flex-direction: column; position: relative; z-index: 80; }
         .empty-chat-state { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-muted); }
         .empty-chat-state i { font-size: 5rem; color: #e2e8f0; margin-bottom: 20px; }
@@ -216,7 +213,7 @@
     <nav class="app-sidebar">
         <div class="logo" onclick="window.location.href='user-hub.html'" title="Kembali ke Dashboard"><i class="fa-solid fa-layer-group"></i></div>
         <a href="#" class="nav-icon" onclick="openActivityModal(); activateSidebar(this)" title="Aktivitas Terbaru"><i class="fa-solid fa-bell"></i><span>Aktivitas</span></a>
-        <a href="#" class="nav-icon active" onclick="activateSidebar(this); switchTab('all', document.querySelectorAll('.chat-tab')[0])"><i class="fa-solid fa-message"></i><span>Obrolan</span><div class="badge">3</div></a>
+        <a href="#" class="nav-icon active" onclick="activateSidebar(this); switchTab('all', document.querySelectorAll('.chat-tab')[0])"><i class="fa-solid fa-message"></i><span>Obrolan</span></a>
         <a href="#" class="nav-icon" onclick="activateSidebar(this); switchTab('groups', document.querySelectorAll('.chat-tab')[2])" title="Lihat Grup Divisi"><i class="fa-solid fa-users-rectangle"></i><span>Grup Divisi</span></a>
         <a href="#" class="nav-icon" onclick="openOrgChartModal(); activateSidebar(this)" title="Lihat Struktur Organisasi"><i class="fa-solid fa-sitemap"></i><span>Struktur</span></a>
         <a href="#" class="nav-icon" onclick="openAgendaModal(); activateSidebar(this)" title="Jadwalkan Agenda"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
@@ -433,11 +430,9 @@
 
         // --- INIT LISTENER ---
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
+            const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
             
-            // SECURITY: Jika tidak ada session asli, paksa pengguna kembali ke halaman login.
-            // Tidak ada lagi mode dummy/simulasi yang merusak database.
-            if (!session) {
+            if (sessionError || !session) {
                 showToast("Sesi Habis", "Mengarahkan ke halaman login...", "error");
                 setTimeout(() => window.location.href = 'index.html', 1500);
                 return;
@@ -446,18 +441,28 @@
             const urlParams = new URLSearchParams(window.location.search);
             currentWorkspaceId = urlParams.get('workspace');
             
+            // JIKA URL TIDAK ADA PARAMETER ?workspace= , CARI DI DATABASE
             if(!currentWorkspaceId) {
-                const { data: wsMem } = await supabaseClient.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).limit(1);
-                if(wsMem && wsMem.length > 0) currentWorkspaceId = wsMem[0].workspace_id;
-                else {
-                    showToast("Error", "Workspace tidak ditemukan.", "error");
+                const { data: wsMem, error: errWsMem } = await supabaseClient.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).limit(1);
+                
+                if(errWsMem) {
+                    console.error("Gagal menarik workspace (Cek RLS):", errWsMem);
+                }
+
+                if(wsMem && wsMem.length > 0) {
+                    currentWorkspaceId = wsMem[0].workspace_id;
+                } else {
+                    document.getElementById('chat-list-container').innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #e74c3c;"><b>Error:</b> Workspace tidak ditemukan / Akses ditolak oleh Database.</div>`;
+                    showToast("Error RLS", "Workspace tidak ditemukan.", "error");
                     return;
                 }
             }
 
-            const { data: myProfile } = await supabaseClient.from('workspace_members').select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
-            if(!myProfile) {
-                showToast("Akses Ditolak", "Anda bukan bagian dari workspace ini.", "error");
+            const { data: myProfile, error: errProfile } = await supabaseClient.from('workspace_members').select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
+            
+            if(errProfile || !myProfile) {
+                console.error("Gagal menarik profile diri sendiri:", errProfile);
+                showToast("Akses Ditolak", "Anda tidak terdaftar di workspace ini.", "error");
                 return;
             }
 
@@ -503,7 +508,7 @@
                 if (data) allMembers = data;
             } catch (e) {
                 console.error("Gagal memuat anggota workspace:", e);
-                showToast("Gagal Memuat Anggota", "Pastikan koneksi internet Anda stabil.", "error");
+                showToast("Gagal Memuat Anggota", "Periksa koneksi atau aturan RLS Database.", "error");
             }
         }
 
@@ -630,7 +635,6 @@
                 if (type === 'group') {
                     query = query.eq('group_id', id);
                 } else {
-                    // FIX ERROR 400: Menggunakan operator .in untuk UUID mencegah string formatting error PostgREST
                     query = query.is('group_id', null)
                                  .in('sender_id', [currentUser.id, id])
                                  .in('receiver_id', [currentUser.id, id]);
@@ -700,12 +704,11 @@
             scrollToBottom();
 
             try {
-                // SIMPAN LANGSUNG KE SUPABASE, TIDAK ADA SIMULASI LOKAL LAGI
                 const { error } = await supabaseClient.from('chat_messages').insert([newMsg]);
                 if(error) throw error;
             } catch (err) {
                 console.error("Gagal mengirim pesan ke server:", err);
-                showToast("Gagal Mengirim", "Gagal mengirim pesan, pastikan koneksi Anda stabil.", "error");
+                showToast("Gagal Mengirim", "Gagal mengirim pesan, pastikan RLS mengizinkan INSERT.", "error");
             }
         }
 
@@ -776,23 +779,23 @@
             try {
                 let combinedData = [];
 
-                // 1. Tarik Data Aset (Dokumen, Finansial, Program Kerja) dari Supabase
+                // 1. Tarik Data Aset 
                 const { data: assets } = await supabaseClient.from('workspace_assets')
                     .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
                 if(assets) {
                     assets.forEach(a => combinedData.push({ id: a.id, type: a.type || 'doc', title: a.title, sub: a.status_sub || 'Aset Workspace' }));
                 }
 
-                // 2. Tarik Data Tugas (Tasks) dari Supabase (Jika tabel tugas ada)
+                // 2. Tarik Data Tugas 
                 try {
                     const { data: tasks } = await supabaseClient.from('tasks')
                         .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
                     if(tasks) {
                         tasks.forEach(t => combinedData.push({ id: t.id, type: 'task', title: t.title, sub: `Deadline: ${t.deadline || '-'}` }));
                     }
-                } catch(err) { /* Abaikan jika tabel task belum dibuat di database */ }
+                } catch(err) {}
 
-                // 3. Tarik Anggota/Admin untuk Tag Orang
+                // 3. Tarik Anggota/Admin
                 allMembers.forEach(m => {
                     if(m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(mentionQuery)) {
                         combinedData.push({ id: m.user_id, type: 'user', title: m.nama_user, sub: m.role || 'Member' });
@@ -1089,7 +1092,6 @@
             }
 
             try {
-                // Sesuai dengan instruksi, agenda ini dipush ke Supabase. 
                 const { error } = await supabaseClient.from('workspace_agenda').insert([{ 
                     workspace_id: currentWorkspaceId,
                     title: title, date: date, time: time, description: desc, created_by: currentUser.id 
