@@ -126,7 +126,11 @@
         .mention-tag { background: var(--mention-bg); color: var(--mention-text); padding: 2px 6px; border-radius: 5px; font-weight: 700; font-size: 0.85rem; cursor: pointer; border: 1px solid #bfdbfe; display: inline-flex; align-items: center; gap: 4px;}
         .message-row.me .mention-tag { background: rgba(255,255,255,0.2); color: white; border-color: rgba(255,255,255,0.3);}
 
-        .chat-input-area { padding: 20px 25px; background: var(--bg-panel); border-top: 1px solid var(--border-color); }
+        .chat-input-area { padding: 20px 25px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; flex-direction: column;}
+        
+        /* INDIKATOR MENGETIK (BARU) */
+        #typing-indicator { display: none; font-size: 0.75rem; color: var(--primary); font-weight: 700; margin-bottom: 8px; padding-left: 10px; font-style: italic; transition: 0.3s; }
+        
         .input-wrapper { background: #f8fafc; border: 2px solid var(--border-color); border-radius: 15px; padding: 10px; display: flex; flex-direction: column; transition: 0.3s; position: relative; }
         .input-wrapper:focus-within { border-color: var(--primary); background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.03);}
         .rich-input { width: 100%; min-height: 45px; max-height: 120px; overflow-y: auto; outline: none; font-size: 0.95rem; line-height: 1.5; padding: 5px; color: var(--text-dark); }
@@ -273,6 +277,11 @@
             <div class="messages-container" id="messages-container"></div>
 
             <div class="chat-input-area">
+                <!-- ANIMASI MENGETIK -->
+                <div id="typing-indicator">
+                    <i class="fa-solid fa-pen-nib fa-bounce"></i> <span id="typing-text">Seseorang sedang mengetik...</span>
+                </div>
+                
                 <div class="input-wrapper">
                     <div class="mention-dropdown" id="mention-dropdown">
                         <div class="mention-header">
@@ -425,7 +434,7 @@
         let activeChatName = "";
         
         let onlineUsers = {}; 
-        let presenceChannel = null;
+        let realtimeChannel = null;
 
         // DUMMY DATA UNTUK MENTION AGAR SELALU MUNCUL SEBAGAI FALLBACK
         const dummyDashboardData = [
@@ -448,34 +457,27 @@
             const urlParams = new URLSearchParams(window.location.search);
             currentWorkspaceId = urlParams.get('workspace');
             
-            // LOGIKA PENCARIAN WORKSPACE ID
             if(!currentWorkspaceId) {
-                // 1. Coba cari di workspace_members
                 let { data: wsMem } = await supabaseClient.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).limit(1);
                 
                 if(wsMem && wsMem.length > 0) {
                     currentWorkspaceId = wsMem[0].workspace_id;
                 } else {
-                    // 2. JIKA ADMIN BARU LOGIN & BELUM ADA DI TABEL: Ambil sebarang ID Workspace yang aktif
-                    // Ini memastikan admin tidak akan kena error merah dan langsung masuk ke ruang chat.
                     let { data: anyWs } = await supabaseClient.from('workspace_members').select('workspace_id').limit(1);
                     if (anyWs && anyWs.length > 0) {
                         currentWorkspaceId = anyWs[0].workspace_id;
                     } else {
-                        // 3. Fallback terakhir jika database benar-benar kosong
                         currentWorkspaceId = 'default-workspace-id';
                     }
                 }
             }
 
-            // AUTO-HEAL ADMIN PROFILE
-            let { data: myProfile, error: errProfile } = await supabaseClient.from('workspace_members')
+            let { data: myProfile } = await supabaseClient.from('workspace_members')
                 .select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
             
             if(!myProfile) {
                 let fallbackName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
                 try {
-                    // Coba masukkan Admin secara otomatis
                     const { data: newProfile, error: insertErr } = await supabaseClient.from('workspace_members').insert([{
                         workspace_id: currentWorkspaceId,
                         user_id: session.user.id,
@@ -486,10 +488,8 @@
                     if (newProfile) myProfile = newProfile;
                     else throw insertErr;
                 } catch(e) {
-                    // JIKA RLS MASIH DIBLOKIR, KITA GUNAKAN MEMORI LOKAL AGAR UI TETAP JALAN
-                    console.log("RLS Insert diblokir. Menggunakan memori lokal untuk Admin.");
                     myProfile = { user_id: session.user.id, nama_user: fallbackName + ' (Admin)', role: 'Admin' };
-                    allMembers.push(myProfile); // Mendaftarkan admin ke RAM sementara
+                    allMembers.push(myProfile);
                 }
             }
 
@@ -498,33 +498,128 @@
             
             await loadWorkspaceMembers();
             await loadChatGroups();
-            setupPresence(); 
-            setupGlobalPresenceAndMessages();
-            setupRealtimeMembers(); 
+            
+            // JALANKAN SISTEM REALTIME (PRESENCE, TYPING, CHAT BARU)
+            setupRealtimeSystem(); 
+            
             setupMentionInput();
             renderChatList();
         });
 
-        // --- PRESENCE & REALTIME DATA SYSTEM ---
-        function setupPresence() {
-            presenceChannel = supabaseClient.channel('online-users', { config: { presence: { key: currentUser.id } } });
-            presenceChannel.on('presence', { event: 'sync' }, () => {
-                const newState = presenceChannel.presenceState();
-                onlineUsers = {};
-                for (let id in newState) onlineUsers[id] = true;
-                renderChatList(); 
+        // --- SISTEM REALTIME TERPUSAT (SATU CHANNEL UNTUK SEMUA) ---
+        function setupRealtimeSystem() {
+            // Gunakan satu channel agar tidak memakan banyak koneksi
+            realtimeChannel = supabaseClient.channel('workspace_realtime_' + currentWorkspaceId, {
+                config: { broadcast: { ack: false }, presence: { key: currentUser.id } }
             });
-            presenceChannel.subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentUser.id, name: currentUser.name });
-            });
+
+            realtimeChannel
+                // 1. PRESENCE (STATUS ONLINE)
+                .on('presence', { event: 'sync' }, () => {
+                    const newState = realtimeChannel.presenceState();
+                    onlineUsers = {};
+                    for (let id in newState) onlineUsers[id] = true;
+                    renderChatList(); 
+                })
+                
+                // 2. BROADCAST (INDIKATOR MENGETIK)
+                .on('broadcast', { event: 'typing' }, payload => {
+                    handleTypingEvent(payload.payload);
+                })
+                
+                // 3. POSTGRES CHANGES (PESAN BARU MASUK DARI DB - TANPA REFRESH)
+                .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
+                    const msg = payload.new;
+                    
+                    // Kalau itu chat kita sendiri, abaikan (karena sudah dirender lokal di sendMessage)
+                    if(msg.sender_id === currentUser.id) return; 
+                    
+                    let isRelevant = (activeChatType === 'group' && msg.group_id === activeChatId) || 
+                                     (activeChatType === 'user' && msg.sender_id === activeChatId && msg.receiver_id === currentUser.id);
+                    
+                    if(isRelevant) { 
+                        appendMessageToUI(msg); 
+                        scrollToBottom(); 
+                        document.getElementById('typing-indicator').style.display = 'none'; // Sembunyikan 'sedang mengetik' jika chat masuk
+                    } 
+                    else if(msg.receiver_id === currentUser.id || msg.group_id) { 
+                        showToast("Pesan Baru", "Ada pesan baru masuk di obrolan Anda.", "info"); 
+                        renderChatList(); // Update UI list chat (unread count, dll)
+                    }
+                })
+                
+                // 4. POSTGRES CHANGES (ANGGOTA BARU / UPDATE WORKSPACE)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, async () => {
+                    await loadWorkspaceMembers(); 
+                    renderChatList(); 
+                })
+                
+                // SUBSCRIBE CHANNEL
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await realtimeChannel.track({ user_id: currentUser.id, name: currentUser.name });
+                    }
+                });
         }
 
-        function setupRealtimeMembers() {
-            supabaseClient.channel('workspace_members_channel')
-            .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, async () => {
-                await loadWorkspaceMembers(); 
-                renderChatList(); 
-            }).subscribe();
+        // --- KIRIM INDIKATOR MENGETIK KETIKA INPUT DIKETIK ---
+        let typingTimer;
+        document.getElementById('chat-input').addEventListener('input', () => {
+            handleMentionInput(); // Jalankan trigger mention juga
+
+            if(!activeChatId || !realtimeChannel) return;
+
+            // Broadcast bahwa user ini sedang mengetik ke target chat
+            realtimeChannel.send({
+                type: 'broadcast',
+                event: 'typing',
+                payload: {
+                    sender_id: currentUser.id,
+                    target_id: activeChatId,
+                    chat_type: activeChatType,
+                    is_typing: true
+                }
+            });
+
+            // Hentikan penanda ketik jika sudah berhenti ngetik selama 2 detik
+            clearTimeout(typingTimer);
+            typingTimer = setTimeout(() => {
+                realtimeChannel.send({
+                    type: 'broadcast',
+                    event: 'typing',
+                    payload: {
+                        sender_id: currentUser.id,
+                        target_id: activeChatId,
+                        chat_type: activeChatType,
+                        is_typing: false
+                    }
+                });
+            }, 2000);
+        });
+
+        // --- TANGANI BROADCAST INDIKATOR MENGETIK ---
+        function handleTypingEvent(data) {
+            const indicator = document.getElementById('typing-indicator');
+            const typingText = document.getElementById('typing-text');
+
+            let isRelevant = false;
+            
+            // Cek apakah target typing sesuai dengan layar chat yang terbuka
+            if(activeChatType === 'group' && data.chat_type === 'group' && data.target_id === activeChatId) {
+                isRelevant = true;
+            } else if(activeChatType === 'user' && data.chat_type === 'user' && data.target_id === currentUser.id && data.sender_id === activeChatId) {
+                isRelevant = true;
+            }
+
+            if(isRelevant && data.is_typing) {
+                const sender = allMembers.find(m => m.user_id === data.sender_id);
+                const name = sender ? sender.nama_user : "Seseorang";
+                typingText.innerText = `${name} sedang mengetik...`;
+                indicator.style.display = 'block';
+                scrollToBottom();
+            } else if (isRelevant && !data.is_typing) {
+                indicator.style.display = 'none';
+            }
         }
 
         // --- LOAD DATA DARI SUPABASE ---
@@ -532,7 +627,6 @@
             try {
                 const { data, error } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', currentWorkspaceId);
                 if (data) {
-                    // Gabungkan data dari DB dengan admin jika admin pakai memori lokal
                     let existingIds = data.map(d => d.user_id);
                     if (!existingIds.includes(currentUser.id)) {
                         data.push({ user_id: currentUser.id, nama_user: currentUser.name, role: currentUser.role });
@@ -548,9 +642,7 @@
             try {
                 const { data, error } = await supabaseClient.from('chat_groups').select('*').eq('workspace_id', currentWorkspaceId);
                 if (data) chatGroups = data;
-            } catch (err) {
-                console.error("Gagal memuat grup:", err);
-            }
+            } catch (err) {}
         }
 
         // --- RENDERING CHAT LIST ---
@@ -727,6 +819,16 @@
 
             inputEl.innerHTML = ''; 
 
+            // Hentikan broadcast mengetik karena pesan sudah dikirim
+            clearTimeout(typingTimer);
+            if(realtimeChannel) {
+                realtimeChannel.send({
+                    type: 'broadcast',
+                    event: 'typing',
+                    payload: { sender_id: currentUser.id, target_id: activeChatId, chat_type: activeChatType, is_typing: false }
+                });
+            }
+
             const newMsg = { sender_id: currentUser.id, content: content, created_at: new Date().toISOString() };
             if(activeChatType === 'group') { newMsg.group_id = activeChatId; newMsg.receiver_id = null; } 
             else { newMsg.group_id = null; newMsg.receiver_id = activeChatId; }
@@ -750,21 +852,6 @@
             }
         });
 
-        // --- REALTIME MESSAGES ---
-        function setupGlobalPresenceAndMessages() {
-            supabaseClient.channel('chat_channel')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
-                const msg = payload.new;
-                if(msg.sender_id === currentUser.id) return; 
-                
-                let isRelevant = (activeChatType === 'group' && msg.group_id === activeChatId) || 
-                                 (activeChatType === 'user' && msg.sender_id === activeChatId && msg.receiver_id === currentUser.id);
-                
-                if(isRelevant) { appendMessageToUI(msg); scrollToBottom(); } 
-                else if(msg.receiver_id === currentUser.id || msg.group_id) { showToast("Pesan Baru", "Anda memiliki pesan baru.", "info"); }
-            }).subscribe();
-        }
-
         // --- MENTIONS SYSTEM ---
         const chatInput = document.getElementById('chat-input');
         const mentionDropdown = document.getElementById('mention-dropdown');
@@ -772,7 +859,6 @@
         let isMentioning = false; let mentionQuery = ''; let savedRange = null;
 
         function setupMentionInput() {
-            chatInput.addEventListener('input', handleMentionInput);
             chatInput.addEventListener('keydown', handleMentionNavigation);
         }
 
@@ -806,35 +892,30 @@
             mentionDropdown.classList.add('active');
 
             try {
-                // Selalu sertakan data dummy dari user HTML agar fitur mention pasti muncul
-                let combinedData = [...dummyDashboardData];
+                let combinedData = [...dummyDashboardData]; // Tarik fallback data statis
 
-                // Coba tarik data tambahan dari DB (Aset)
                 try {
                     const { data: assets } = await supabaseClient.from('workspace_assets')
                         .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
                     if(assets) {
                         assets.forEach(a => combinedData.push({ id: a.id, type: a.type || 'doc', title: a.title, sub: a.status_sub || 'Aset Workspace' }));
                     }
-                } catch(err) { console.log("Abaikan jika tabel assets belum dibuat"); }
+                } catch(err) { }
 
-                // Coba tarik data tambahan dari DB (Tugas)
                 try {
                     const { data: tasks } = await supabaseClient.from('tasks')
                         .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
                     if(tasks) {
                         tasks.forEach(t => combinedData.push({ id: t.id, type: 'task', title: t.title, sub: `Deadline: ${t.deadline || '-'}` }));
                     }
-                } catch(err) { console.log("Abaikan jika tabel tasks belum dibuat"); }
+                } catch(err) { }
 
-                // Masukkan nama-nama Anggota/Admin untuk Tag
                 allMembers.forEach(m => {
                     if(m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(mentionQuery)) {
                         combinedData.push({ id: m.user_id, type: 'user', title: m.nama_user, sub: m.role || 'Member' });
                     }
                 });
 
-                // Hapus duplikat dan sesuaikan dengan query ketikan user
                 if(mentionQuery.length > 0) {
                     combinedData = combinedData.filter(item => item.title.toLowerCase().includes(mentionQuery));
                 }
