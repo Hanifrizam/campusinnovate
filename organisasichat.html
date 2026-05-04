@@ -274,7 +274,6 @@
 
             <div class="chat-input-area">
                 <div class="input-wrapper">
-                    <!-- POP UP MENTION REKOMENDASI -->
                     <div class="mention-dropdown" id="mention-dropdown">
                         <div class="mention-header">
                             Sematkan Data Dashboard (Rekomendasi)
@@ -428,7 +427,7 @@
         let onlineUsers = {}; 
         let presenceChannel = null;
 
-        // --- INIT LISTENER ---
+        // --- INIT LISTENER & AUTO-HEAL ADMIN ---
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session }, error: sessionError } = await supabaseClient.auth.getSession();
             
@@ -443,43 +442,50 @@
             
             // JIKA URL TIDAK ADA PARAMETER ?workspace= , CARI DI DATABASE
             if(!currentWorkspaceId) {
-                const { data: wsMem, error: errWsMem } = await supabaseClient.from('workspace_members')
-                    .select('workspace_id').eq('user_id', session.user.id).limit(1);
+                // 1. Coba cari di workspace_members (Sebagai User)
+                const { data: wsMem } = await supabaseClient.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).limit(1);
                 
                 if(wsMem && wsMem.length > 0) {
                     currentWorkspaceId = wsMem[0].workspace_id;
                 } else {
-                    document.getElementById('chat-list-container').innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #e74c3c;"><b>Error:</b> Workspace tidak ditemukan / Akses ditolak RLS Database.</div>`;
-                    showToast("Error", "Anda tidak terdaftar di Workspace ini.", "error");
-                    return;
+                    // 2. Jika tidak ada di anggota, coba cari di tabel workspaces (Sebagai Admin Pembuat)
+                    const { data: myOwnedWs } = await supabaseClient.from('workspaces').select('id').eq('created_by', session.user.id).limit(1);
+                    
+                    if(myOwnedWs && myOwnedWs.length > 0) {
+                        currentWorkspaceId = myOwnedWs[0].id;
+                    } else {
+                        document.getElementById('chat-list-container').innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #e74c3c;"><b>Error:</b> Anda tidak terdaftar di Workspace manapun.</div>`;
+                        showToast("Error", "Workspace tidak ditemukan.", "error");
+                        return;
+                    }
                 }
             }
 
-            // AUTO-HEAL ADMIN: Tarik Profile Diri Sendiri
+            // AUTO-HEAL ADMIN: Tarik Profile Diri Sendiri di tabel anggota
             let { data: myProfile, error: errProfile } = await supabaseClient.from('workspace_members')
                 .select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
             
-            // JIKA ADMIN BELUM ADA DI TABEL WORKSPACE_MEMBERS TAPI BERHASIL MASUK (VIA URL)
+            // JIKA ADMIN BELUM ADA DI TABEL ANGGOTA, MASUKKAN SECARA OTOMATIS!
             if(!myProfile && currentWorkspaceId) {
                 let fallbackName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-                const { data: newAdminProfile } = await supabaseClient.from('workspace_members').insert([{
+                
+                const { data: newAdminProfile, error: insertErr } = await supabaseClient.from('workspace_members').insert([{
                     workspace_id: currentWorkspaceId,
                     user_id: session.user.id,
                     nama_user: fallbackName + ' (Admin)',
-                    role: 'Admin Workspace'
+                    role: 'Admin'
                 }]).select().single();
                 
                 if(newAdminProfile) {
                     myProfile = newAdminProfile;
+                } else {
+                    // Bypass sementara di UI jika RLS masih memblokir Insert
+                    myProfile = { user_id: session.user.id, nama_user: fallbackName + ' (Admin)', role: 'Admin' };
                 }
             }
 
-            if(myProfile) {
-                currentUser = { id: session.user.id, name: myProfile.nama_user, role: myProfile.role };
-                document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
-            } else {
-                currentUser = { id: session.user.id, name: "Admin", role: 'Admin' };
-            }
+            currentUser = { id: session.user.id, name: myProfile.nama_user, role: myProfile.role };
+            document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
             
             await loadWorkspaceMembers();
             await loadChatGroups();
@@ -520,7 +526,7 @@
                 if (data) allMembers = data;
             } catch (e) {
                 console.error("Gagal memuat anggota workspace:", e);
-                showToast("Gagal Memuat", "Pastikan RLS Database sudah disetting (USING true).", "error");
+                showToast("Gagal Memuat", "Pastikan SQL RLS diset USING (true)", "error");
             }
         }
 
@@ -790,14 +796,12 @@
             try {
                 let combinedData = [];
 
-                // 1. Tarik Data Aset 
                 const { data: assets } = await supabaseClient.from('workspace_assets')
                     .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
                 if(assets) {
                     assets.forEach(a => combinedData.push({ id: a.id, type: a.type || 'doc', title: a.title, sub: a.status_sub || 'Aset Workspace' }));
                 }
 
-                // 2. Tarik Data Tugas 
                 try {
                     const { data: tasks } = await supabaseClient.from('tasks')
                         .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
@@ -806,7 +810,6 @@
                     }
                 } catch(err) {}
 
-                // 3. Tarik Anggota/Admin
                 allMembers.forEach(m => {
                     if(m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(mentionQuery)) {
                         combinedData.push({ id: m.user_id, type: 'user', title: m.nama_user, sub: m.role || 'Member' });
@@ -1045,13 +1048,11 @@
             container.innerHTML = '<div style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Menarik Log...</div>';
             
             try {
-                // FIX: Menambahkan error handling yang benar untuk Log Aktivitas
                 const { data: messages, error } = await supabaseClient.from('chat_messages')
                     .select('*').order('created_at', { ascending: false }).limit(20);
                 
                 if (error) throw error;
                 
-                // FIX: Menyaring pesan agar hanya menampilkan aktivitas dari anggota di workspace ini
                 let validMessages = [];
                 if (messages) {
                     validMessages = messages.filter(msg => allMembers.some(m => m.user_id === msg.sender_id)).slice(0, 5);
