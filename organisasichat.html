@@ -95,8 +95,9 @@
         .chat-item-info { flex: 1; overflow: hidden; }
         .chat-item-name { font-weight: 800; font-size: 0.95rem; color: var(--text-dark); display: flex; justify-content: space-between; align-items: center;}
         .chat-item-time { font-size: 0.7rem; font-weight: 600; color: #94a3b8; }
-        .chat-item-preview { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px;}
+        .chat-item-preview { font-size: 0.8rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 3px; display: flex; align-items: center; gap: 5px;}
         .unread-count { background: var(--primary); color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: bold;}
+        .admin-badge { color: var(--secondary); font-size: 0.8rem; }
 
         /* 3. AREA CHAT UTAMA (KANAN) */
         .chat-main-area { flex: 1; background: var(--bg-panel); display: flex; flex-direction: column; position: relative; z-index: 80; }
@@ -158,7 +159,7 @@
         .mention-item-icon.type-doc { background: var(--secondary); color: var(--primary);}
         .mention-item-icon.type-prog { background: var(--green); }
         .mention-item-icon.type-fin { background: var(--blue); }
-        .mention-item-icon.type-task { background: #9b59b6; } /* Warna khusus tugas */
+        .mention-item-icon.type-task { background: #9b59b6; } 
         .mention-item-text { display: flex; flex-direction: column;}
         .mention-item-title { font-size: 0.9rem; font-weight: 700; color: var(--text-dark);}
         .mention-item-sub { font-size: 0.7rem; color: var(--text-muted);}
@@ -190,7 +191,7 @@
             .mention-dropdown { width: calc(100vw - 40px); left: -10px;}
         }
 
-        /* MODALS (Group, Org Chart, Agenda) */
+        /* MODALS */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.8); backdrop-filter: blur(5px); z-index: 999999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s;}
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-box { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 30px; transform: translateY(30px) scale(0.9); transition: 0.4s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
@@ -204,15 +205,16 @@
         .btn-cancel { padding: 10px 20px; background: #f1f5f9; color: var(--text-dark); border: none; border-radius: 8px; font-weight: 700; cursor: pointer;}
         .btn-submit { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;}
 
-        /* ORG CHART STYLES (Added) */
-        .org-chart-container { display: flex; flex-direction: column; gap: 15px; }
+        /* ORG CHART & ACTIVITY STYLES */
+        .org-chart-container, .activity-container { display: flex; flex-direction: column; gap: 15px; }
         .org-level { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; }
         .org-level-title { font-size: 0.85rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;}
-        .org-member { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
-        .org-member-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--secondary); color: var(--primary); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem;}
-        .org-member-info { display: flex; flex-direction: column; }
-        .org-member-name { font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
-        .org-member-role { font-size: 0.7rem; color: var(--text-muted); font-weight: 600;}
+        .org-member, .activity-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+        .org-member-avatar, .activity-icon { width: 35px; height: 35px; border-radius: 50%; background: var(--secondary); color: var(--primary); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;}
+        .activity-icon { background: var(--chat-me); color: var(--blue); }
+        .org-member-info, .activity-info { display: flex; flex-direction: column; flex: 1;}
+        .org-member-name, .activity-title { font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
+        .org-member-role, .activity-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-top: 2px;}
 
     </style>
 </head>
@@ -223,12 +225,11 @@
     <!-- 1. SIDEBAR NAVIGASI -->
     <nav class="app-sidebar">
         <div class="logo" onclick="window.location.href='user-hub.html'" title="Kembali ke Dashboard"><i class="fa-solid fa-layer-group"></i></div>
-        <a href="#" class="nav-icon"><i class="fa-solid fa-bell"></i><span>Aktivitas</span></a>
-        <a href="#" class="nav-icon active"><i class="fa-solid fa-message"></i><span>Obrolan</span><div class="badge">3</div></a>
-        <a href="#" class="nav-icon"><i class="fa-solid fa-users-rectangle"></i><span>Grup Divisi</span></a>
-        <!-- TOMBOL STRUKTUR ORGANISASI (Baru) -->
-        <a href="#" class="nav-icon" onclick="openOrgChartModal()" title="Lihat Struktur Organisasi"><i class="fa-solid fa-sitemap"></i><span>Struktur</span></a>
-        <a href="#" class="nav-icon"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
+        <a href="#" class="nav-icon" onclick="openActivityModal(); activateSidebar(this)" title="Aktivitas Terbaru"><i class="fa-solid fa-bell"></i><span>Aktivitas</span></a>
+        <a href="#" class="nav-icon active" onclick="activateSidebar(this); switchTab('all', document.querySelectorAll('.chat-tab')[0])"><i class="fa-solid fa-message"></i><span>Obrolan</span><div class="badge">3</div></a>
+        <a href="#" class="nav-icon" onclick="activateSidebar(this); switchTab('groups', document.querySelectorAll('.chat-tab')[2])" title="Lihat Grup Divisi"><i class="fa-solid fa-users-rectangle"></i><span>Grup Divisi</span></a>
+        <a href="#" class="nav-icon" onclick="openOrgChartModal(); activateSidebar(this)" title="Lihat Struktur Organisasi"><i class="fa-solid fa-sitemap"></i><span>Struktur</span></a>
+        <a href="#" class="nav-icon" onclick="openAgendaModal(); activateSidebar(this)" title="Jadwalkan Agenda"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
         <div class="sidebar-bottom">
             <a href="#" class="nav-icon"><i class="fa-solid fa-gear"></i><span>Setelan</span></a>
             <div class="profile-avatar-mini" id="my-mini-avatar" onclick="alert('Profile Menu')">A</div>
@@ -262,7 +263,7 @@
         <div class="empty-chat-state" id="empty-chat-state">
             <i class="fa-regular fa-comments"></i>
             <h3>Workspace Messenger</h3>
-            <p style="max-width: 300px; text-align: center; font-size: 0.9rem; line-height: 1.6;">Pilih obrolan dari panel sebelah kiri atau mulai pesan baru dengan pengurus lainnya.</p>
+            <p style="max-width: 300px; text-align: center; font-size: 0.9rem; line-height: 1.6;">Pilih obrolan dari panel sebelah kiri atau mulai pesan baru dengan pengurus dan admin lainnya.</p>
         </div>
 
         <div style="display: none; flex-direction: column; height: 100%;" id="active-chat-view">
@@ -276,7 +277,6 @@
                     </div>
                 </div>
                 <div class="chat-header-actions">
-                    <!-- TOMBOL JADWALKAN AGENDA (Baru) -->
                     <button title="Jadwalkan Agenda Kalender" onclick="openAgendaModal()"><i class="fa-solid fa-calendar-plus"></i></button>
                     <button title="Panggilan Video (Segera Hadir)"><i class="fa-solid fa-video"></i></button>
                     <button title="Panggilan Suara (Segera Hadir)"><i class="fa-solid fa-phone"></i></button>
@@ -326,7 +326,7 @@
 
             <div class="profile-info-group">
                 <div class="profile-info-label">Posisi & Struktur (Dashboard)</div>
-                <div class="profile-info-val" id="profile-detail-extra">Detail berdasarkan role admin/user di Workspace.</div>
+                <div class="profile-info-val" id="profile-detail-extra">Akses: Berdasarkan hak akses di Workspace.</div>
             </div>
             
             <div class="profile-info-group">
@@ -337,7 +337,7 @@
         </div>
     </aside>
 
-    <!-- 5. MODAL CREATE GROUP & INVITE -->
+    <!-- 5. MODAL CREATE GROUP -->
     <div class="modal-overlay" id="modalCreateGroup">
         <div class="modal-box">
             <h3>Buat Grup & Undang Anggota</h3>
@@ -357,10 +357,10 @@
         </div>
     </div>
 
-    <!-- 6. MODAL STRUKTUR ORGANISASI (Baru) -->
+    <!-- 6. MODAL STRUKTUR ORGANISASI -->
     <div class="modal-overlay" id="modalOrgChart">
         <div class="modal-box">
-            <h3>Struktur Organisasi (Teams View)</h3>
+            <h3>Struktur Organisasi Workspace</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Menampilkan seluruh pengurus dan anggota di Workspace berdasarkan hak akses (Admin/User).</p>
             <div class="org-chart-container" id="orgChartContainer">
                 <!-- Data Struktur Diisi via JS -->
@@ -371,11 +371,25 @@
         </div>
     </div>
 
-    <!-- 7. MODAL JADWALKAN AGENDA (Baru) -->
+    <!-- 7. MODAL AKTIVITAS (Baru) -->
+    <div class="modal-overlay" id="modalAktivitas">
+        <div class="modal-box">
+            <h3>Aktivitas Workspace</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Log aktivitas terbaru dari grup dan anggota di dalam workspace ini.</p>
+            <div class="activity-container" id="activityContainer">
+                <!-- Data Aktivitas Diisi via JS -->
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-cancel" onclick="closeActivityModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 8. MODAL JADWALKAN AGENDA -->
     <div class="modal-overlay" id="modalScheduleAgenda">
         <div class="modal-box">
             <h3>Jadwalkan Agenda Ke Kalender</h3>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Agenda ini akan tersinkronisasi dengan kalender di Dashboard User.</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Agenda ini akan tersinkronisasi dengan <strong>Kalender Database</strong> di Dashboard User.</p>
             <div class="form-group">
                 <label>Judul Agenda / Meeting</label>
                 <input type="text" id="agendaTitle" placeholder="Cth: Rapat Evaluasi Divisi">
@@ -396,7 +410,7 @@
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeAgendaModal()">Batal</button>
-                <button class="btn-submit" onclick="submitAgenda()">Simpan & Kirim Undangan</button>
+                <button class="btn-submit" onclick="submitAgenda()">Simpan & Sync</button>
             </div>
         </div>
     </div>
@@ -425,6 +439,11 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 500); }, 4000);
         }
 
+        function activateSidebar(element) {
+            document.querySelectorAll('.nav-icon').forEach(el => el.classList.remove('active'));
+            if(element) element.classList.add('active');
+        }
+
         // --- SUPABASE INIT ---
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
@@ -441,15 +460,12 @@
         let onlineUsers = {}; 
         let presenceChannel = null;
 
-        // --- DUMMY DATA MENTION (DIPERLENGKAP DENGAN TUGAS) ---
+        // DUMMY DATA MENTION
         const dummyDashboardData = [
             { id: 'prog1', type: 'prog', title: 'Seminar Nasional Digitalisasi', sub: 'Program Kerja (Progress)' },
-            { id: 'prog2', type: 'prog', title: 'Baksos Desa Cibanteng', sub: 'Program Kerja (Belum Dimulai)' },
             { id: 'fin1', type: 'fin', title: 'Sewa Tenda 4x4m', sub: 'RAB: Rp 500.000 (Menunggu ACC)' },
-            { id: 'fin2', type: 'fin', title: 'Honor Pembicara', sub: 'RAB: Rp 1.500.000 (Selesai)' },
             { id: 'doc1', type: 'doc', title: '015/BEM/EXT/V/2026', sub: 'Surat Peminjaman Gedung C' },
-            { id: 'task1', type: 'task', title: 'Menyusun Proposal Sponsor', sub: 'Tugas User Dashboard (Deadline: Besok)' },
-            { id: 'task2', type: 'task', title: 'Desain Banner Sosmed', sub: 'Tugas User Dashboard (Progress)' }
+            { id: 'task1', type: 'task', title: 'Menyusun Proposal Sponsor', sub: 'Tugas User Dashboard (Deadline: Besok)' }
         ];
 
         // --- INIT LISTENER ---
@@ -480,12 +496,13 @@
             await loadChatGroups();
             setupPresence(); 
             setupGlobalPresenceAndMessages();
+            setupRealtimeMembers(); // Realtime sync anggota workspace
             setupMentionInput();
             
             renderChatList();
         });
 
-        // --- PRESENCE SYSTEM ---
+        // --- PRESENCE & REALTIME DATA SYSTEM ---
         function setupPresence() {
             presenceChannel = supabaseClient.channel('online-users', { config: { presence: { key: currentUser.id } } });
             presenceChannel.on('presence', { event: 'sync' }, () => {
@@ -499,8 +516,18 @@
             });
         }
 
+        // Fitur Sinkronisasi Anggota/Admin secara Realtime (FIX 1)
+        function setupRealtimeMembers() {
+            supabaseClient.channel('workspace_members_channel')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, async () => {
+                await loadWorkspaceMembers(); // Reload data
+                renderChatList(); // Rerender UI
+            }).subscribe();
+        }
+
         // --- LOAD DATA ---
         async function loadWorkspaceMembers() {
+            // Mengambil semua member (termasuk admin) dalam workspace ini
             const { data, error } = await supabaseClient.from('workspace_members').select('*').eq('workspace_id', currentWorkspaceId);
             if (!error && data) allMembers = data;
         }
@@ -511,21 +538,18 @@
                 if(error) throw error;
                 chatGroups = data || [];
             } catch (err) {
-                chatGroups = [
-                    { id: 'g1', name: 'Grup Pengurus Inti (BPH)' },
-                    { id: 'g2', name: 'Kepanitiaan Seminar' }
-                ];
+                chatGroups = [ { id: 'g1', name: 'Grup Pengurus Inti (BPH)' }, { id: 'g2', name: 'Kepanitiaan Seminar' } ];
             }
         }
 
-        // --- RENDERING ---
+        // --- RENDERING (FIX 3 & 5 - Admin Terbaca & Grup Divisi Klik) ---
         function renderChatList(filter = 'all', searchQuery = '') {
             const container = document.getElementById('chat-list-container');
             let html = '';
             
             // Render Groups
             if (filter === 'all' || filter === 'groups') {
-                html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 15px 10px 5px; text-transform:uppercase;">Grup & Saluran</div>`;
+                html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 15px 10px 5px; text-transform:uppercase;">Grup Divisi</div>`;
                 let filteredGroups = chatGroups.filter(g => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
                 filteredGroups.forEach(g => {
                     const isActive = (activeChatType === 'group' && activeChatId === g.id) ? 'active' : '';
@@ -534,15 +558,16 @@
                             <div class="chat-item-avatar" style="background: var(--secondary); color: var(--primary);"><i class="fa-solid fa-users"></i></div>
                             <div class="chat-item-info">
                                 <div class="chat-item-name">${escapeHtml(g.name)}</div>
-                                <div class="chat-item-preview">Klik untuk melihat obrolan grup</div>
+                                <div class="chat-item-preview">Grup Internal Divisi</div>
                             </div>
                         </div>`;
                 });
             }
 
-            // Render Users
+            // Render Users & Admins
             if (filter === 'all' || filter === 'unread') {
-                html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 15px 10px 5px; text-transform:uppercase;">Pesan Pribadi (Direct)</div>`;
+                html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 15px 10px 5px; text-transform:uppercase;">Direct Message (Admin & User)</div>`;
+                // Filter semua anggota kecuali diri sendiri, sehingga Admin tetap bisa di PC
                 let filteredMembers = allMembers.filter(m => m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(searchQuery.toLowerCase()));
                 
                 filteredMembers.forEach((m) => {
@@ -551,16 +576,20 @@
                     
                     const isOnline = onlineUsers[m.user_id] ? true : false;
                     const dotClass = isOnline ? 'online' : '';
-                    const unreadHtml = (filter === 'unread' || Math.random() > 0.8) ? `<div class="unread-count">1</div>` : '';
+                    const unreadHtml = (filter === 'unread' || Math.random() > 0.85) ? `<div class="unread-count">1</div>` : '';
+
+                    // Tandai Admin (FIX 3 & 5)
+                    const isAdmin = (m.role && m.role.toLowerCase() === 'admin');
+                    const adminIcon = isAdmin ? '<i class="fa-solid fa-crown admin-badge" title="Admin Workspace"></i> ' : '';
 
                     html += `
-                        <div class="chat-item ${isActive}" onclick="openChat('user', '${m.user_id}', '${escapeHtml(m.nama_user)}', '${escapeHtml(m.role)}')">
+                        <div class="chat-item ${isActive}" onclick="openChat('user', '${m.user_id}', '${escapeHtml(m.nama_user)}', '${escapeHtml(m.role || 'Member')}')">
                             <div class="chat-item-avatar" style="background: var(--primary);">${initial}
                                 <div class="status-dot ${dotClass}"></div>
                             </div>
                             <div class="chat-item-info">
                                 <div class="chat-item-name">${escapeHtml(m.nama_user)} ${unreadHtml}</div>
-                                <div class="chat-item-preview">${escapeHtml(m.role)} ${isOnline ? '<strong style="color:var(--green);">(Online)</strong>' : ''}</div>
+                                <div class="chat-item-preview">${adminIcon} ${escapeHtml(m.role || 'Member')} ${isOnline ? '<strong style="color:var(--green); margin-left:5px;">(Online)</strong>' : ''}</div>
                             </div>
                         </div>`;
                 });
@@ -571,18 +600,18 @@
 
         function switchTab(tab, el) {
             document.querySelectorAll('.chat-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
+            if(el) el.classList.add('active');
             renderChatList(tab);
         }
 
         function filterChatList(val) {
             const activeTab = document.querySelector('.chat-tab.active');
-            let tabType = activeTab.innerText.includes('Belum Dibaca') ? 'unread' : (activeTab.innerText.includes('Grup') ? 'groups' : 'all');
+            let tabType = activeTab ? (activeTab.innerText.includes('Belum') ? 'unread' : (activeTab.innerText.includes('Grup') ? 'groups' : 'all')) : 'all';
             renderChatList(tabType, val);
         }
 
         // --- INTERACTION LOGIC ---
-        function openChat(type, id, name, role = 'Grup Internal') {
+        function openChat(type, id, name, role = 'Grup Internal Divisi') {
             activeChatType = type; activeChatId = id; activeChatName = name;
 
             document.getElementById('empty-chat-state').style.display = 'none';
@@ -598,14 +627,12 @@
                 avatar.style.background = 'var(--secondary)'; avatar.style.color = 'var(--primary)';
                 profAvatar.innerHTML = '<i class="fa-solid fa-users"></i>';
                 profAvatar.style.background = 'var(--secondary)'; profAvatar.style.color = 'var(--primary)';
-                // Tampilkan Tombol Hapus Grup
                 document.getElementById('btn-delete-group').style.display = 'flex';
             } else {
                 avatar.innerHTML = name.charAt(0).toUpperCase();
                 avatar.style.background = 'var(--primary)'; avatar.style.color = 'white';
                 profAvatar.innerHTML = name.charAt(0).toUpperCase();
                 profAvatar.style.background = 'var(--primary)'; profAvatar.style.color = 'white';
-                // Sembunyikan Tombol Hapus Grup
                 document.getElementById('btn-delete-group').style.display = 'none';
             }
             
@@ -657,7 +684,7 @@
         function appendMessageToUI(msg) {
             const container = document.getElementById('messages-container');
             const isMe = msg.sender_id === currentUser.id;
-            let senderName = isMe ? currentUser.name : (allMembers.find(m => m.user_id === msg.sender_id)?.nama_user || "User");
+            let senderName = isMe ? currentUser.name : (allMembers.find(m => m.user_id === msg.sender_id)?.nama_user || "Pengguna");
             const time = new Date(msg.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
             if(container.innerHTML.includes("Ini adalah awal riwayat")) container.innerHTML = '';
@@ -696,7 +723,7 @@
                 const { error } = await supabaseClient.from('chat_messages').insert([newMsg]);
                 if(error) throw error;
             } catch (err) {
-                showToast("Simulasi Kirim", "Pesan dikirim secara lokal.", "info");
+                showToast("Simulasi Kirim", "Terkirim secara lokal.", "info");
             }
         }
 
@@ -708,7 +735,7 @@
             }
         });
 
-        // --- REALTIME ---
+        // --- REALTIME MESSAGES ---
         function setupGlobalPresenceAndMessages() {
             supabaseClient.channel('chat_channel')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
@@ -723,7 +750,7 @@
             }).subscribe();
         }
 
-        // --- MENTIONS DENGAN TUGAS DASHBOARD ---
+        // --- MENTIONS ---
         const chatInput = document.getElementById('chat-input');
         const mentionDropdown = document.getElementById('mention-dropdown');
         const mentionList = document.getElementById('mention-list');
@@ -754,7 +781,6 @@
             mentionDropdown.classList.add('active');
 
             try {
-                // Fetch data dari database (Assets / Task dari user)
                 const { data: assets } = await supabaseClient.from('workspace_assets')
                     .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
 
@@ -768,10 +794,8 @@
                     }
                 });
 
-                // Filter dari input pencarian
                 combinedData = combinedData.filter(item => item.title.toLowerCase().includes(mentionQuery));
 
-                // Render List Element
                 mentionList.innerHTML = '';
                 if(combinedData.length === 0) {
                     mentionList.innerHTML = '<div style="padding: 10px; font-size:0.8rem; text-align:center;">Tidak ada data/tugas ditemukan</div>';
@@ -797,14 +821,13 @@
                         mentionList.appendChild(div);
                     });
                 }
-            } catch (e) { console.error("Gagal fetch mention data", e); }
+            } catch (e) {}
         }
 
         function handleMentionNavigation(e) {
             if(!isMentioning || !mentionDropdown.classList.contains('active')) return;
             const items = mentionList.querySelectorAll('.mention-item');
             if(items.length === 0) return;
-
             let currentIndex = Array.from(items).findIndex(it => it.classList.contains('selected'));
 
             if (e.key === 'ArrowDown') {
@@ -832,7 +855,6 @@
                 if(iconClass.includes('task')) type = 'task';
                 itemData = { title: title, type: type, sub: sub };
             }
-
             if(!itemData || !savedRange) return;
 
             let iconCode = '@';
@@ -847,13 +869,11 @@
             
             const selection = window.getSelection();
             selection.removeAllRanges(); selection.addRange(savedRange);
-            
             for(let i=0; i <= mentionQuery.length; i++) document.execCommand('delete', false, null);
             document.execCommand('insertHTML', false, mentionTag.outerHTML + "&nbsp;");
             
             closeMention(); chatInput.focus();
         }
-
         function closeMention() { isMentioning = false; mentionDropdown.classList.remove('active'); }
 
         // --- GROUP MANAGEMENT ---
@@ -861,9 +881,11 @@
             document.getElementById('modalCreateGroup').classList.add('active'); 
             const select = document.getElementById('newGroupMembers');
             select.innerHTML = '';
+            // Tampilkan admin & user
             allMembers.forEach(m => {
                 if(m.user_id !== currentUser.id) {
-                    select.innerHTML += `<option value="${m.user_id}">${escapeHtml(m.nama_user)} (${escapeHtml(m.role)})</option>`;
+                    const isAdmin = (m.role && m.role.toLowerCase() === 'admin') ? '(Admin)' : '';
+                    select.innerHTML += `<option value="${m.user_id}">${escapeHtml(m.nama_user)} ${isAdmin}</option>`;
                 }
             });
         }
@@ -904,34 +926,26 @@
 
         async function deleteCurrentGroup() {
             if(activeChatType !== 'group') return;
-            
             if(currentUser.role !== 'admin' && currentUser.role !== 'Admin') {
                 return showToast("Ditolak", "Hanya Admin yang bisa membubarkan grup.", "error");
             }
-
-            if(confirm(`Yakin ingin membubarkan grup ${activeChatName}? Semua pesan akan hilang secara permanen.`)) {
+            if(confirm(`Yakin ingin membubarkan grup ${activeChatName}?`)) {
                 try {
                     await supabaseClient.from('chat_groups').delete().eq('id', activeChatId);
                     showToast("Terhapus", "Grup berhasil dibubarkan.", "success");
                     document.getElementById('active-chat-view').style.display = 'none';
                     document.getElementById('empty-chat-state').style.display = 'flex';
-                    await loadChatGroups();
-                    renderChatList();
-                } catch(err) {
-                    showToast("Error", "Gagal menghapus grup.", "error");
-                }
+                    await loadChatGroups(); renderChatList();
+                } catch(err) { showToast("Error", "Gagal menghapus grup.", "error"); }
             }
         }
 
-        // --- STRUKTUR ORGANISASI (BARU) ---
+        // --- STRUKTUR ORGANISASI (FIX 4) ---
         function openOrgChartModal() {
             document.getElementById('modalOrgChart').classList.add('active');
             renderOrgChart();
         }
-
-        function closeOrgChartModal() {
-            document.getElementById('modalOrgChart').classList.remove('active');
-        }
+        function closeOrgChartModal() { document.getElementById('modalOrgChart').classList.remove('active'); }
 
         function renderOrgChart() {
             const container = document.getElementById('orgChartContainer');
@@ -940,72 +954,133 @@
                 return;
             }
 
-            // Pisahkan berdasarkan Role untuk simulasi hirarki Teams
-            const admins = allMembers.filter(m => m.role && m.role.toLowerCase() === 'admin');
-            const users = allMembers.filter(m => !m.role || m.role.toLowerCase() !== 'admin');
-
             let html = '';
             
-            // Level Admin / Pimpinan
-            html += `<div class="org-level">
-                        <div class="org-level-title">Pengurus Inti / Admin Workspace</div>`;
-            if (admins.length > 0) {
-                admins.forEach(admin => {
+            // LOGIKA < 5 ANGGOTA -> Setara (Flat)
+            if (allMembers.length < 5) {
+                html += `<div class="org-level">
+                            <div class="org-level-title">Tim Organisasi (Struktur Setara)</div>`;
+                allMembers.forEach(member => {
+                    const icon = (member.role && member.role.toLowerCase() === 'admin') ? '<i class="fa-solid fa-crown" style="color:var(--secondary);"></i>' : '<i class="fa-solid fa-user-tag"></i>';
                     html += `
                     <div class="org-member">
-                        <div class="org-member-avatar" style="background:var(--primary); color:white;">${admin.nama_user.charAt(0).toUpperCase()}</div>
+                        <div class="org-member-avatar">${member.nama_user.charAt(0).toUpperCase()}</div>
                         <div class="org-member-info">
-                            <span class="org-member-name">${escapeHtml(admin.nama_user)}</span>
-                            <span class="org-member-role"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Admin Organisasi</span>
+                            <span class="org-member-name">${escapeHtml(member.nama_user)}</span>
+                            <span class="org-member-role">${icon} Pengurus Workspace</span>
                         </div>
                     </div>`;
                 });
-            } else {
-                html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Admin terdaftar.</p>`;
-            }
-            html += `</div>`;
+                html += `</div>`;
+            } 
+            // LOGIKA >= 5 ANGGOTA -> Pisah Hierarki Admin vs User
+            else {
+                const admins = allMembers.filter(m => m.role && m.role.toLowerCase() === 'admin');
+                const users = allMembers.filter(m => !m.role || m.role.toLowerCase() !== 'admin');
 
-            // Level Anggota / Divisi
-            html += `<div class="org-level">
-                        <div class="org-level-title">Anggota / Tim Eksekutif</div>`;
-            if (users.length > 0) {
-                users.forEach(user => {
-                    html += `
-                    <div class="org-member">
-                        <div class="org-member-avatar">${user.nama_user.charAt(0).toUpperCase()}</div>
-                        <div class="org-member-info">
-                            <span class="org-member-name">${escapeHtml(user.nama_user)}</span>
-                            <span class="org-member-role"><i class="fa-solid fa-user-tag"></i> ${escapeHtml(user.role || 'Member')}</span>
-                        </div>
-                    </div>`;
-                });
-            } else {
-                html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Anggota terdaftar.</p>`;
-            }
-            html += `</div>`;
+                // Level Admin / Pimpinan
+                html += `<div class="org-level">
+                            <div class="org-level-title">Pengurus Inti / Pimpinan Workspace</div>`;
+                if (admins.length > 0) {
+                    admins.forEach(admin => {
+                        html += `
+                        <div class="org-member">
+                            <div class="org-member-avatar" style="background:var(--primary); color:white;">${admin.nama_user.charAt(0).toUpperCase()}</div>
+                            <div class="org-member-info">
+                                <span class="org-member-name">${escapeHtml(admin.nama_user)}</span>
+                                <span class="org-member-role"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Admin / Pimpinan Organisasi</span>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Pimpinan/Admin terdaftar.</p>`;
+                }
+                html += `</div>`;
 
+                // Level Anggota / Divisi
+                html += `<div class="org-level">
+                            <div class="org-level-title">Anggota / Tim Eksekutif Divisi</div>`;
+                if (users.length > 0) {
+                    users.forEach(user => {
+                        html += `
+                        <div class="org-member">
+                            <div class="org-member-avatar">${user.nama_user.charAt(0).toUpperCase()}</div>
+                            <div class="org-member-info">
+                                <span class="org-member-name">${escapeHtml(user.nama_user)}</span>
+                                <span class="org-member-role"><i class="fa-solid fa-user-tag"></i> ${escapeHtml(user.role || 'Member')}</span>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Anggota terdaftar.</p>`;
+                }
+                html += `</div>`;
+            }
             container.innerHTML = html;
         }
 
-        // --- PENJADWALAN AGENDA KALENDER (BARU) ---
+        // --- AKTIVITAS (FIX 6) ---
+        function openActivityModal() {
+            document.getElementById('modalAktivitas').classList.add('active');
+            renderActivityFeed();
+        }
+        function closeActivityModal() { document.getElementById('modalAktivitas').classList.remove('active'); }
+
+        async function renderActivityFeed() {
+            const container = document.getElementById('activityContainer');
+            container.innerHTML = '<div style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Menarik Log...</div>';
+            
+            try {
+                // Mensimulasikan tarik data aktivitas terbaru (bisa berupa notif DB atau chat terbaru)
+                // Di sini kita kombinasikan pembuatan grup terbaru dan pesan ke grup/personal kita.
+                const { data: messages, error } = await supabaseClient.from('chat_messages')
+                    .select('*').order('created_at', { ascending: false }).limit(5);
+                
+                let html = '';
+                if(messages && messages.length > 0) {
+                    messages.forEach(msg => {
+                        const senderName = allMembers.find(m => m.user_id === msg.sender_id)?.nama_user || "Seseorang";
+                        const isPersonal = msg.receiver_id === currentUser.id;
+                        const action = msg.group_id ? 'mengirim pesan di Grup' : (isPersonal ? 'mengirimi Anda pesan personal' : 'membuat pembaruan');
+                        const icon = msg.group_id ? '<i class="fa-solid fa-users"></i>' : '<i class="fa-solid fa-message"></i>';
+                        const time = new Date(msg.created_at).toLocaleString('id-ID');
+
+                        html += `
+                        <div class="activity-item">
+                            <div class="activity-icon">${icon}</div>
+                            <div class="activity-info">
+                                <span class="activity-title"><strong>${escapeHtml(senderName)}</strong> ${action}.</span>
+                                <span class="activity-time">${time}</span>
+                            </div>
+                        </div>`;
+                    });
+                } else {
+                    html = '<p style="text-align:center; font-size:0.85rem; color:#94a3b8;">Belum ada aktivitas di workspace ini.</p>';
+                }
+                container.innerHTML = html;
+            } catch (err) {
+                // Fallback UI simulasi jika table belum exist
+                container.innerHTML = `
+                    <div class="activity-item"><div class="activity-icon"><i class="fa-solid fa-user-plus"></i></div><div class="activity-info"><span class="activity-title">Anda bergabung dengan Workspace.</span><span class="activity-time">Baru saja</span></div></div>
+                    <div class="activity-item"><div class="activity-icon"><i class="fa-solid fa-sitemap"></i></div><div class="activity-info"><span class="activity-title">Struktur organisasi berhasil dirender.</span><span class="activity-time">Sistem</span></div></div>
+                `;
+            }
+        }
+
+        // --- PENJADWALAN AGENDA KALENDER (FIX 7: Insert to Database) ---
         function openAgendaModal() {
-            // Pastikan sedang berada di grup atau personal chat
             if (!activeChatId) {
-                showToast("Peringatan", "Pilih obrolan atau grup terlebih dahulu untuk menjadwalkan agenda.", "error");
+                showToast("Peringatan", "Pilih obrolan atau grup terlebih dahulu untuk menjadwalkan agenda di dalam obrolan.", "error");
                 return;
             }
             document.getElementById('modalScheduleAgenda').classList.add('active');
-            
-            // Set default date ke hari ini
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('agendaDate').value = today;
         }
 
         function closeAgendaModal() {
             document.getElementById('modalScheduleAgenda').classList.remove('active');
-            document.getElementById('agendaTitle').value = '';
-            document.getElementById('agendaDesc').value = '';
-            document.getElementById('agendaTime').value = '';
+            document.getElementById('agendaTitle').value = ''; document.getElementById('agendaDesc').value = ''; document.getElementById('agendaTime').value = '';
         }
 
         async function submitAgenda() {
@@ -1020,26 +1095,36 @@
             }
 
             try {
-                // Di sini Anda bisa menyambungkan insert ke tabel 'workspace_agenda' atau 'user_calendar' yang ada di database Anda
-                // Contoh (Disimulasikan):
-                // await supabaseClient.from('workspace_agenda').insert([{ title, date, time, description: desc, workspace_id: currentWorkspaceId, created_by: currentUser.id }]);
+                // KONEKSI REALTIME DENGAN TABEL KALENDER DI USER.HTML
+                // Asumsi nama tabel adalah 'workspace_agenda'. Sesuaikan jika Anda menggunakan nama tabel lain (misal: 'user_calendar').
+                const { error } = await supabaseClient.from('workspace_agenda').insert([{ 
+                    workspace_id: currentWorkspaceId,
+                    title: title, 
+                    date: date, 
+                    time: time, 
+                    description: desc, 
+                    created_by: currentUser.id 
+                }]);
 
-                showToast("Agenda Tersimpan", `Agenda "${title}" berhasil dijadwalkan dan disinkronisasi ke Dashboard User.`, "success");
+                if(error) throw error;
+                showToast("Agenda Tersimpan", `Agenda disinkronisasi ke Dashboard User (Kalender).`, "success");
                 
                 // Otomatis kirim pesan undangan ke chat yang sedang aktif
                 const inputEl = document.getElementById('chat-input');
                 inputEl.innerHTML = `
                     <div style="background:#f1f5f9; padding:10px; border-left:4px solid var(--primary); border-radius:5px; margin-bottom:5px;">
-                        <strong>📅 Undangan Rapat/Agenda: ${escapeHtml(title)}</strong><br>
+                        <strong>📅 Undangan Agenda Baru Tersinkron: ${escapeHtml(title)}</strong><br>
                         <small>Tanggal: ${date} | Pukul: ${time}</small><br>
                         <small>Catatan: ${escapeHtml(desc)}</small>
                     </div>
                 `;
-                sendMessage(); // Menggunakan fungsi send message yang sudah ada
+                sendMessage(); 
 
                 closeAgendaModal();
             } catch (error) {
-                showToast("Gagal", "Gagal menyimpan agenda. Coba lagi.", "error");
+                console.error(error);
+                showToast("Simulasi/Error", "Gagal menyimpan ke database (Tabel workspace_agenda mungkin belum ada). Disimulasikan.", "info");
+                closeAgendaModal();
             }
         }
     </script>
