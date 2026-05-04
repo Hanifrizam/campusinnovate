@@ -21,6 +21,7 @@
         
         /* ANIMASI UMUM */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseLogo { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .card { animation: slideUpFade 0.5s ease-out forwards; background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
         /* SIDEBAR */
@@ -219,65 +220,6 @@
             .rte-editor-page { box-shadow: none; }
         }
 
-        /* FITUR BARU: LOADING & VERIFIKASI OVERLAY */
-        #auth-loader-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: var(--primary); color: white;
-            z-index: 999999; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center;
-            transition: opacity 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.6s;
-        }
-        #auth-loader-overlay.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .loader-spinner {
-            width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.2);
-            border-top-color: var(--secondary); border-radius: 50%;
-            animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .loader-text { font-size: 1.2rem; font-weight: 500; letter-spacing: 1px; animation: pulseText 1.5s infinite; }
-        @keyframes pulseText { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-
-        /* FITUR BARU: ORGANISASI CHAT FLOATING WIDGET */
-        #org-chat-widget {
-            position: fixed; bottom: 30px; right: 30px; width: 350px; height: 500px;
-            background: white; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            display: flex; flex-direction: column; z-index: 9990;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            overflow: hidden; transform-origin: bottom right;
-        }
-        #org-chat-widget.minimized { height: 60px; width: 220px; cursor: pointer; border-radius: 30px; }
-        #org-chat-widget.fullscreen { width: 100vw; height: 100vh; bottom: 0; right: 0; border-radius: 0; }
-        .chat-header {
-            background: var(--primary); color: white; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            cursor: pointer; user-select: none; transition: background 0.2s;
-        }
-        .chat-header:hover { background: #082644; }
-        .chat-header h3 { font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 10px;}
-        .chat-header-actions button { background: none; border: none; color: white; cursor: pointer; font-size: 1rem; margin-left: 10px; transition: transform 0.2s;}
-        .chat-header-actions button:hover { transform: scale(1.2); color: var(--secondary); }
-        .chat-body { flex: 1; padding: 15px; overflow-y: auto; background: var(--bg); display: flex; flex-direction: column; gap: 15px; }
-        .chat-message { display: flex; flex-direction: column; max-width: 85%; animation: slideUpFade 0.3s; }
-        .chat-message.self { align-self: flex-end; align-items: flex-end; }
-        .chat-message.other { align-self: flex-start; align-items: flex-start; }
-        .chat-bubble { padding: 10px 15px; border-radius: 15px; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
-        .chat-message.self .chat-bubble { background: var(--blue); color: white; border-bottom-right-radius: 2px; }
-        .chat-message.other .chat-bubble { background: white; color: var(--text); border-bottom-left-radius: 2px; border: 1px solid #eee; }
-        .chat-meta { font-size: 0.7rem; color: #888; margin-top: 4px; }
-        .chat-footer { padding: 15px; background: white; border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center; }
-        .chat-input { flex: 1; border: 1px solid #ddd; padding: 10px 15px; border-radius: 20px; outline: none; font-family: 'Poppins'; transition: border-color 0.2s; }
-        .chat-input:focus { border-color: var(--secondary); }
-        .chat-send-btn { background: var(--secondary); color: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; transition: transform 0.2s; }
-        .chat-send-btn:hover { transform: scale(1.1); }
-
-        /* FITUR BARU: PEMBATASAN ROLE / ADMIN ONLY */
-        [data-role-access="admin"] { display: none !important; }
-        body.is-admin [data-role-access="admin"] { display: inline-flex !important; }
-        body.is-admin div[data-role-access="admin"] { display: block !important; }
-        body.is-admin tr[data-role-access="admin"] { display: table-row !important; }
-        body.is-admin td[data-role-access="admin"] { display: table-cell !important; }
-
         /* MEDIA QUERIES */
         .mobile-overlay-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 90; }
         .mobile-overlay-bg.active { display: block; }
@@ -323,21 +265,25 @@
             .input-group label { font-size: 0.85rem; }
             .table-custom th, .table-custom td { padding: 8px; font-size: 0.75rem; }
             .cal-event-badge { font-size: 0.55rem; padding: 2px 4px; }
-
-            /* Penyesuaian Chat di Mobile */
-            #org-chat-widget { width: 90vw; right: 5vw; bottom: 20px; }
-            #org-chat-widget.minimized { width: 60px; height: 60px; right: 20px; border-radius: 50%; }
-            #org-chat-widget.minimized .chat-header h3 { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- OVERLAY LOADING SISTEM -->
-    <div id="auth-loader-overlay">
-        <div class="loader-spinner"></div>
-        <h2 class="loader-text">Memverifikasi Akses Sistem...</h2>
-        <p style="margin-top: 10px; font-size: 0.85rem; color: rgba(255,255,255,0.7);"><i class="fa-solid fa-shield-halved"></i> Security Check</p>
+    <!-- OVERLAY LOADING & VERIFIKASI AWAL -->
+    <div id="initial-loader" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease;">
+        <img src="logo-campus-innovate.webp" alt="Logo" style="max-height: 100px; margin-bottom: 20px; animation: pulseLogo 1.5s infinite;">
+        <i class="fa-solid fa-shield-halved fa-beat-fade" style="font-size: 3rem; color: var(--secondary); margin-bottom: 15px;"></i>
+        <h2 style="font-family: 'Poppins', sans-serif;">Memverifikasi Akses Anda...</h2>
+        <p id="loader-text" style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">Menghubungkan ke server Campus Innovate</p>
+    </div>
+
+    <!-- OVERLAY LIMIT / SUSPENDED DARI SUPER ADMIN -->
+    <div id="limit-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 48, 85, 0.98); z-index: 9999999; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;">
+        <i class="fa-solid fa-lock" style="font-size: 5rem; color: var(--red); margin-bottom: 20px;"></i>
+        <h1 style="margin-bottom: 15px; font-size: 2rem;">Akses Sistem Dibatasi</h1>
+        <p id="limit-message" style="max-width: 500px; line-height: 1.6; margin-bottom: 30px; font-size: 1.1rem; color: #ddd;">Workspace Anda telah mencapai limit atau dibekukan oleh Super Admin. Silakan hubungi tim dukungan Campus Innovate untuk membuka kembali akses sistem ini.</p>
+        <button class="btn-action" style="background: var(--secondary); color: white; padding: 12px 25px; font-size: 1.1rem;" onclick="handleLogout()">Kembali ke Beranda / Logout</button>
     </div>
 
     <div id="toast-container"></div>
@@ -378,8 +324,12 @@
             <div class="nav-item" onclick="switchTab('notulensi')"><i class="fa-solid fa-folder-open"></i> Notulensi</div>
             <div class="nav-item" onclick="switchTab('kpi')"><i class="fa-solid fa-bullseye"></i> Indikator KPI</div>
             <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
-            <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')" data-role-access="admin"><i class="fa-solid fa-database"></i> Database Surat</div>
+            <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
             
+            <!-- MENU BARU UNTUK CHAT -->
+            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Komunikasi</p>
+            <div class="nav-item" onclick="window.location.href='organisasichat.html?workspace=' + globalWorkspaceId"><i class="fa-solid fa-comments"></i> Chat Organisasi</div>
+
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Playbook</p>
             <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Workspace</div>
         </div>
@@ -453,7 +403,7 @@
         <div id="view-program-event" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                 <h2>Detail Program & Event</h2>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="btn-group-program" data-role-access="admin">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;" id="btn-group-program">
                     <button class="btn-action" style="background: #e2e8f0; color: var(--primary);" onclick="openModal('deptModal')"><i class="fa-solid fa-sitemap"></i> + Departemen</button>
                     <button class="btn-action" onclick="openProgramModal()"><i class="fa-solid fa-plus"></i> Buat Program Baru</button>
                 </div>
@@ -668,7 +618,7 @@
                     <h2>Analitik Anggaran</h2>
                     <p style="color: #666;">Pantau keseluruhan Rencana Anggaran vs Realisasi berdasarkan divisi.</p>
                 </div>
-                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')" data-role-access="admin"><i class="fa-solid fa-download"></i> Export Data Keseluruhan</button>
+                <button class="btn-action" id="btn-export-rekap" onclick="exportTableToExcel('tabel-rekap-asli', 'Data_Rekapitulasi_Keseluruhan')"><i class="fa-solid fa-download"></i> Export Data Keseluruhan</button>
             </div>
 
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -826,7 +776,7 @@
                             <th>Status Kehadiran</th>
                             <th>Keterangan / Deskripsi</th>
                             <th style="color: var(--blue);">Waktu Submit</th>
-                            <th style="text-align: center;" data-role-access="admin">Aksi</th>
+                            <th style="text-align: center;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="table-absen-body">
@@ -951,7 +901,7 @@
         <div id="view-kpi" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap;">
                 <h2>Indikator Kinerja Utama (KPI)</h2>
-                <button class="btn-action" id="btn-add-kpi" onclick="openKPIModal()" data-role-access="admin"><i class="fa-solid fa-plus"></i> Tambah KPI</button>
+                <button class="btn-action" id="btn-add-kpi" onclick="openKPIModal()"><i class="fa-solid fa-plus"></i> Tambah KPI</button>
             </div>
             
             <div class="grid-4" style="margin-bottom: 20px;">
@@ -1053,7 +1003,7 @@
             </div>
         </div>
 
-        <div id="view-database-surat" class="view-section" data-role-access="admin">
+        <div id="view-database-surat" class="view-section">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <div>
                     <h2>Database & Library Surat</h2>
@@ -1164,8 +1114,8 @@
             </div>
         </div>
 
-    </div> 
-    <!-- KUMPULAN MODAL POPUP -->
+    </div>
+
     <div class="modal-overlay" id="scheduleModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="schedule-modal-title">Tambah Jadwal Baru</h2><button class="close-btn" onclick="closeModal('scheduleModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -1330,24 +1280,6 @@
         </div>
     </div>
 
-    <!-- FITUR BARU: WIDGET CHAT ORGANISASI -->
-    <div id="org-chat-widget" class="minimized">
-        <div class="chat-header" onclick="toggleChatWidget(event)">
-            <h3 id="chat-widget-title"><i class="fa-solid fa-comments"></i> Obrolan Organisasi</h3>
-            <div class="chat-header-actions" id="chat-header-actions" style="display: none;">
-                <button onclick="toggleFullscreenChat(event)" title="Fullscreen"><i class="fa-solid fa-expand" id="chat-fullscreen-icon"></i></button>
-                <button onclick="minimizeChatWidget(event)" title="Minimize"><i class="fa-solid fa-minus"></i></button>
-            </div>
-        </div>
-        <div class="chat-body" id="chat-body-container">
-            <div style="text-align: center; font-size: 0.8rem; color: #aaa; margin-top: 10px;">Selamat datang di Obrolan Organisasi. Pesan tidak tersimpan secara permanen (Live Broadcast).</div>
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="chat-input-message" class="chat-input" placeholder="Ketik pesan..." onkeypress="handleChatKeypress(event)">
-            <button class="chat-send-btn" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
-
     <script>
         Chart.register(ChartDataLabels);
 
@@ -1380,11 +1312,6 @@
         let calCurrentDate = new Date();
         let activeFolderId = null; let activeNotulensiId = null; let absenPieChart = null;
         let docZoomLevel = 1.0;
-
-        // VARIABEL CHAT BARU
-        let isChatFullscreen = false;
-        let isChatMinimized = true;
-        let orgChatChannel = null;
 
         function showNotification(msg, type='info') {
             const toast = document.createElement('div');
@@ -1685,178 +1612,106 @@
             if(doCheck) doCheck.innerHTML = options; if(dbCheck) dbCheck.innerHTML = options;
         }
 
-        // ================= FITUR BARU: LOGIKA CHAT WIDGET =================
-        function toggleChatWidget(e) {
-            if(e.target.closest('button')) return; 
-            const widget = document.getElementById('org-chat-widget');
-            const actions = document.getElementById('chat-header-actions');
-            const title = document.getElementById('chat-widget-title');
-            
-            if (widget.classList.contains('minimized')) {
-                widget.classList.remove('minimized');
-                actions.style.display = 'block';
-                isChatMinimized = false;
-                title.innerHTML = '<i class="fa-solid fa-comments"></i> Obrolan Organisasi';
-                scrollToBottomChat();
-            }
-        }
-
-        function minimizeChatWidget(e) {
-            e.stopPropagation();
-            const widget = document.getElementById('org-chat-widget');
-            const actions = document.getElementById('chat-header-actions');
-            widget.classList.remove('fullscreen');
-            widget.classList.add('minimized');
-            actions.style.display = 'none';
-            isChatFullscreen = false;
-            isChatMinimized = true;
-            document.getElementById('chat-fullscreen-icon').classList.replace('fa-compress', 'fa-expand');
-        }
-
-        function toggleFullscreenChat(e) {
-            e.stopPropagation();
-            const widget = document.getElementById('org-chat-widget');
-            const icon = document.getElementById('chat-fullscreen-icon');
-            if (isChatFullscreen) {
-                widget.classList.remove('fullscreen');
-                icon.classList.replace('fa-compress', 'fa-expand');
-                isChatFullscreen = false;
-            } else {
-                widget.classList.add('fullscreen');
-                icon.classList.replace('fa-expand', 'fa-compress');
-                isChatFullscreen = true;
-            }
-            scrollToBottomChat();
-        }
-
-        function handleChatKeypress(e) {
-            if(e.key === 'Enter') sendChatMessage();
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input-message');
-            const msg = input.value.trim();
-            if(!msg) return;
-
-            renderMessage(currentUserName, msg, true);
-            input.value = '';
-
-            if(orgChatChannel) {
-                orgChatChannel.send({
-                    type: 'broadcast',
-                    event: 'new_message',
-                    payload: { user: currentUserName, message: msg }
-                });
-            }
-        }
-
-        function renderMessage(user, msg, isSelf) {
-            const container = document.getElementById('chat-body-container');
-            const time = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-            
-            const msgHtml = `
-                <div class="chat-message ${isSelf ? 'self' : 'other'}">
-                    <div class="chat-meta">${isSelf ? 'Anda' : user} • ${time}</div>
-                    <div class="chat-bubble">${msg}</div>
-                </div>
-            `;
-            container.innerHTML += msgHtml;
-            scrollToBottomChat();
-        }
-
-        function scrollToBottomChat() {
-            const container = document.getElementById('chat-body-container');
-            container.scrollTop = container.scrollHeight;
-        }
-        // ================= AKHIR LOGIKA CHAT WIDGET =================
-
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) { window.location.href = 'index.html'; return; }
+            const loader = document.getElementById('initial-loader');
+            const loaderText = document.getElementById('loader-text');
+            const limitOverlay = document.getElementById('limit-overlay');
+            const limitMsg = document.getElementById('limit-message');
 
-            currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
-            currentUserRole = roleData ? roleData.role : 'user';
-            
-            // LOGIKA PEMBATASAN ROLE DAN LOADING VERIFIKASI (FITUR BARU)
-            if (currentUserRole === 'admin') {
-                document.body.classList.add('is-admin');
-            }
+            try {
+                loaderText.innerText = "Memeriksa Sesi Pengguna...";
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (!session) { window.location.href = 'index.html'; return; }
 
-            // Animasi Loader (Fitur Baru) dihilangkan setelah inisialisasi selesai dan Role terverifikasi
-            setTimeout(() => {
-                const loader = document.getElementById('auth-loader-overlay');
-                if(loader) loader.classList.add('hidden');
-            }, 1500);
+                currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+                const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
+                currentUserRole = roleData ? roleData.role : 'user';
+                
+                document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
+                document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
+                
+                const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
+                if (savedSig) { userSignatureBase64 = savedSig; }
 
-            document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
-            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
-            
-            const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
-            if (savedSig) { userSignatureBase64 = savedSig; }
+                if (currentUserRole !== 'admin') { 
+                    document.getElementById('btn-group-program').style.display = 'none'; 
+                    document.getElementById('btn-add-kpi').style.display = 'none'; 
+                    document.getElementById('menu-database-surat').style.display = 'none'; 
+                    const btnRekap = document.getElementById('btn-export-rekap');
+                    if(btnRekap) btnRekap.style.display = 'none';
+                }
 
-            if (currentUserRole !== 'admin') { 
-                document.getElementById('btn-group-program').style.display = 'none'; 
-                document.getElementById('btn-add-kpi').style.display = 'none'; 
-                // Fitur baru data-role-access="admin" di menu sidebar juga akan mem-bypass tampilan menu Database Surat secara otomatis dari CSS.
-                const btnRekap = document.getElementById('btn-export-rekap');
-                if(btnRekap) btnRekap.style.display = 'none';
-            }
+                loaderText.innerText = "Memverifikasi Akses & Limit Super Admin...";
+                const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
+                if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
 
-            const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
-            if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
+                // CEK LIMIT SUPER ADMIN (Tabel workspaces)
+                const { data: wsData, error: wsError } = await supabaseClient.from('workspaces').select('nama_organisasi, status_langganan, batas_user').eq('id', globalWorkspaceId).single();
+                
+                if (wsError || !wsData) {
+                    limitMsg.innerText = "Data Workspace tidak ditemukan di server. Pastikan URL Anda valid.";
+                    limitOverlay.style.display = 'flex';
+                    loader.style.display = 'none';
+                    return;
+                }
 
-            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
-            if (wsData) {
+                // BLOKIR JIKA SUSPENDED / EXPIRED
+                if (wsData.status_langganan === 'Suspended' || wsData.status_langganan === 'Expired' || wsData.status_langganan === 'Nonaktif') {
+                    limitMsg.innerText = `Workspace "${wsData.nama_organisasi}" saat ini berstatus ${wsData.status_langganan}. Akses Anda telah dibatasi oleh Super Admin Campus Innovate.`;
+                    limitOverlay.style.display = 'flex';
+                    loader.style.display = 'none';
+                    return;
+                }
+
                 document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
-            }
 
-            const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
-            userPresenceChannel.subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
-            });
+                loaderText.innerText = "Memuat Modul & Data Sistem...";
 
-            // LOGIKA BROADCAST CHAT ORGANISASI BARU
-            orgChatChannel = supabaseClient.channel(`chat_${globalWorkspaceId}`);
-            orgChatChannel.on('broadcast', { event: 'new_message' }, (payload) => {
-                if(payload.payload.user !== currentUserName) {
-                    renderMessage(payload.payload.user, payload.payload.message, false);
-                    if (isChatMinimized) {
-                        document.getElementById('chat-widget-title').innerHTML = '<i class="fa-solid fa-bell" style="color:var(--secondary);"></i> Pesan Baru!';
+                const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
+                userPresenceChannel.subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
+                });
+
+                async function updatePresenceToDB() {
+                    if (currentUserId && globalWorkspaceId) {
+                        await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
                     }
                 }
-            }).subscribe();
+                updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
+                window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
 
-            async function updatePresenceToDB() {
-                if (currentUserId && globalWorkspaceId) {
-                    await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
+                setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+
+                try { await populateContextDropdowns(); } catch(e){} 
+                try { await loadWorkspaceUsers(); } catch(e){} 
+                try { await loadDepartments(); } catch(e){}
+                try { await loadFinanceData(); } catch(e){}
+                try { await loadSchedules(); } catch(e){} 
+                try { await loadProgramData(); } catch(e){} 
+                try { await loadRabTable(); } catch(e){}
+                try { await loadRealisasiTable(); } catch(e){}
+                try { await loadRekapitulasiData(); } catch(e){}
+                try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
+                try { loadFolders(); } catch(e){}
+                try { await loadKPIData(); } catch(e){}
+                try { await loadDigitalOffice(); } catch(e){}
+                
+                if(currentUserRole === 'admin') {
+                    try { await loadSuratContexts(); await loadDatabaseSuratLog(); } catch(e){}
                 }
-            }
-            updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
-            window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
+                
+                initSignaturePad(); initDraggableSignature();
 
-            setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+                // HILANGKAN LOADER SAAT SEMUA SUDAH SELESAI DIMUAT
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.display = 'none', 500);
 
-            try { await populateContextDropdowns(); } catch(e){} 
-            try { await loadWorkspaceUsers(); } catch(e){} 
-            try { await loadDepartments(); } catch(e){}
-            try { await loadFinanceData(); } catch(e){}
-            try { await loadSchedules(); } catch(e){} 
-            try { await loadProgramData(); } catch(e){} 
-            try { await loadRabTable(); } catch(e){}
-            try { await loadRealisasiTable(); } catch(e){}
-            try { await loadRekapitulasiData(); } catch(e){}
-            try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
-            try { loadFolders(); } catch(e){}
-            try { await loadKPIData(); } catch(e){}
-            try { await loadDigitalOffice(); } catch(e){}
-            
-            if(currentUserRole === 'admin') {
-                try { await loadSuratContexts(); await loadDatabaseSuratLog(); } catch(e){}
+            } catch (err) {
+                console.error("Critical Init Error:", err);
+                loaderText.innerText = "Terjadi Kesalahan Kritis!";
+                setTimeout(() => loader.style.display = 'none', 2000);
             }
-            
-            initSignaturePad(); initDraggableSignature();
         });
 
         async function loadDepartments() {
@@ -2315,6 +2170,7 @@
                     `;
 
                     progRabs.forEach(item => {
+                        // Calculate specific realization for this RAB Item by name (logic matching point 4)
                         let itemRealisasi = progReals.filter(r => r.keterangan === item.nama_barang).reduce((a, c) => a + parseFloat(c.nominal || 0), 0);
                         let itemSelisih = item.total_harga - itemRealisasi;
                         let itemSelisihStr = itemSelisih < 0 ? `<span style="color:var(--red); font-size:0.75rem;">${formatRp(Math.abs(itemSelisih))}</span>` : `<span style="color:var(--green); font-size:0.75rem;">${formatRp(Math.abs(itemSelisih))}</span>`;
@@ -2438,7 +2294,7 @@
             document.getElementById('absen-greeting').innerText = `Selamat Datang, ${currentUserName}!`; 
             if (currentUserRole === 'admin') { 
                 document.getElementById('panel-absen-admin').style.display = 'block'; 
-                document.getElementById('panel-absen-user').style.display = 'none'; 
+                document.getElementById('panel-absen-user').style.display = 'none'; // Admin cannot submit here (point 5)
                 document.getElementById('tabel-absen-title').innerText = "Riwayat Absensi Pengurus"; 
             } else { 
                 document.getElementById('panel-absen-admin').style.display = 'none'; 
@@ -2474,7 +2330,7 @@
                         actionBtn = `<button class="btn-table-del" onclick="deleteAbsenAction('${h.id}')" title="Hapus Data"><i class="fa-solid fa-trash"></i></button>`;
                     }
 
-                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td><td style="text-align:center;" data-role-access="admin">${actionBtn}</td></tr>`; 
+                    tbody.innerHTML += `<tr><td>${index + 1}</td><td><strong>${h.nama_user}</strong></td><td>${tipeLabel}</td><td>${tgl}</td><td><span style="background: ${statKehadiranBg}; color: ${statKehadiranColor}; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; font-weight:bold;">${h.kehadiran || 'Hadir'}</span></td><td>${h.deskripsi || '-'}</td><td style="color: var(--blue); font-weight: 500;">${h.waktu_masuk}</td><td style="text-align:center;">${actionBtn}</td></tr>`; 
                 
                     if (h.user_id === currentUserId) {
                         const d = new Date(h.tanggal);
