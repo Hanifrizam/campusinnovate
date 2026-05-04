@@ -195,6 +195,7 @@
 </head>
 <body>
 
+    <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
     <div id="loader" class="loader-screen">
@@ -203,12 +204,14 @@
         <p style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Mengambil data langsung dari Dashboard Internal</p>
     </div>
 
+    <!-- BANNER DARURAT GLOBAL -->
     <div id="global-announcement">
         <strong id="ann-title">Pengumuman</strong>
         <div id="ann-desc">Deskripsi pengumuman.</div>
         <button id="close-ann" onclick="document.getElementById('global-announcement').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
+    <!-- DYNAMIC BLOCKS CONTAINER -->
     <div id="main-content"></div>
 
     <footer id="footer" style="display:none;">
@@ -216,13 +219,16 @@
             <h3 style="color: white; margin-bottom: 15px; font-weight: 800; font-size: 1.8rem;" id="footer-org-name">Campus Innovate</h3>
             <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus secara real-time.</p>
             
+            <!-- SOCIAL MEDIA LINKS -->
             <div id="footer-social-links" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
-                </div>
+                <!-- Akan diisi otomatis jika data tersedia -->
+            </div>
             
             <p style="margin-top: 40px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi. Powered by Campus Innovate Workspace.</p>
         </div>
     </footer>
 
+    <!-- MODAL BERITA -->
     <div class="modal-overlay" id="newsModal" onclick="closeNewsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeNewsModal(event)"><i class="fa-solid fa-xmark"></i></button>
@@ -258,6 +264,7 @@
 
         // Variable global
         let globalNewsData = [];
+        let currentWorkspaceId = null;
 
         // TOAST ALERT SYSTEM
         function showToast(msg, type = 'info') {
@@ -358,26 +365,67 @@
             return html;
         }
 
-        // MAIN INIT
+        // MAIN INIT DENGAN URL ROUTING LOGIC BARU
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            const workspaceId = urlParams.get('workspace');
             
-            if (!workspaceId) {
-                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: ID Workspace Tidak Ditemukan!</h2>`; 
+            // Logika Pembacaan URL Parameter
+            const orgNameParam = urlParams.get('org');
+            const workspaceIdParam = urlParams.get('workspace');
+            
+            let queryKey = '';
+            let queryValue = '';
+
+            // Prioritaskan pencarian menggunakan '?org=Nama-BEM'
+            if (orgNameParam) {
+                // Mengubah 'bem-ipb' di URL menjadi 'BEM IPB' untuk pencarian case-insensitive (kurang lebih)
+                queryKey = 'nama_organisasi';
+                queryValue = orgNameParam.replace(/-/g, ' '); 
+            } else if (workspaceIdParam) {
+                queryKey = 'id';
+                queryValue = workspaceIdParam;
+            } else {
+                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Parameter URL (org / workspace) Tidak Ditemukan!</h2>`; 
                 return;
             }
 
             try {
-                // Fetch Data Organisasi
-                const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', workspaceId).single();
-                let orgName = wsData ? wsData.nama_organisasi : 'Campus Innovate';
+                // Fetch Data Organisasi berdasarkan Nama (ilike agar tidak terlalu sensitif huruf besar/kecil)
+                // Atau berdasarkan ID jika org name tidak disediakan
+                let wsData;
                 
-                // Fetch Layout Data
-                const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', workspaceId).single();
+                if (queryKey === 'nama_organisasi') {
+                    const { data } = await supabaseClient
+                        .from('workspaces')
+                        .select('id, nama_organisasi')
+                        .ilike('nama_organisasi', queryValue)
+                        .single();
+                    wsData = data;
+                } else {
+                    const { data } = await supabaseClient
+                        .from('workspaces')
+                        .select('id, nama_organisasi')
+                        .eq('id', queryValue)
+                        .single();
+                    wsData = data;
+                }
+                
+                if (!wsData) {
+                    document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Organisasi "${queryValue}" tidak ditemukan di server!</h2><p style="color:#666; margin-top:10px;">Periksa kembali link URL Anda.</p>`; 
+                    return;
+                }
+                
+                currentWorkspaceId = wsData.id;
+                let orgName = wsData.nama_organisasi;
+                
+                // Ubah Title Web sesuai nama organisasi
+                document.title = `${orgName} - Portal Publik Campus Innovate`;
+
+                // Fetch Layout Data menggunakan ID yang telah ditemukan
+                const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
                 
                 if (!config || !config.is_published) {
-                    document.getElementById('loader').innerHTML = `<h2>Mohon Maaf, halaman ini belum dipublikasikan oleh Admin.</h2>`; 
+                    document.getElementById('loader').innerHTML = `<h2>Mohon Maaf, halaman ${orgName} belum dipublikasikan oleh Admin mereka.</h2>`; 
                     return;
                 }
 
@@ -572,8 +620,8 @@
                                 </div>
                             </div>`;
                         
-                        // Fetch data directly from internal DB to keep it auto-syncing
-                        supabaseClient.from('finance_summaries').select('*').eq('workspace_id', workspaceId).single().then(({data: fData}) => {
+                        // Fetch data directly from internal DB using currentWorkspaceId
+                        supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single().then(({data: fData}) => {
                             let total = fData ? parseFloat(fData.total_rab) : 0; 
                             let real = fData ? parseFloat(fData.realisasi_rab) : 0;
                             
@@ -598,7 +646,7 @@
                             <h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2>
                             <div class="kpi-grid" id="kpi-container-${i}">Memuat KPI...</div>`;
                         
-                        supabaseClient.from('kpi_items').select('*').eq('workspace_id', workspaceId).then(({data: kData}) => {
+                        supabaseClient.from('kpi_items').select('*').eq('workspace_id', currentWorkspaceId).then(({data: kData}) => {
                             let kpiHtml = '';
                             if(!kData || kData.length === 0) {
                                 kpiHtml = '<p style="color:#aaa; grid-column: 1 / -1;">Belum ada target KPI yang ditetapkan.</p>';
@@ -630,7 +678,7 @@
                             <h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
                             <div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>`;
                         
-                        supabaseClient.from('programs').select('*').eq('workspace_id', workspaceId).then(({data: pData}) => {
+                        supabaseClient.from('programs').select('*').eq('workspace_id', currentWorkspaceId).then(({data: pData}) => {
                             let pHtml = '';
                             if(pData && pData.length > 0) {
                                 pData.forEach(p => {
@@ -678,3 +726,5 @@
     </script>
 </body>
 </html>
+
+ini tolong yaaa diperbarui public html saya
