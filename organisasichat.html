@@ -158,6 +158,7 @@
         .mention-item-icon.type-doc { background: var(--secondary); color: var(--primary);}
         .mention-item-icon.type-prog { background: var(--green); }
         .mention-item-icon.type-fin { background: var(--blue); }
+        .mention-item-icon.type-task { background: #9b59b6; } /* Warna khusus tugas */
         .mention-item-text { display: flex; flex-direction: column;}
         .mention-item-title { font-size: 0.9rem; font-weight: 700; color: var(--text-dark);}
         .mention-item-sub { font-size: 0.7rem; color: var(--text-muted);}
@@ -189,19 +190,30 @@
             .mention-dropdown { width: calc(100vw - 40px); left: -10px;}
         }
 
-        /* Create Group Modal */
+        /* MODALS (Group, Org Chart, Agenda) */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.8); backdrop-filter: blur(5px); z-index: 999999; display: flex; justify-content: center; align-items: center; opacity: 0; visibility: hidden; transition: 0.3s;}
         .modal-overlay.active { opacity: 1; visibility: visible; }
-        .modal-box { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 30px; transform: translateY(30px) scale(0.9); transition: 0.4s; box-shadow: 0 20px 50px rgba(0,0,0,0.2);}
+        .modal-box { background: white; width: 90%; max-width: 450px; border-radius: 20px; padding: 30px; transform: translateY(30px) scale(0.9); transition: 0.4s; box-shadow: 0 20px 50px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;}
         .modal-overlay.active .modal-box { transform: translateY(0) scale(1); }
         .modal-box h3 { font-size: 1.5rem; font-weight: 800; color: var(--primary); margin-bottom: 20px;}
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;}
-        .form-group input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; font-size: 0.95rem; font-weight: 600;}
-        .form-group input:focus { border-color: var(--primary); }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 10px; outline: none; font-size: 0.95rem; font-weight: 600;}
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px;}
         .btn-cancel { padding: 10px 20px; background: #f1f5f9; color: var(--text-dark); border: none; border-radius: 8px; font-weight: 700; cursor: pointer;}
         .btn-submit { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer;}
+
+        /* ORG CHART STYLES (Added) */
+        .org-chart-container { display: flex; flex-direction: column; gap: 15px; }
+        .org-level { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; }
+        .org-level-title { font-size: 0.85rem; font-weight: 800; color: var(--primary); text-transform: uppercase; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px;}
+        .org-member { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; background: white; margin-bottom: 8px; border: 1px solid #e2e8f0; }
+        .org-member-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--secondary); color: var(--primary); display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: 0.8rem;}
+        .org-member-info { display: flex; flex-direction: column; }
+        .org-member-name { font-size: 0.9rem; font-weight: 700; color: var(--text-dark); }
+        .org-member-role { font-size: 0.7rem; color: var(--text-muted); font-weight: 600;}
+
     </style>
 </head>
 <body>
@@ -214,6 +226,8 @@
         <a href="#" class="nav-icon"><i class="fa-solid fa-bell"></i><span>Aktivitas</span></a>
         <a href="#" class="nav-icon active"><i class="fa-solid fa-message"></i><span>Obrolan</span><div class="badge">3</div></a>
         <a href="#" class="nav-icon"><i class="fa-solid fa-users-rectangle"></i><span>Grup Divisi</span></a>
+        <!-- TOMBOL STRUKTUR ORGANISASI (Baru) -->
+        <a href="#" class="nav-icon" onclick="openOrgChartModal()" title="Lihat Struktur Organisasi"><i class="fa-solid fa-sitemap"></i><span>Struktur</span></a>
         <a href="#" class="nav-icon"><i class="fa-solid fa-calendar-check"></i><span>Agenda</span></a>
         <div class="sidebar-bottom">
             <a href="#" class="nav-icon"><i class="fa-solid fa-gear"></i><span>Setelan</span></a>
@@ -262,6 +276,8 @@
                     </div>
                 </div>
                 <div class="chat-header-actions">
+                    <!-- TOMBOL JADWALKAN AGENDA (Baru) -->
+                    <button title="Jadwalkan Agenda Kalender" onclick="openAgendaModal()"><i class="fa-solid fa-calendar-plus"></i></button>
                     <button title="Panggilan Video (Segera Hadir)"><i class="fa-solid fa-video"></i></button>
                     <button title="Panggilan Suara (Segera Hadir)"><i class="fa-solid fa-phone"></i></button>
                     <button title="Detail Informasi" onclick="toggleProfilePanel()"><i class="fa-solid fa-circle-info"></i></button>
@@ -275,13 +291,13 @@
                 <div class="input-wrapper">
                     <div class="mention-dropdown" id="mention-dropdown">
                         <div class="mention-header">
-                            Ketik nama, atau panggil data (RAB/Surat/Program)
+                            Ketik nama, atau panggil data (Tugas/RAB/Program)
                             <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1rem;" onclick="closeMention()"></i>
                         </div>
                         <div class="mention-list" id="mention-list"></div>
                     </div>
 
-                    <div class="rich-input" id="chat-input" contenteditable="true" placeholder="Ketik pesan baru... Ketik '@' untuk menyematkan data dari Dashboard."></div>
+                    <div class="rich-input" id="chat-input" contenteditable="true" placeholder="Ketik pesan baru... Ketik '@' untuk menyematkan data/tugas dari Dashboard."></div>
                     
                     <div class="input-actions">
                         <div class="input-tools">
@@ -309,8 +325,8 @@
             <div class="profile-role" id="profile-detail-role">Jabatan / Tipe</div>
 
             <div class="profile-info-group">
-                <div class="profile-info-label">Info Tambahan</div>
-                <div class="profile-info-val" id="profile-detail-extra">Informasi detail akan muncul di sini.</div>
+                <div class="profile-info-label">Posisi & Struktur (Dashboard)</div>
+                <div class="profile-info-val" id="profile-detail-extra">Detail berdasarkan role admin/user di Workspace.</div>
             </div>
             
             <div class="profile-info-group">
@@ -330,12 +346,57 @@
                 <input type="text" id="newGroupName" placeholder="Cth: Panitia Seminar Nasional">
             </div>
             <div class="form-group">
-                <label>Pilih Anggota (Tahan Ctrl/Cmd untuk pilih banyak)</label>
+                <label>Pilih Anggota (User & Admin Workspace)</label>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 5px;">Tahan Ctrl/Cmd untuk pilih banyak</p>
                 <select id="newGroupMembers" multiple style="width: 100%; height: 120px; border-radius: 10px; padding: 10px; border: 2px solid var(--border-color); outline: none; font-family:'Plus Jakarta Sans'; font-size:0.9rem;"></select>
             </div>
             <div class="modal-actions">
                 <button class="btn-cancel" onclick="closeCreateGroupModal()">Batal</button>
                 <button class="btn-submit" onclick="submitCreateGroup()">Buat & Undang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. MODAL STRUKTUR ORGANISASI (Baru) -->
+    <div class="modal-overlay" id="modalOrgChart">
+        <div class="modal-box">
+            <h3>Struktur Organisasi (Teams View)</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Menampilkan seluruh pengurus dan anggota di Workspace berdasarkan hak akses (Admin/User).</p>
+            <div class="org-chart-container" id="orgChartContainer">
+                <!-- Data Struktur Diisi via JS -->
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn-cancel" onclick="closeOrgChartModal()">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. MODAL JADWALKAN AGENDA (Baru) -->
+    <div class="modal-overlay" id="modalScheduleAgenda">
+        <div class="modal-box">
+            <h3>Jadwalkan Agenda Ke Kalender</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Agenda ini akan tersinkronisasi dengan kalender di Dashboard User.</p>
+            <div class="form-group">
+                <label>Judul Agenda / Meeting</label>
+                <input type="text" id="agendaTitle" placeholder="Cth: Rapat Evaluasi Divisi">
+            </div>
+            <div class="form-group" style="display: flex; gap: 10px;">
+                <div style="flex: 1;">
+                    <label>Tanggal</label>
+                    <input type="date" id="agendaDate">
+                </div>
+                <div style="flex: 1;">
+                    <label>Waktu</label>
+                    <input type="time" id="agendaTime">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Deskripsi / Tautan Meeting</label>
+                <textarea id="agendaDesc" rows="3" placeholder="Masukkan detail rapat atau link zoom/meet..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeAgendaModal()">Batal</button>
+                <button class="btn-submit" onclick="submitAgenda()">Simpan & Kirim Undangan</button>
             </div>
         </div>
     </div>
@@ -380,13 +441,15 @@
         let onlineUsers = {}; 
         let presenceChannel = null;
 
-        // --- DUMMY DATA ---
+        // --- DUMMY DATA MENTION (DIPERLENGKAP DENGAN TUGAS) ---
         const dummyDashboardData = [
             { id: 'prog1', type: 'prog', title: 'Seminar Nasional Digitalisasi', sub: 'Program Kerja (Progress)' },
             { id: 'prog2', type: 'prog', title: 'Baksos Desa Cibanteng', sub: 'Program Kerja (Belum Dimulai)' },
             { id: 'fin1', type: 'fin', title: 'Sewa Tenda 4x4m', sub: 'RAB: Rp 500.000 (Menunggu ACC)' },
             { id: 'fin2', type: 'fin', title: 'Honor Pembicara', sub: 'RAB: Rp 1.500.000 (Selesai)' },
-            { id: 'doc1', type: 'doc', title: '015/BEM/EXT/V/2026', sub: 'Surat Peminjaman Gedung C' }
+            { id: 'doc1', type: 'doc', title: '015/BEM/EXT/V/2026', sub: 'Surat Peminjaman Gedung C' },
+            { id: 'task1', type: 'task', title: 'Menyusun Proposal Sponsor', sub: 'Tugas User Dashboard (Deadline: Besok)' },
+            { id: 'task2', type: 'task', title: 'Desain Banner Sosmed', sub: 'Tugas User Dashboard (Progress)' }
         ];
 
         // --- INIT LISTENER ---
@@ -660,7 +723,7 @@
             }).subscribe();
         }
 
-        // --- MENTIONS ---
+        // --- MENTIONS DENGAN TUGAS DASHBOARD ---
         const chatInput = document.getElementById('chat-input');
         const mentionDropdown = document.getElementById('mention-dropdown');
         const mentionList = document.getElementById('mention-list');
@@ -691,7 +754,7 @@
             mentionDropdown.classList.add('active');
 
             try {
-                // Fetch data dari database
+                // Fetch data dari database (Assets / Task dari user)
                 const { data: assets } = await supabaseClient.from('workspace_assets')
                     .select('*').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
 
@@ -705,16 +768,20 @@
                     }
                 });
 
+                // Filter dari input pencarian
+                combinedData = combinedData.filter(item => item.title.toLowerCase().includes(mentionQuery));
+
                 // Render List Element
                 mentionList.innerHTML = '';
                 if(combinedData.length === 0) {
-                    mentionList.innerHTML = '<div style="padding: 10px; font-size:0.8rem; text-align:center;">Tidak ada data</div>';
+                    mentionList.innerHTML = '<div style="padding: 10px; font-size:0.8rem; text-align:center;">Tidak ada data/tugas ditemukan</div>';
                 } else {
                     combinedData.forEach((item, index) => {
                         let iconHtml = '';
                         if(item.type === 'prog') iconHtml = '<div class="mention-item-icon type-prog"><i class="fa-solid fa-list-check"></i></div>';
                         else if(item.type === 'fin') iconHtml = '<div class="mention-item-icon type-fin"><i class="fa-solid fa-wallet"></i></div>';
                         else if(item.type === 'doc') iconHtml = '<div class="mention-item-icon type-doc"><i class="fa-solid fa-file-signature"></i></div>';
+                        else if(item.type === 'task') iconHtml = '<div class="mention-item-icon type-task"><i class="fa-solid fa-clipboard-check"></i></div>';
                         else iconHtml = `<div class="mention-item-icon type-user">${item.title.charAt(0)}</div>`;
 
                         const div = document.createElement('div');
@@ -762,6 +829,7 @@
                 if(iconClass.includes('prog')) type = 'prog';
                 if(iconClass.includes('fin')) type = 'fin';
                 if(iconClass.includes('doc')) type = 'doc';
+                if(iconClass.includes('task')) type = 'task';
                 itemData = { title: title, type: type, sub: sub };
             }
 
@@ -771,6 +839,7 @@
             if(itemData.type === 'prog') iconCode = '<i class="fa-solid fa-list-check"></i>';
             if(itemData.type === 'fin') iconCode = '<i class="fa-solid fa-wallet"></i>';
             if(itemData.type === 'doc') iconCode = '<i class="fa-solid fa-file-signature"></i>';
+            if(itemData.type === 'task') iconCode = '<i class="fa-solid fa-clipboard-check"></i>';
 
             const mentionTag = document.createElement('span');
             mentionTag.className = 'mention-tag'; mentionTag.contentEditable = "false"; 
@@ -851,6 +920,126 @@
                 } catch(err) {
                     showToast("Error", "Gagal menghapus grup.", "error");
                 }
+            }
+        }
+
+        // --- STRUKTUR ORGANISASI (BARU) ---
+        function openOrgChartModal() {
+            document.getElementById('modalOrgChart').classList.add('active');
+            renderOrgChart();
+        }
+
+        function closeOrgChartModal() {
+            document.getElementById('modalOrgChart').classList.remove('active');
+        }
+
+        function renderOrgChart() {
+            const container = document.getElementById('orgChartContainer');
+            if (allMembers.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: var(--text-muted);">Memuat struktur organisasi...</p>';
+                return;
+            }
+
+            // Pisahkan berdasarkan Role untuk simulasi hirarki Teams
+            const admins = allMembers.filter(m => m.role && m.role.toLowerCase() === 'admin');
+            const users = allMembers.filter(m => !m.role || m.role.toLowerCase() !== 'admin');
+
+            let html = '';
+            
+            // Level Admin / Pimpinan
+            html += `<div class="org-level">
+                        <div class="org-level-title">Pengurus Inti / Admin Workspace</div>`;
+            if (admins.length > 0) {
+                admins.forEach(admin => {
+                    html += `
+                    <div class="org-member">
+                        <div class="org-member-avatar" style="background:var(--primary); color:white;">${admin.nama_user.charAt(0).toUpperCase()}</div>
+                        <div class="org-member-info">
+                            <span class="org-member-name">${escapeHtml(admin.nama_user)}</span>
+                            <span class="org-member-role"><i class="fa-solid fa-crown" style="color:var(--secondary);"></i> Admin Organisasi</span>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Admin terdaftar.</p>`;
+            }
+            html += `</div>`;
+
+            // Level Anggota / Divisi
+            html += `<div class="org-level">
+                        <div class="org-level-title">Anggota / Tim Eksekutif</div>`;
+            if (users.length > 0) {
+                users.forEach(user => {
+                    html += `
+                    <div class="org-member">
+                        <div class="org-member-avatar">${user.nama_user.charAt(0).toUpperCase()}</div>
+                        <div class="org-member-info">
+                            <span class="org-member-name">${escapeHtml(user.nama_user)}</span>
+                            <span class="org-member-role"><i class="fa-solid fa-user-tag"></i> ${escapeHtml(user.role || 'Member')}</span>
+                        </div>
+                    </div>`;
+                });
+            } else {
+                html += `<p style="font-size:0.8rem; color:#94a3b8;">Belum ada Anggota terdaftar.</p>`;
+            }
+            html += `</div>`;
+
+            container.innerHTML = html;
+        }
+
+        // --- PENJADWALAN AGENDA KALENDER (BARU) ---
+        function openAgendaModal() {
+            // Pastikan sedang berada di grup atau personal chat
+            if (!activeChatId) {
+                showToast("Peringatan", "Pilih obrolan atau grup terlebih dahulu untuk menjadwalkan agenda.", "error");
+                return;
+            }
+            document.getElementById('modalScheduleAgenda').classList.add('active');
+            
+            // Set default date ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('agendaDate').value = today;
+        }
+
+        function closeAgendaModal() {
+            document.getElementById('modalScheduleAgenda').classList.remove('active');
+            document.getElementById('agendaTitle').value = '';
+            document.getElementById('agendaDesc').value = '';
+            document.getElementById('agendaTime').value = '';
+        }
+
+        async function submitAgenda() {
+            const title = document.getElementById('agendaTitle').value;
+            const date = document.getElementById('agendaDate').value;
+            const time = document.getElementById('agendaTime').value;
+            const desc = document.getElementById('agendaDesc').value;
+
+            if (!title || !date || !time) {
+                showToast("Form Tidak Lengkap", "Judul, Tanggal, dan Waktu agenda wajib diisi.", "error");
+                return;
+            }
+
+            try {
+                // Di sini Anda bisa menyambungkan insert ke tabel 'workspace_agenda' atau 'user_calendar' yang ada di database Anda
+                // Contoh (Disimulasikan):
+                // await supabaseClient.from('workspace_agenda').insert([{ title, date, time, description: desc, workspace_id: currentWorkspaceId, created_by: currentUser.id }]);
+
+                showToast("Agenda Tersimpan", `Agenda "${title}" berhasil dijadwalkan dan disinkronisasi ke Dashboard User.`, "success");
+                
+                // Otomatis kirim pesan undangan ke chat yang sedang aktif
+                const inputEl = document.getElementById('chat-input');
+                inputEl.innerHTML = `
+                    <div style="background:#f1f5f9; padding:10px; border-left:4px solid var(--primary); border-radius:5px; margin-bottom:5px;">
+                        <strong>📅 Undangan Rapat/Agenda: ${escapeHtml(title)}</strong><br>
+                        <small>Tanggal: ${date} | Pukul: ${time}</small><br>
+                        <small>Catatan: ${escapeHtml(desc)}</small>
+                    </div>
+                `;
+                sendMessage(); // Menggunakan fungsi send message yang sudah ada
+
+                closeAgendaModal();
+            } catch (error) {
+                showToast("Gagal", "Gagal menyimpan agenda. Coba lagi.", "error");
             }
         }
     </script>

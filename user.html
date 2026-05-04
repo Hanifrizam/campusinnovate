@@ -21,7 +21,6 @@
         
         /* ANIMASI UMUM */
         @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulseLogo { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         .card { animation: slideUpFade 0.5s ease-out forwards; background: var(--white); padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
         /* SIDEBAR */
@@ -210,6 +209,16 @@
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 
+        /* FLOATING CHAT STYLES */
+        .chat-fab { position: fixed; bottom: 30px; right: 30px; background: var(--secondary); color: var(--primary); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2); cursor: pointer; z-index: 9999; transition: 0.3s; border: none; }
+        .chat-fab:hover { transform: scale(1.1); }
+        .chat-widget { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 500px; background: white; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 9999; transform: translateY(20px); opacity: 0; visibility: hidden; transition: 0.3s ease; overflow: hidden; border: 1px solid #eee;}
+        .chat-widget.active { transform: translateY(0); opacity: 1; visibility: visible; }
+        .chat-header { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+        .chat-header-actions button { background: none; border: none; color: white; font-size: 1.1rem; cursor: pointer; margin-left: 10px; transition: 0.2s; }
+        .chat-header-actions button:hover { color: var(--secondary); }
+        .chat-body { flex: 1; background: #f8fafc; border: none; width: 100%; height: 100%; }
+
         /* PRINT STYLE */
         @media print {
             body * { visibility: hidden; }
@@ -218,6 +227,7 @@
             .rte-toolbar, .btn-action, #zoom-widget-float { display: none !important; }
             .editor-workspace-bg { height: auto; overflow: visible; box-shadow: none; border: none; }
             .rte-editor-page { box-shadow: none; }
+            .chat-fab, .chat-widget { display: none !important; } /* Hide chat on print */
         }
 
         /* MEDIA QUERIES */
@@ -265,26 +275,14 @@
             .input-group label { font-size: 0.85rem; }
             .table-custom th, .table-custom td { padding: 8px; font-size: 0.75rem; }
             .cal-event-badge { font-size: 0.55rem; padding: 2px 4px; }
+
+            /* Mobile tweaks for Chat */
+            .chat-widget { width: calc(100% - 40px); right: 20px; left: 20px; bottom: 100px; height: 60vh; }
+            .chat-fab { bottom: 20px; right: 20px; width: 50px; height: 50px; font-size: 1.5rem; }
         }
     </style>
 </head>
 <body>
-
-    <!-- OVERLAY LOADING & VERIFIKASI AWAL -->
-    <div id="initial-loader" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--primary); z-index: 999999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; transition: opacity 0.5s ease;">
-        <img src="logo-campus-innovate.webp" alt="Logo" style="max-height: 100px; margin-bottom: 20px; animation: pulseLogo 1.5s infinite;">
-        <i class="fa-solid fa-shield-halved fa-beat-fade" style="font-size: 3rem; color: var(--secondary); margin-bottom: 15px;"></i>
-        <h2 style="font-family: 'Poppins', sans-serif;">Memverifikasi Akses Anda...</h2>
-        <p id="loader-text" style="color: #ccc; margin-top: 10px; font-size: 0.9rem;">Menghubungkan ke server Campus Innovate</p>
-    </div>
-
-    <!-- OVERLAY LIMIT / SUSPENDED DARI SUPER ADMIN -->
-    <div id="limit-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(10, 48, 85, 0.98); z-index: 9999999; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;">
-        <i class="fa-solid fa-lock" style="font-size: 5rem; color: var(--red); margin-bottom: 20px;"></i>
-        <h1 style="margin-bottom: 15px; font-size: 2rem;">Akses Sistem Dibatasi</h1>
-        <p id="limit-message" style="max-width: 500px; line-height: 1.6; margin-bottom: 30px; font-size: 1.1rem; color: #ddd;">Workspace Anda telah mencapai limit atau dibekukan oleh Super Admin. Silakan hubungi tim dukungan Campus Innovate untuk membuka kembali akses sistem ini.</p>
-        <button class="btn-action" style="background: var(--secondary); color: white; padding: 12px 25px; font-size: 1.1rem;" onclick="handleLogout()">Kembali ke Beranda / Logout</button>
-    </div>
 
     <div id="toast-container"></div>
 
@@ -326,10 +324,6 @@
             <div class="nav-item" onclick="switchTab('surat')"><i class="fa-solid fa-file-signature"></i> Digital Office</div>
             <div class="nav-item" id="menu-database-surat" onclick="switchTab('database-surat')"><i class="fa-solid fa-database"></i> Database Surat</div>
             
-            <!-- MENU BARU UNTUK CHAT -->
-            <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Komunikasi</p>
-            <div class="nav-item" onclick="window.location.href='organisasichat.html?workspace=' + globalWorkspaceId"><i class="fa-solid fa-comments"></i> Chat Organisasi</div>
-
             <p style="padding: 15px 20px 5px; font-size: 0.75rem; color: #aaa; text-transform: uppercase; letter-spacing: 1px;">Playbook</p>
             <div class="nav-item" onclick="switchTab('integrasi-docs')"><i class="fa-solid fa-cloud"></i> Workspace</div>
         </div>
@@ -1116,6 +1110,21 @@
 
     </div>
 
+    <!-- FLOATING CHAT FAB & WIDGET -->
+    <button class="chat-fab" onclick="toggleChatWidget()" id="chatFabBtn" title="Buka Chat Organisasi">
+        <i class="fa-solid fa-comment-dots"></i>
+    </button>
+    <div class="chat-widget" id="chatWidget">
+        <div class="chat-header">
+            <div><i class="fa-solid fa-users"></i> Obrolan Organisasi</div>
+            <div class="chat-header-actions">
+                <button onclick="fullscreenChat()" title="Fullscreen / Buka Halaman Penuh"><i class="fa-solid fa-expand"></i></button>
+                <button onclick="toggleChatWidget()" title="Tutup / Hide"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <iframe src="organisasichat.html" class="chat-body" id="chatIframe" title="Organisasi Chat"></iframe>
+    </div>
+
     <div class="modal-overlay" id="scheduleModal">
         <div class="modal-content">
             <div class="modal-header"><h2 id="schedule-modal-title">Tambah Jadwal Baru</h2><button class="close-btn" onclick="closeModal('scheduleModal')"><i class="fa-solid fa-xmark"></i></button></div>
@@ -1359,6 +1368,24 @@
                 document.getElementById('mobile-overlay-bg').classList.remove('active');
             }
         }
+
+        /* ----- FUNGSI FLOATING CHAT WIDGET ----- */
+        function toggleChatWidget() {
+            const widget = document.getElementById('chatWidget');
+            widget.classList.toggle('active');
+            
+            const fabIcon = document.querySelector('#chatFabBtn i');
+            if (widget.classList.contains('active')) {
+                fabIcon.className = 'fa-solid fa-xmark';
+            } else {
+                fabIcon.className = 'fa-solid fa-comment-dots';
+            }
+        }
+
+        function fullscreenChat() {
+            window.location.href = 'organisasichat.html';
+        }
+        /* --------------------------------------- */
 
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka || 0);
@@ -1613,105 +1640,70 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            const loader = document.getElementById('initial-loader');
-            const loaderText = document.getElementById('loader-text');
-            const limitOverlay = document.getElementById('limit-overlay');
-            const limitMsg = document.getElementById('limit-message');
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (!session) { window.location.href = 'index.html'; return; }
 
-            try {
-                loaderText.innerText = "Memeriksa Sesi Pengguna...";
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (!session) { window.location.href = 'index.html'; return; }
+            currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
+            currentUserRole = roleData ? roleData.role : 'user';
+            
+            document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
+            document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
+            
+            const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
+            if (savedSig) { userSignatureBase64 = savedSig; }
 
-                currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-                const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
-                currentUserRole = roleData ? roleData.role : 'user';
-                
-                document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
-                document.getElementById('user-role-badge').innerText = currentUserRole === 'admin' ? "ADMIN ORGANISASI" : "Pengurus";
-                
-                const savedSig = localStorage.getItem(`savedSignature_${currentUserId}`);
-                if (savedSig) { userSignatureBase64 = savedSig; }
+            if (currentUserRole !== 'admin') { 
+                document.getElementById('btn-group-program').style.display = 'none'; 
+                document.getElementById('btn-add-kpi').style.display = 'none'; 
+                document.getElementById('menu-database-surat').style.display = 'none'; 
+                const btnRekap = document.getElementById('btn-export-rekap');
+                if(btnRekap) btnRekap.style.display = 'none';
+            }
 
-                if (currentUserRole !== 'admin') { 
-                    document.getElementById('btn-group-program').style.display = 'none'; 
-                    document.getElementById('btn-add-kpi').style.display = 'none'; 
-                    document.getElementById('menu-database-surat').style.display = 'none'; 
-                    const btnRekap = document.getElementById('btn-export-rekap');
-                    if(btnRekap) btnRekap.style.display = 'none';
-                }
+            const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
+            if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
 
-                loaderText.innerText = "Memverifikasi Akses & Limit Super Admin...";
-                const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
-                if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
-
-                // CEK LIMIT SUPER ADMIN (Tabel workspaces)
-                const { data: wsData, error: wsError } = await supabaseClient.from('workspaces').select('nama_organisasi, status_langganan, batas_user').eq('id', globalWorkspaceId).single();
-                
-                if (wsError || !wsData) {
-                    limitMsg.innerText = "Data Workspace tidak ditemukan di server. Pastikan URL Anda valid.";
-                    limitOverlay.style.display = 'flex';
-                    loader.style.display = 'none';
-                    return;
-                }
-
-                // BLOKIR JIKA SUSPENDED / EXPIRED
-                if (wsData.status_langganan === 'Suspended' || wsData.status_langganan === 'Expired' || wsData.status_langganan === 'Nonaktif') {
-                    limitMsg.innerText = `Workspace "${wsData.nama_organisasi}" saat ini berstatus ${wsData.status_langganan}. Akses Anda telah dibatasi oleh Super Admin Campus Innovate.`;
-                    limitOverlay.style.display = 'flex';
-                    loader.style.display = 'none';
-                    return;
-                }
-
+            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
+            if (wsData) {
                 document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
-
-                loaderText.innerText = "Memuat Modul & Data Sistem...";
-
-                const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
-                userPresenceChannel.subscribe(async (status) => {
-                    if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
-                });
-
-                async function updatePresenceToDB() {
-                    if (currentUserId && globalWorkspaceId) {
-                        await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
-                    }
-                }
-                updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
-                window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
-
-                setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
-
-                try { await populateContextDropdowns(); } catch(e){} 
-                try { await loadWorkspaceUsers(); } catch(e){} 
-                try { await loadDepartments(); } catch(e){}
-                try { await loadFinanceData(); } catch(e){}
-                try { await loadSchedules(); } catch(e){} 
-                try { await loadProgramData(); } catch(e){} 
-                try { await loadRabTable(); } catch(e){}
-                try { await loadRealisasiTable(); } catch(e){}
-                try { await loadRekapitulasiData(); } catch(e){}
-                try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
-                try { loadFolders(); } catch(e){}
-                try { await loadKPIData(); } catch(e){}
-                try { await loadDigitalOffice(); } catch(e){}
-                
-                if(currentUserRole === 'admin') {
-                    try { await loadSuratContexts(); await loadDatabaseSuratLog(); } catch(e){}
-                }
-                
-                initSignaturePad(); initDraggableSignature();
-
-                // HILANGKAN LOADER SAAT SEMUA SUDAH SELESAI DIMUAT
-                loader.style.opacity = '0';
-                setTimeout(() => loader.style.display = 'none', 500);
-
-            } catch (err) {
-                console.error("Critical Init Error:", err);
-                loaderText.innerText = "Terjadi Kesalahan Kritis!";
-                setTimeout(() => loader.style.display = 'none', 2000);
             }
+
+            const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
+            userPresenceChannel.subscribe(async (status) => {
+                if (status === 'SUBSCRIBED') { await userPresenceChannel.track({ user_id: currentUserId, nama_user: currentUserName, online_at: new Date().toISOString() }); }
+            });
+
+            async function updatePresenceToDB() {
+                if (currentUserId && globalWorkspaceId) {
+                    await supabaseClient.from('workspace_members').update({ last_seen: new Date().toISOString(), nama_user: currentUserName }).eq('user_id', currentUserId).eq('workspace_id', globalWorkspaceId);
+                }
+            }
+            updatePresenceToDB(); setInterval(updatePresenceToDB, 60000); 
+            window.addEventListener('beforeunload', () => { updatePresenceToDB(); });
+
+            setInterval(() => { document.getElementById('absen-live-time').innerText = new Date().toLocaleTimeString('id-ID'); }, 1000);
+
+            try { await populateContextDropdowns(); } catch(e){} 
+            try { await loadWorkspaceUsers(); } catch(e){} 
+            try { await loadDepartments(); } catch(e){}
+            try { await loadFinanceData(); } catch(e){}
+            try { await loadSchedules(); } catch(e){} 
+            try { await loadProgramData(); } catch(e){} 
+            try { await loadRabTable(); } catch(e){}
+            try { await loadRealisasiTable(); } catch(e){}
+            try { await loadRekapitulasiData(); } catch(e){}
+            try { setupAbsensiView(); await loadAbsensiData(); } catch(e){}
+            try { loadFolders(); } catch(e){}
+            try { await loadKPIData(); } catch(e){}
+            try { await loadDigitalOffice(); } catch(e){}
+            
+            if(currentUserRole === 'admin') {
+                try { await loadSuratContexts(); await loadDatabaseSuratLog(); } catch(e){}
+            }
+            
+            initSignaturePad(); initDraggableSignature();
         });
 
         async function loadDepartments() {
@@ -3011,7 +3003,7 @@
                 if (isResizing) {
                     let newWidth = startW + (clientX - startX); let newHeight = startH + (clientY - startY);
                     if (newWidth < 50) newWidth = 50; if (newHeight < 25) newHeight = 25;
-                    if (overlay.offsetLeft + newWidth > wrapper.offsetWidthI ) newWidth = wrapper.offsetWidth - overlay.offsetLeft;
+                    if (overlay.offsetLeft + newWidth > wrapper.offsetWidth) newWidth = wrapper.offsetWidth - overlay.offsetLeft;
                     if (overlay.offsetTop + newHeight > wrapper.offsetHeight) newHeight = wrapper.offsetHeight - overlay.offsetTop;
                     overlay.style.width = newWidth + 'px'; overlay.style.height = newHeight + 'px';
                 } else if (isDragging) {
@@ -3024,40 +3016,13 @@
                 }
             };
             const stopAction = () => { isDragging = false; isResizing = false; };
-            
-            overlay.addEventListener('mousedown', startAction); 
-            document.addEventListener('mousemove', doAction); 
-            document.addEventListener('mouseup', stopAction);
-            
-            overlay.addEventListener('touchstart', startAction, { passive: false }); 
-            document.addEventListener('touchmove', doAction, { passive: false }); 
-            document.addEventListener('touchend', stopAction);
+            overlay.addEventListener('mousedown', startAction); document.addEventListener('mousemove', doAction); document.addEventListener('mouseup', stopAction);
+            overlay.addEventListener('touchstart', startAction, { passive: false }); document.addEventListener('touchmove', doAction, { passive: false }); document.addEventListener('touchend', stopAction);
         }
 
-        // Fungsi Global Modal & Logout
-        function openModal(modalId) { 
-            document.getElementById(modalId).classList.add('active'); 
-        }
-        
-        function closeModal(modalId) { 
-            document.getElementById(modalId).classList.remove('active'); 
-        }
-        
-        async function handleLogout() { 
-            showConfirm("Apakah Anda yakin ingin keluar dari Workspace?", async () => {
-                const loader = document.getElementById('initial-loader');
-                const loaderText = document.getElementById('loader-text');
-                
-                if(loader && loaderText) {
-                    loaderText.innerText = "Keluar dari sistem...";
-                    loader.style.display = 'flex';
-                    loader.style.opacity = '1';
-                }
-                
-                await supabaseClient.auth.signOut(); 
-                window.location.href = 'index.html'; 
-            });
-        }
+        function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
+        async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
     </script>
 </body>
 </html>
