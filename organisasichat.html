@@ -443,31 +443,43 @@
             
             // JIKA URL TIDAK ADA PARAMETER ?workspace= , CARI DI DATABASE
             if(!currentWorkspaceId) {
-                const { data: wsMem, error: errWsMem } = await supabaseClient.from('workspace_members').select('workspace_id').eq('user_id', session.user.id).limit(1);
+                const { data: wsMem, error: errWsMem } = await supabaseClient.from('workspace_members')
+                    .select('workspace_id').eq('user_id', session.user.id).limit(1);
                 
-                if(errWsMem) {
-                    console.error("Gagal menarik workspace (Cek RLS):", errWsMem);
-                }
-
                 if(wsMem && wsMem.length > 0) {
                     currentWorkspaceId = wsMem[0].workspace_id;
                 } else {
-                    document.getElementById('chat-list-container').innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #e74c3c;"><b>Error:</b> Workspace tidak ditemukan / Akses ditolak oleh Database.</div>`;
-                    showToast("Error RLS", "Workspace tidak ditemukan.", "error");
+                    document.getElementById('chat-list-container').innerHTML = `<div style="text-align: center; padding: 40px 20px; color: #e74c3c;"><b>Error:</b> Workspace tidak ditemukan / Akses ditolak RLS Database.</div>`;
+                    showToast("Error", "Anda tidak terdaftar di Workspace ini.", "error");
                     return;
                 }
             }
 
-            const { data: myProfile, error: errProfile } = await supabaseClient.from('workspace_members').select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
+            // AUTO-HEAL ADMIN: Tarik Profile Diri Sendiri
+            let { data: myProfile, error: errProfile } = await supabaseClient.from('workspace_members')
+                .select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
             
-            if(errProfile || !myProfile) {
-                console.error("Gagal menarik profile diri sendiri:", errProfile);
-                showToast("Akses Ditolak", "Anda tidak terdaftar di workspace ini.", "error");
-                return;
+            // JIKA ADMIN BELUM ADA DI TABEL WORKSPACE_MEMBERS TAPI BERHASIL MASUK (VIA URL)
+            if(!myProfile && currentWorkspaceId) {
+                let fallbackName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+                const { data: newAdminProfile } = await supabaseClient.from('workspace_members').insert([{
+                    workspace_id: currentWorkspaceId,
+                    user_id: session.user.id,
+                    nama_user: fallbackName + ' (Admin)',
+                    role: 'Admin Workspace'
+                }]).select().single();
+                
+                if(newAdminProfile) {
+                    myProfile = newAdminProfile;
+                }
             }
 
-            currentUser = { id: session.user.id, name: myProfile.nama_user || 'Pengguna', role: myProfile.role || 'Member' };
-            document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            if(myProfile) {
+                currentUser = { id: session.user.id, name: myProfile.nama_user, role: myProfile.role };
+                document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
+            } else {
+                currentUser = { id: session.user.id, name: "Admin", role: 'Admin' };
+            }
             
             await loadWorkspaceMembers();
             await loadChatGroups();
@@ -508,7 +520,7 @@
                 if (data) allMembers = data;
             } catch (e) {
                 console.error("Gagal memuat anggota workspace:", e);
-                showToast("Gagal Memuat Anggota", "Periksa koneksi atau aturan RLS Database.", "error");
+                showToast("Gagal Memuat", "Pastikan RLS Database sudah disetting (USING true).", "error");
             }
         }
 
@@ -571,7 +583,7 @@
                 });
             }
 
-            container.innerHTML = html || `<div style="text-align: center; padding: 30px 20px; color: #94a3b8; font-size: 0.85rem;">Tidak ada hasil ditemukan.</div>`;
+            container.innerHTML = html || `<div style="text-align: center; padding: 30px 20px; color: #94a3b8; font-size: 0.85rem;">Belum ada kontak atau grup.</div>`;
         }
 
         function switchTab(tab, el) {
@@ -649,7 +661,7 @@
                 container.innerHTML = `
                     <div style="text-align:center; margin-top:50px; color:#cbd5e1;">
                         <i class="fa-regular fa-handshake" style="font-size:4rem; margin-bottom:15px;"></i>
-                        <p style="font-weight:600;">Ini adalah awal riwayat obrolan Anda dengan ${escapeHtml(activeChatName)}</p>
+                        <p style="font-weight:600;">Mulai percakapan Anda dengan ${escapeHtml(activeChatName)}</p>
                     </div>`;
             }
         }
@@ -658,7 +670,7 @@
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
             if(messages.length === 0) {
-                 container.innerHTML = `<div style="text-align:center; margin-top:50px; color:#cbd5e1;"><i class="fa-regular fa-handshake" style="font-size:4rem; margin-bottom:15px;"></i><p style="font-weight:600;">Ini adalah awal riwayat obrolan Anda dengan ${escapeHtml(activeChatName)}</p></div>`;
+                 container.innerHTML = `<div style="text-align:center; margin-top:50px; color:#cbd5e1;"><i class="fa-regular fa-handshake" style="font-size:4rem; margin-bottom:15px;"></i><p style="font-weight:600;">Mulai percakapan Anda dengan ${escapeHtml(activeChatName)}</p></div>`;
                 return;
             }
             messages.forEach(msg => appendMessageToUI(msg));
@@ -671,7 +683,7 @@
             let senderName = isMe ? currentUser.name : (allMembers.find(m => m.user_id === msg.sender_id)?.nama_user || "Pengguna");
             const time = new Date(msg.created_at).toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
 
-            if(container.innerHTML.includes("Ini adalah awal riwayat")) container.innerHTML = '';
+            if(container.innerHTML.includes("Mulai percakapan")) container.innerHTML = '';
 
             container.innerHTML += `
                 <div class="message-row ${isMe ? 'me' : 'other'}">
@@ -708,7 +720,7 @@
                 if(error) throw error;
             } catch (err) {
                 console.error("Gagal mengirim pesan ke server:", err);
-                showToast("Gagal Mengirim", "Gagal mengirim pesan, pastikan RLS mengizinkan INSERT.", "error");
+                showToast("Gagal Mengirim", "Pesan tidak terkirim. Cek RLS INSERT pada database.", "error");
             }
         }
 
@@ -731,7 +743,7 @@
                                  (activeChatType === 'user' && msg.sender_id === activeChatId && msg.receiver_id === currentUser.id);
                 
                 if(isRelevant) { appendMessageToUI(msg); scrollToBottom(); } 
-                else if(msg.receiver_id === currentUser.id || msg.group_id) { showToast("Pesan Baru Masuk", "Cek panel obrolan Anda.", "info"); }
+                else if(msg.receiver_id === currentUser.id || msg.group_id) { showToast("Pesan Baru", "Anda memiliki pesan baru.", "info"); }
             }).subscribe();
         }
 
@@ -759,7 +771,6 @@
 
             savedRange = selection.getRangeAt(0).cloneRange();
             const textBeforeCursor = text.substring(0, savedRange.startOffset);
-            
             const match = textBeforeCursor.match(/(?:^|\s)@([a-zA-Z0-9]*)$/);
 
             if (match !== null) { 
@@ -1034,12 +1045,21 @@
             container.innerHTML = '<div style="text-align:center;"><i class="fa-solid fa-spinner fa-spin"></i> Menarik Log...</div>';
             
             try {
+                // FIX: Menambahkan error handling yang benar untuk Log Aktivitas
                 const { data: messages, error } = await supabaseClient.from('chat_messages')
-                    .select('*').order('created_at', { ascending: false }).limit(5);
+                    .select('*').order('created_at', { ascending: false }).limit(20);
                 
+                if (error) throw error;
+                
+                // FIX: Menyaring pesan agar hanya menampilkan aktivitas dari anggota di workspace ini
+                let validMessages = [];
+                if (messages) {
+                    validMessages = messages.filter(msg => allMembers.some(m => m.user_id === msg.sender_id)).slice(0, 5);
+                }
+
                 let html = '';
-                if(messages && messages.length > 0) {
-                    messages.forEach(msg => {
+                if(validMessages.length > 0) {
+                    validMessages.forEach(msg => {
                         const senderName = allMembers.find(m => m.user_id === msg.sender_id)?.nama_user || "Seseorang";
                         const isPersonal = msg.receiver_id === currentUser.id;
                         const action = msg.group_id ? 'mengirim pesan di Grup' : (isPersonal ? 'mengirimi Anda pesan personal' : 'membuat pembaruan');
@@ -1060,7 +1080,8 @@
                 }
                 container.innerHTML = html;
             } catch (err) {
-                container.innerHTML = '<p style="text-align:center; font-size:0.85rem; color:var(--red);">Gagal memuat aktivitas dari server.</p>';
+                console.error("Gagal menarik log:", err);
+                container.innerHTML = '<p style="text-align:center; font-size:0.85rem; color:var(--red);">Gagal memuat aktivitas. RLS memblokir aksi baca pada server.</p>';
             }
         }
 
