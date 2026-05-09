@@ -1704,7 +1704,23 @@
             }
             
             initSignaturePad(); initDraggableSignature();
-        });
+            
+            // ===== TAMBAHKAN KODE REALTIME DI BAWAH INI =====
+            // Dengarkan perubahan database secara realtime khusus untuk workspace ini
+            supabaseClient.channel('workspace_dashboard_updates')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
+                    loadWorkspaceUsers(); // Update dropdown penerima surat otomatis
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'digital_office', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
+                    loadDigitalOffice(); // Update tabel surat masuk/keluar otomatis
+                    if(currentUserRole === 'admin') loadDatabaseSuratLog();
+                })
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'attendances', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
+                    loadAbsensiData(); // Update grafik dan tabel absen otomatis
+                })
+                .subscribe();
+            // ================================================
+        }); // <-- Ini penutup dari DOMContentLoaded
 
         async function loadDepartments() {
             const { data } = await supabaseClient.from('departments').select('*').eq('workspace_id', globalWorkspaceId);
@@ -2670,18 +2686,20 @@
         function openAjukanSuratModal() { document.getElementById('form-ajukan-surat').reset(); openModal('modalAjukanSurat'); }
 
         async function extractTextFromPDFFile(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-            let fullText = "";
-            const maxPages = Math.min(pdf.numPages, 3);
-            for (let i = 1; i <= maxPages; i++) {
-                const page = await pdf.getPage(i);
-                const textContent = await page.getTextContent();
-                const pageText = textContent.items.map(item => item.str).join(" ");
-                fullText += pageText + " ";
-            }
-            return fullText;
-        }
+    const arrayBuffer = await file.arrayBuffer();
+    // FIX: Konversi ke Uint8Array agar PDF.js bisa membacanya di semua browser
+    const uint8Array = new Uint8Array(arrayBuffer); 
+    const pdf = await pdfjsLib.getDocument({ data: uint8Array }).promise;
+    let fullText = "";
+    const maxPages = Math.min(pdf.numPages, 3);
+    for (let i = 1; i <= maxPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map(item => item.str).join(" ");
+        fullText += pageText + " ";
+    }
+    return fullText;
+}
 
         async function savePengajuanSurat(e) {
             e.preventDefault();
@@ -2730,7 +2748,7 @@
                     return; 
                 }
 
-                const { data: existingSurat } = await supabaseClient.from('digital_office').select('id').eq('nomor_surat', detectedNomor).single();
+                const { data: existingSurat } = await supabaseClient.from('digital_office').select('id').eq('nomor_surat', detectedNomor).maybeSingle();
                     
                 if (existingSurat) {
                     showNotification(`Nomor surat ${detectedNomor} sudah TERPAKAI di database. Silakan cek nomor terbaru.`, "error");
