@@ -330,23 +330,8 @@
         <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1);" onclick="handleLogout()"><i class="fa-solid fa-sign-out-alt"></i> Keluar</div>
     </div>
 
-    <div class="main-content">
+   <div class="main-content">
         <div class="topbar">
-            <!-- LAYAR FITUR TERKUNCI (OTOMATIS MUNCUL JIKA DIBLOKIR SUPER ADMIN) -->
-        <div id="view-locked" class="view-section">
-            <div style="text-align: center; margin-top: 15vh; background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 600px; margin-left: auto; margin-right: auto; border-top: 5px solid var(--red);">
-                <i class="fa-solid fa-lock" style="font-size: 5rem; color: #cbd5e1; margin-bottom: 20px;"></i>
-                <h2 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 10px;">Fitur Dibatasi</h2>
-                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
-                    Mohon maaf, akses ke modul ini telah dikunci oleh <b>Super Admin</b>.<br>
-                    Silakan hubungi administrator sistem untuk meningkatkan paket langganan organisasi Anda agar dapat menggunakan fitur ini kembali.
-                </p>
-                <button class="btn-action" style="margin-top: 30px; background: var(--primary); color: white;" onclick="switchTab('dashboard')">
-                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
-                </button>
-            </div>
-        </div>
-        <!-- ================================================================== -->
             <div>
                 <div style="display: flex; align-items: center;">
                     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
@@ -363,8 +348,25 @@
                 <div class="workspace-badge"><i class="fa-solid fa-building-columns"></i> <span id="workspace-name-display">Mencari Identitas...</span></div>
             </div>
             <!-- AKHIR TOMBOL REFRESH -->
-            
+        </div> <!-- INI ADALAH PENUTUP TOPBAR YANG BENAR -->
+
+        <!-- LAYAR FITUR TERKUNCI (OTOMATIS MUNCUL JIKA DIBLOKIR SUPER ADMIN) -->
+        <div id="view-locked" class="view-section">
+            <div style="text-align: center; margin-top: 15vh; background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 600px; margin-left: auto; margin-right: auto; border-top: 5px solid var(--red);">
+                <i class="fa-solid fa-lock" style="font-size: 5rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 10px;">Fitur Dibatasi</h2>
+                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
+                    Mohon maaf, akses ke modul ini telah dikunci oleh <b>Super Admin</b>.<br>
+                    Silakan hubungi administrator sistem untuk meningkatkan paket langganan organisasi Anda agar dapat menggunakan fitur ini kembali.
+                </p>
+                <button class="btn-action" style="margin-top: 30px; background: var(--primary); color: white;" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+                </button>
+            </div>
         </div>
+        <!-- ================================================================== -->
+
+        <div id="view-dashboard" class="view-section active">
 
         <div id="view-dashboard" class="view-section active">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
