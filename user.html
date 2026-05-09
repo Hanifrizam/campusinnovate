@@ -332,6 +332,21 @@
 
     <div class="main-content">
         <div class="topbar">
+            <!-- LAYAR FITUR TERKUNCI (OTOMATIS MUNCUL JIKA DIBLOKIR SUPER ADMIN) -->
+        <div id="view-locked" class="view-section">
+            <div style="text-align: center; margin-top: 15vh; background: white; padding: 50px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 600px; margin-left: auto; margin-right: auto; border-top: 5px solid var(--red);">
+                <i class="fa-solid fa-lock" style="font-size: 5rem; color: #cbd5e1; margin-bottom: 20px;"></i>
+                <h2 style="color: var(--primary); font-size: 1.8rem; margin-bottom: 10px;">Fitur Dibatasi</h2>
+                <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6;">
+                    Mohon maaf, akses ke modul ini telah dikunci oleh <b>Super Admin</b>.<br>
+                    Silakan hubungi administrator sistem untuk meningkatkan paket langganan organisasi Anda agar dapat menggunakan fitur ini kembali.
+                </p>
+                <button class="btn-action" style="margin-top: 30px; background: var(--primary); color: white;" onclick="switchTab('dashboard')">
+                    <i class="fa-solid fa-arrow-left"></i> Kembali ke Dashboard
+                </button>
+            </div>
+        </div>
+        <!-- ================================================================== -->
             <div>
                 <div style="display: flex; align-items: center;">
                     <button class="mobile-menu-btn" onclick="toggleMobileMenu()"><i class="fa-solid fa-bars"></i></button>
@@ -1306,6 +1321,8 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         let globalWorkspaceId = null; 
+        let workspaceFeatures = { finance: true, kpi: true, do: true }; // Tambahkan ini (Default Terbuka)
+        let globalPrograms = []; 
         let globalPrograms = []; 
         let globalSchedules = []; 
         let globalKPIs = []; 
@@ -1357,21 +1374,40 @@
         }
 
         function switchTab(tabId) { 
+            // 1. LOGIKA CEK STATUS KUNCI (LOCKS)
+            let isLocked = false;
+            
+            // Pemetaan menu ke kategori kunci di Database
+            const financeTabs = ['input-rab', 'realisasi-anggaran', 'rekap-rab'];
+            const doTabs = ['surat', 'database-surat'];
+            const kpiTabs = ['kpi'];
+
+            // Jika nilai false (dikunci oleh super admin), maka isLocked = true
+            if (financeTabs.includes(tabId) && workspaceFeatures.finance === false) isLocked = true;
+            if (doTabs.includes(tabId) && workspaceFeatures.do === false) isLocked = true;
+            if (kpiTabs.includes(tabId) && workspaceFeatures.kpi === false) isLocked = true;
+
+            // 2. RESET TAMPILAN
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active')); 
             
-            // Handle if tab trigger has an event target
+            // Handle active class pada Sidebar
             if (event && event.currentTarget) {
                 event.currentTarget.classList.add('active'); 
             } else {
-                // Find matching sidebar item manually if triggered programmatically
                 document.querySelectorAll('.nav-item').forEach(el => {
                     if (el.getAttribute('onclick')?.includes(tabId)) el.classList.add('active');
                 });
             }
 
-            document.getElementById('view-' + tabId).classList.add('active'); 
+            // 3. TAMPILKAN HALAMAN (Berdasarkan Status Kunci)
+            if (isLocked) {
+                document.getElementById('view-locked').classList.add('active'); 
+            } else {
+                document.getElementById('view-' + tabId).classList.add('active'); 
+            }
             
+            // Mobile Menu Logic
             if(window.innerWidth <= 768) {
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('mobile-overlay-bg').classList.remove('active');
@@ -1673,10 +1709,15 @@
             const urlParams = new URLSearchParams(window.location.search); globalWorkspaceId = urlParams.get('workspace');
             if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
 
-            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi').eq('id', globalWorkspaceId).single();
+            // FIX: Tambahkan tarikan data 'locked_features'
+            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi, locked_features').eq('id', globalWorkspaceId).single();
             if (wsData) {
                 document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
+                // Simpan status kunci ke memori
+                if (wsData.locked_features) {
+                    workspaceFeatures = wsData.locked_features;
+                }
             }
 
             const userPresenceChannel = supabaseClient.channel(`room_${globalWorkspaceId}`);
@@ -1714,20 +1755,33 @@
             
             initSignaturePad(); initDraggableSignature();
             
-            // ===== TAMBAHKAN KODE REALTIME DI BAWAH INI =====
-            // Dengarkan perubahan database secara realtime khusus untuk workspace ini
+           // ===== TAMBAHKAN KODE REALTIME DI BAWAH INI =====
             supabaseClient.channel('workspace_dashboard_updates')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
-                    loadWorkspaceUsers(); // Update dropdown penerima surat otomatis
+                    loadWorkspaceUsers(); 
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'digital_office', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
-                    loadDigitalOffice(); // Update tabel surat masuk/keluar otomatis
+                    loadDigitalOffice(); 
                     if(currentUserRole === 'admin') loadDatabaseSuratLog();
                 })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'attendances', filter: `workspace_id=eq.${globalWorkspaceId}` }, () => {
-                    loadAbsensiData(); // Update grafik dan tabel absen otomatis
+                    loadAbsensiData(); 
+                })
+                // TAMBAHAN BARU: Realtime Kunci Fitur dari Super Admin
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workspaces', filter: `id=eq.${globalWorkspaceId}` }, (payload) => {
+                    if (payload.new.locked_features) {
+                        workspaceFeatures = payload.new.locked_features;
+                        
+                        // Jika user sedang membuka menu yang barusan dikunci, paksa refresh halamannya agar terganti ke layar gembok
+                        const activeView = document.querySelector('.view-section.active');
+                        if (activeView && activeView.id !== 'view-locked') {
+                            const currentTabId = activeView.id.replace('view-', '');
+                            switchTab(currentTabId);
+                        }
+                    }
                 })
                 .subscribe();
+            // ================================================
             // ================================================
         }); // <-- Ini penutup dari DOMContentLoaded
 
