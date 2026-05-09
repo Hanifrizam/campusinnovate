@@ -2717,23 +2717,30 @@
 
             try {
                 const pdfText = await extractTextFromPDFFile(file);
+                
+                // FIX OCR: Hapus SELURUH spasi yang tidak sengaja tergenerasi oleh pembacaan PDF.js
+                // Ini akan mengubah "001 / SK - MOU / CAMPUSINNOVATE" menjadi "001/SK-MOU/CAMPUSINNOVATE"
+                const cleanPdfText = pdfText.replace(/\s+/g, ''); 
+
                 const { data: contexts } = await supabaseClient.from('surat_contexts').select('*').eq('workspace_id', globalWorkspaceId);
                 
                 let matchedContext = null;
                 let detectedNomor = null;
 
                 if (contexts && contexts.length > 0) {
-                    const nomorSuratRegex = /\b(\d{3,})\s*\/\s*([A-Za-z0-9\.\-]+)\s*\/\s*([A-Za-z0-9\.\-]+)\s*\/\s*([IVXLCDM]+)\s*\/\s*(\d{4})\b/g;
+                    // FIX OCR REGEX: Pola disederhanakan dan dibebaskan dari pengecekan spasi (\s*)
+                    const nomorSuratRegex = /(\d{3,})\/([A-Za-z0-9\.\-_]+)\/([A-Za-z0-9\.\-_]+)\/([IVXLCDMivxlcdm]+)\/(\d{4})/g;
                     
                     let match;
-                    while ((match = nomorSuratRegex.exec(pdfText)) !== null) {
+                    while ((match = nomorSuratRegex.exec(cleanPdfText)) !== null) {
                         const numPart = match[1];
-                        const kodePart = match[2];
+                        const kodePart = match[2].toUpperCase(); // Memastikan kode bebas masalah huruf besar/kecil
                         
                         for (const ctx of contexts) {
-                            if (kodePart === ctx.kode_inisial) {
+                            if (kodePart === ctx.kode_inisial.toUpperCase()) {
                                 matchedContext = ctx;
-                                detectedNomor = `${numPart}/${kodePart}/${match[3]}/${match[4]}/${match[5]}`;
+                                // Merakit kembali nomor surat ke format baku
+                                detectedNomor = `${numPart}/${kodePart}/${match[3]}/${match[4].toUpperCase()}/${match[5]}`;
                                 break;
                             }
                         }
