@@ -1690,7 +1690,7 @@
             if (!session) { window.location.href = 'index.html'; return; }
 
             currentUserId = session.user.id; currentUserName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).single();
+            const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', currentUserId).maybeSingle();
             currentUserRole = roleData ? roleData.role : 'user';
             
             document.getElementById('welcomeText').innerHTML = `Hai, ${currentUserName}! 👋`;
@@ -1711,7 +1711,7 @@
             if (!globalWorkspaceId) { showNotification("Akses Ditolak!", "error"); window.location.href = 'index.html'; return; }
 
             // FIX: Tambahkan tarikan data 'locked_features'
-            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi, locked_features').eq('id', globalWorkspaceId).single();
+            const { data: wsData } = await supabaseClient.from('workspaces').select('nama_organisasi, locked_features').eq('id', globalWorkspaceId).maybeSingle();
             if (wsData) {
                 document.getElementById('workspace-name-display').innerText = wsData.nama_organisasi;
                 document.getElementById('sidebar-workspace-name').innerText = wsData.nama_organisasi;
@@ -2177,14 +2177,14 @@
             let totalRabSum = 0; if(dataRab) totalRabSum = dataRab.reduce((s, i) => s + parseFloat(i.total_harga || 0), 0); 
             const { data: dataReal } = await supabaseClient.from('realisasi_items').select('nominal').eq('workspace_id', globalWorkspaceId); 
             let totalRealisasiSum = 0; if(dataReal) totalRealisasiSum = dataReal.reduce((s, i) => s + parseFloat(i.nominal || 0), 0); 
-            const { data: exist } = await supabaseClient.from('finance_summaries').select('id').eq('workspace_id', globalWorkspaceId).single(); 
+            const { data: exist } = await supabaseClient.from('finance_summaries').select('id').eq('workspace_id', globalWorkspaceId).maybeSingle(); 
             if (exist) { await supabaseClient.from('finance_summaries').update({ total_rab: totalRabSum, realisasi_rab: totalRealisasiSum }).eq('id', exist.id); } 
             else { await supabaseClient.from('finance_summaries').insert([{ workspace_id: globalWorkspaceId, total_rab: totalRabSum, realisasi_rab: totalRealisasiSum }]); } 
             loadFinanceData(); 
         }
 
         async function loadFinanceData() { 
-            const { data } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', globalWorkspaceId).single(); 
+            const { data } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', globalWorkspaceId).maybeSingle(); 
             let t = 0; let r = 0; if (data) { t = parseFloat(data.total_rab); r = parseFloat(data.realisasi_rab); } 
             const sisa = t - r; const persentase = t > 0 ? Math.round((r/t)*100) : 0; 
             document.getElementById('val-total-rab').innerText = formatRp(t); 
@@ -2474,7 +2474,7 @@
             let queryCek = supabaseClient.from('attendances').select('*').eq('workspace_id', globalWorkspaceId).eq('user_id', currentUserId).eq('tanggal', today); 
             if(isProgram) queryCek = queryCek.eq('program_id', progId); else queryCek = queryCek.is('program_id', null); 
             
-            const { data: existingAbsen } = await queryCek.single(); 
+            const { data: existingAbsen } = await queryCek.maybeSingle(); 
             
             if (existingAbsen) { showNotification("Anda sudah men-submit form absensi untuk konteks ini hari ini!", "error"); return; } 
             
