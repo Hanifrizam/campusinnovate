@@ -339,7 +339,16 @@
                 </div>
                 <p style="color: #777; font-size: 0.9rem; margin-top: 5px;">Selamat datang di Workspace Anda. Akses Anda: <strong id="user-role-badge" style="color: var(--secondary);">...</strong></p>
             </div>
-            <div class="workspace-badge"><i class="fa-solid fa-building-columns"></i> <span id="workspace-name-display">Mencari Identitas...</span></div>
+            
+            <!-- TOMBOL REFRESH GLOBAL -->
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="btn-action" style="background: white; border: 1px solid #e2e8f0; color: var(--primary); padding: 8px 15px;" onclick="refreshCurrentView(this)" title="Muat Ulang Data di Halaman Ini">
+                    <i class="fa-solid fa-arrows-rotate"></i> Refresh
+                </button>
+                <div class="workspace-badge"><i class="fa-solid fa-building-columns"></i> <span id="workspace-name-display">Mencari Identitas...</span></div>
+            </div>
+            <!-- AKHIR TOMBOL REFRESH -->
+            
         </div>
 
         <div id="view-dashboard" class="view-section active">
@@ -3051,6 +3060,70 @@
         function openModal(modalId) { document.getElementById(modalId).classList.add('active'); }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = 'index.html'; }
+
+        // ===== FUNGSI REFRESH PINTAR =====
+        async function refreshCurrentView(btnElement) {
+            // Putar icon saat memuat
+            const icon = btnElement.querySelector('i');
+            if (icon) icon.classList.add('fa-spin');
+            btnElement.disabled = true;
+
+            // Cek menu mana yang sedang aktif
+            const activeView = document.querySelector('.view-section.active');
+            const viewId = activeView ? activeView.id : '';
+
+            try {
+                switch(viewId) {
+                    case 'view-dashboard':
+                        await Promise.all([loadFinanceData(), loadProgramData(), loadKPIData(), loadAbsensiData()]);
+                        break;
+                    case 'view-program-event':
+                        await Promise.all([loadDepartments(), loadProgramData()]);
+                        break;
+                    case 'view-input-rab':
+                        await Promise.all([loadDepartments(), loadRabTable()]);
+                        break;
+                    case 'view-realisasi-anggaran':
+                        await Promise.all([loadDepartments(), loadRealisasiTable(), recalculateGlobalRAB()]);
+                        break;
+                    case 'view-rekap-rab':
+                        await loadRekapitulasiData();
+                        break;
+                    case 'view-absensi':
+                        await Promise.all([loadAbsensiData(), loadProgramData()]);
+                        break;
+                    case 'view-timeline':
+                        await Promise.all([loadSchedules(), loadProgramData()]);
+                        renderCalendar(); renderMergedTimeline();
+                        break;
+                    case 'view-notulensi':
+                        if (activeFolderId) await loadNotulensiList();
+                        else await loadFolders();
+                        break;
+                    case 'view-kpi':
+                        await Promise.all([loadDepartments(), loadKPIData()]);
+                        break;
+                    case 'view-surat':
+                        await Promise.all([loadDigitalOffice(), populateContextDropdowns(), loadWorkspaceUsers()]);
+                        break;
+                    case 'view-database-surat':
+                        await Promise.all([loadSuratContexts(), loadDatabaseSuratLog()]);
+                        break;
+                    default:
+                        // Fallback jika menu tidak terdeteksi
+                        await Promise.all([loadDepartments(), loadProgramData(), loadFinanceData()]);
+                        break;
+                }
+                showNotification("Data berhasil diperbarui!", "success");
+            } catch (error) {
+                console.error("Refresh error:", error);
+                showNotification("Gagal memperbarui data dari server.", "error");
+            } finally {
+                // Hentikan putaran icon setelah selesai
+                if (icon) icon.classList.remove('fa-spin');
+                btnElement.disabled = false;
+            }
+        }
     </script>
 </body>
 </html>
