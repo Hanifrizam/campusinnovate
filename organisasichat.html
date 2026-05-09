@@ -725,24 +725,33 @@
 }
 
         // --- UI RENDER CHAT LIST ---
+        // --- UI RENDER CHAT LIST ---
         function renderChatList(filter = 'all', searchQuery = '') {
             const container = document.getElementById('chat-list-container');
             let html = '';
             
+            // Amankan teks pencarian agar tidak null
+            const safeQuery = (searchQuery || '').toLowerCase();
+            
             if (filter === 'all' || filter === 'groups') {
                 html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 15px 10px 8px; text-transform:uppercase; letter-spacing:0.5px;">Grup Divisi</div>`;
-                let filteredGroups = chatGroups.filter(g => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
+                
+                // FIX: Gunakan (g.name || '') untuk mencegah error jika nama grup null
+                let filteredGroups = chatGroups.filter(g => (g.name || '').toLowerCase().includes(safeQuery));
+                
                 filteredGroups.forEach(g => {
                     const isActive = (activeChatType === 'group' && activeChatId === g.id) ? 'active' : '';
                     const unreadCnt = unreadCounts[g.id] || 0;
                     const unreadClass = unreadCnt > 0 ? 'has-unread' : '';
                     const unreadHtml = unreadCnt > 0 ? `<div class="unread-badge">${unreadCnt}</div>` : '';
+                    
+                    const safeGroupName = g.name || 'Grup Tanpa Nama'; // Fallback
 
                     html += `
-                        <div class="chat-item ${isActive} ${unreadClass}" onclick="openChat('group', '${g.id}', '${escapeHtml(g.name)}')">
+                        <div class="chat-item ${isActive} ${unreadClass}" onclick="openChat('group', '${g.id}', '${escapeHtml(safeGroupName)}')">
                             <div class="chat-item-avatar" style="background: linear-gradient(135deg, var(--secondary), #f59e0b); color: white;"><i class="fa-solid fa-users"></i></div>
                             <div class="chat-item-info">
-                                <div class="chat-item-name">${escapeHtml(g.name)} ${unreadHtml}</div>
+                                <div class="chat-item-name">${escapeHtml(safeGroupName)} ${unreadHtml}</div>
                                 <div class="chat-item-preview"><i class="fa-solid fa-comment-dots" style="font-size:0.7rem;"></i> Ruang Kolaborasi</div>
                             </div>
                         </div>`;
@@ -751,11 +760,14 @@
 
             if (filter === 'all' || filter === 'unread') {
                 html += `<div style="font-size:0.75rem; font-weight:800; color:#94a3b8; margin: 25px 10px 8px; text-transform:uppercase; letter-spacing:0.5px;">Direct Message</div>`;
-                let filteredMembers = allMembers.filter(m => m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(searchQuery.toLowerCase()));
+                
+                // FIX: Gunakan (m.nama_user || '') untuk mencegah error jika nama user null
+                let filteredMembers = allMembers.filter(m => m.user_id !== currentUser.id && (m.nama_user || '').toLowerCase().includes(safeQuery));
                 
                 filteredMembers.forEach((m) => {
                     const isActive = (activeChatType === 'user' && activeChatId === m.user_id) ? 'active' : '';
-                    const initial = m.nama_user.charAt(0).toUpperCase();
+                    const safeUserName = m.nama_user || "User Tanpa Nama"; // Fallback
+                    const initial = safeUserName.charAt(0).toUpperCase();
                     const isOnline = onlineUsers[m.user_id] ? true : false;
                     const dotClass = isOnline ? 'online' : '';
                     
@@ -769,12 +781,12 @@
                     const adminIcon = isAdmin ? '<i class="fa-solid fa-crown admin-badge" title="Admin"></i>' : '';
 
                     html += `
-                        <div class="chat-item ${isActive} ${unreadClass}" onclick="openChat('user', '${m.user_id}', '${escapeHtml(m.nama_user)}', '${escapeHtml(m.role || 'Member')}')">
+                        <div class="chat-item ${isActive} ${unreadClass}" onclick="openChat('user', '${m.user_id}', '${escapeHtml(safeUserName)}', '${escapeHtml(m.role || 'Member')}')">
                             <div class="chat-item-avatar" style="background: linear-gradient(135deg, var(--primary), #1e40af);">${initial}
                                 <div class="status-dot ${dotClass}"></div>
                             </div>
                             <div class="chat-item-info">
-                                <div class="chat-item-name">${escapeHtml(m.nama_user)} ${unreadHtml}</div>
+                                <div class="chat-item-name">${escapeHtml(safeUserName)} ${unreadHtml}</div>
                                 <div class="chat-item-preview">${adminIcon} ${escapeHtml(m.role || 'Member')}</div>
                             </div>
                         </div>`;
