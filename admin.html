@@ -1420,14 +1420,40 @@
 
         function setupRealtimePresence() {
             const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
+            
             presenceChannel.on('presence', { event: 'sync' }, () => {
                 const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
-                for (const key in state) { state[key].forEach(p => { if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; } }); }
-                document.getElementById('online-count-badge').innerText = count; renderMembersTable();
+                for (const key in state) { 
+                    state[key].forEach(p => { 
+                        if(p.user_id !== currentAdminSession.id) { 
+                            onlineUsers[p.user_id] = true; 
+                            count++; 
+                            
+                            // FIX: Tangkap nama dari sinyal online jika namanya masih "User Tanpa Nama"
+                            const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
+                            if(idx !== -1 && p.nama_user && (!allMembersData[idx].nama_user || allMembersData[idx].nama_user === 'User Tanpa Nama')) {
+                                allMembersData[idx].nama_user = p.nama_user;
+                            }
+                        } 
+                    }); 
+                }
+                document.getElementById('online-count-badge').innerText = count; 
+                renderMembersTable();
+                
             }).on('presence', { event: 'join' }, ({ newPresences }) => { 
-                newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); }); 
+                newPresences.forEach(p => { 
+                    if(p.user_id !== currentAdminSession.id) {
+                        showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); 
+                        
+                        // FIX: Update nama secara instan saat user join
+                        const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
+                        if(idx !== -1 && p.nama_user) allMembersData[idx].nama_user = p.nama_user;
+                        renderMembersTable();
+                    }
+                }); 
+                
             }).on('presence', { event: 'leave' }, ({ leftPresences }) => { 
-                // Fix Bug Tracking: Segera update timestamp last_seen secara lokal dan simpan ke DB UI jika memungkinkan
+                // Segera update timestamp last_seen secara lokal
                 const nowIso = new Date().toISOString();
                 leftPresences.forEach(p => {
                     const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
@@ -1436,9 +1462,11 @@
                     }
                 });
                 renderMembersTable();
-                setTimeout(loadMembers, 2500); // Reload untuk memastikan sync dari database 
+                setTimeout(loadMembers, 2500); // Reload data utuh dari DB setelah 2.5 detik
             })
-            .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
+            .subscribe(async (status) => { 
+                if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); 
+            });
 
             supabaseClient.channel('db-changes')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, payload => {
@@ -1447,6 +1475,8 @@
                     if(idx !== -1) {
                         allMembersData[idx] = updatedMember;
                         renderMembersTable();
+                    } else {
+                        loadMembers(); // Jika user baru tidak ada di daftar lokal, muat ulang semua
                     }
                 }).subscribe();
         }
