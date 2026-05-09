@@ -615,7 +615,7 @@
             const tableBody = document.getElementById('usersTableBody');
             tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
 
-            // Tarik seluruh data dari tabel user_roles
+            // 1. Tarik seluruh data dari tabel user_roles
             const { data: userRoles, error } = await supabaseClient.from('user_roles').select('*').order('created_at', { ascending: false });
             
             if (error) {
@@ -623,12 +623,17 @@
                 return;
             }
 
-            // Supabase API Rest Frontend tidak bisa mengakses email/password dari auth.users secara bebas.
-            // Strategi: Kita mencoba menarik nama dari workspace_members.
-            const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
+            // 2. FIX: Panggil fungsi RPC rahasia yang baru kita buat untuk mendapatkan nama asli
+            const { data: authUsers, error: authError } = await supabaseClient.rpc('get_all_auth_users');
+            
             let nameMap = {};
-            if(membersInfo) {
-                membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
+            if(authUsers) {
+                // Mapping nama asli. Jika tidak ada full_name, gunakan emailnya.
+                authUsers.forEach(u => nameMap[u.user_id] = u.full_name || u.email || "Pengguna Tanpa Nama");
+            } else {
+                // Fallback darurat jika fungsi RPC belum dijalankan di SQL Editor
+                const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
+                if(membersInfo) membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
             }
 
             globalUsersData = userRoles || [];
@@ -642,7 +647,7 @@
             globalUsersData.forEach(ur => {
                 const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                 
-                // Cek Map Nama, jika tidak ada fallback
+                // Cek Map Nama menggunakan sistem baru yang 100% akurat
                 let identifiedName = nameMap[ur.user_id] || "Identitas Disembunyikan / Baru Dibuat";
                 if(ur.role === 'superadmin') identifiedName = "Chief of System (Super Admin)";
 

@@ -571,20 +571,38 @@
                 }
             }
 
+            // Ambil data asli dari Auth Supabase untuk berjaga-jaga
+            let fallbackName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || session.user.email.split('@')[0];
+
             let { data: myProfile } = await supabaseClient.from('workspace_members').select('*').eq('user_id', session.user.id).eq('workspace_id', currentWorkspaceId).single();
             
-            if(!myProfile) {
-                let fallbackName = session.user.user_metadata?.full_name || session.user.email.split('@')[0];
+            // LOGIKA AUTO-HEALING (PERBAIKAN OTOMATIS)
+            if (!myProfile) {
                 try {
                     const { data: newProfile, error: insertErr } = await supabaseClient.from('workspace_members').insert([{
-                        workspace_id: currentWorkspaceId, user_id: session.user.id, nama_user: fallbackName, role: 'Admin'
+                        workspace_id: currentWorkspaceId, user_id: session.user.id, nama_user: fallbackName, role: 'Member'
                     }]).select().single();
                     if (newProfile) myProfile = newProfile; else throw insertErr;
                 } catch(e) {
-                    myProfile = { user_id: session.user.id, nama_user: fallbackName, role: 'Admin' };
+                    myProfile = { user_id: session.user.id, nama_user: fallbackName, role: 'Member' };
                     allMembers.push(myProfile);
                 }
+            } else if (!myProfile.nama_user || myProfile.nama_user === 'User Tanpa Nama' || myProfile.nama_user.trim() === '') {
+                // Jika user masuk via kode undangan dan namanya kosong, update ke database sekarang juga!
+                await supabaseClient.from('workspace_members')
+                    .update({ nama_user: fallbackName })
+                    .eq('user_id', session.user.id)
+                    .eq('workspace_id', currentWorkspaceId);
+                
+                myProfile.nama_user = fallbackName; // Update data lokal
             }
+
+            // Mencegah error charAt(0)
+            let finalName = myProfile.nama_user || fallbackName || "User";
+            currentUser = { id: session.user.id, name: finalName, role: myProfile.role || 'Member' };
+            
+            // Set inisial avatar dengan aman
+            document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
 
             currentUser = { id: session.user.id, name: myProfile.nama_user, role: myProfile.role };
             document.getElementById('my-mini-avatar').innerText = currentUser.name.charAt(0).toUpperCase();
