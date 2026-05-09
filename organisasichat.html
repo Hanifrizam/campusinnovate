@@ -613,24 +613,27 @@
                     handleTypingEvent(payload.payload);
                 })
                 .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_messages' }, payload => {
-                    const msg = payload.new;
-                    if(msg.sender_id === currentUser.id) return; 
-                    
-                    let isRelevant = (activeChatType === 'group' && msg.group_id === activeChatId) || 
-                                     (activeChatType === 'user' && msg.sender_id === activeChatId && msg.receiver_id === currentUser.id);
-                    
-                    if(isRelevant) { 
-                        appendMessageToUI(msg); 
-                        scrollToBottom(); 
-                        document.getElementById('typing-indicator').style.display = 'none';
-                    } 
-                    else if(msg.receiver_id === currentUser.id || msg.group_id) { 
-                        let key = msg.group_id ? msg.group_id : msg.sender_id;
-                        unreadCounts[key] = (unreadCounts[key] || 0) + 1;
-                        showToast("Pesan Baru Masuk", "Ada pesan masuk di obrolan lain.", "info"); 
-                        renderChatList(); 
-                    }
-                })
+    const msg = payload.new;
+    if(msg.sender_id === currentUser.id) return; 
+    
+    let isRelevant = (activeChatType === 'group' && msg.group_id === activeChatId) || 
+                     (activeChatType === 'user' && msg.sender_id === activeChatId && msg.receiver_id === currentUser.id);
+    
+    // FIX REALTIME OVERLAPPING: Cek apakah pesan grup ini milik grup yang user ikuti
+    const isMyGroup = msg.group_id && chatGroups.some(g => g.id === msg.group_id);
+
+    if(isRelevant) { 
+        appendMessageToUI(msg); 
+        scrollToBottom(); 
+        document.getElementById('typing-indicator').style.display = 'none';
+    } 
+    else if(msg.receiver_id === currentUser.id || isMyGroup) { 
+        let key = msg.group_id ? msg.group_id : msg.sender_id;
+        unreadCounts[key] = (unreadCounts[key] || 0) + 1;
+        showToast("Pesan Baru Masuk", "Ada pesan masuk di obrolan lain.", "info"); 
+        renderChatList(); 
+    }
+})
                 .subscribe(async (status) => {
                     if (status === 'SUBSCRIBED') {
                         await realtimeChannel.track({ user_id: currentUser.id, name: currentUser.name });
@@ -690,11 +693,18 @@
         }
 
         async function loadChatGroups() {
-            try {
-                const { data } = await supabaseClient.from('chat_groups').select('*').eq('workspace_id', currentWorkspaceId);
-                if (data) chatGroups = data;
-            } catch (err) {}
+    try {
+        // HANYA ambil grup dimana pengguna terdaftar sebagai member
+        const { data } = await supabaseClient.from('chat_group_members')
+            .select('group_id, chat_groups(*)')
+            .eq('user_id', currentUser.id);
+        
+        if (data) {
+            // Filter null dan pastikan sesuai workspace
+            chatGroups = data.map(d => d.chat_groups).filter(g => g !== null && g.workspace_id === currentWorkspaceId);
         }
+    } catch (err) { console.error(err); }
+}
 
         // --- UI RENDER CHAT LIST ---
         function renderChatList(filter = 'all', searchQuery = '') {
@@ -986,69 +996,70 @@
         };
 
         async function showMentionDropdown() {
-            mentionList.innerHTML = '<div style="text-align:center; padding:15px;"><i class="fa-solid fa-spinner fa-spin fa-lg color-primary"></i><br><small style="color:#94a3b8; margin-top:5px; display:block;">Menyinkronkan Database...</small></div>';
-            mentionDropdown.classList.add('active');
+    mentionList.innerHTML = '<div style="text-align:center; padding:15px;"><i class="fa-solid fa-spinner fa-spin fa-lg color-primary"></i><br><small style="color:#94a3b8; margin-top:5px; display:block;">Menyinkronkan Database...</small></div>';
+    mentionDropdown.classList.add('active');
 
-            try {
-                let combinedData = [...dummyDashboardData];
+    try {
+        let combinedData = [];
 
-                try {
-                    const { data: assets } = await supabaseClient.from('workspace_assets')
-                        .select('id, title, type, status_sub').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
-                    if(assets) assets.forEach(a => combinedData.push({ id: a.id, type: a.type || 'doc', title: a.title, sub: a.status_sub || 'Aset Dashboard' }));
-                } catch(e) {}
+        // 1. Ambil dari tabel Programs
+        try {
+            const { data: progs } = await supabaseClient.from('programs')
+                .select('id, nama_program, status').eq('workspace_id', currentWorkspaceId).ilike('nama_program', `%${mentionQuery}%`).limit(5);
+            if(progs) progs.forEach(p => combinedData.push({ id: p.id, type: 'prog', title: p.nama_program, sub: `Program: ${p.status}` }));
+        } catch(e) {}
 
-                try {
-                    const { data: tasks } = await supabaseClient.from('tasks')
-                        .select('id, title, deadline').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
-                    if(tasks) tasks.forEach(t => combinedData.push({ id: t.id, type: 'task', title: t.title, sub: `Deadline: ${t.deadline || '-'}` }));
-                } catch(e) {}
+        // 2. Ambil dari tabel Custom Schedules (Agenda)
+        try {
+            const { data: agendas } = await supabaseClient.from('custom_schedules')
+                .select('id, judul_kegiatan, tanggal_mulai').eq('workspace_id', currentWorkspaceId).ilike('judul_kegiatan', `%${mentionQuery}%`).limit(5);
+            if(agendas) agendas.forEach(ag => combinedData.push({ id: ag.id, type: 'agenda', title: ag.judul_kegiatan, sub: `Jadwal: ${ag.tanggal_mulai}` }));
+        } catch(e) {}
 
-                try {
-                    const { data: agendas } = await supabaseClient.from('workspace_agenda')
-                        .select('id, title, date').eq('workspace_id', currentWorkspaceId).ilike('title', `%${mentionQuery}%`).limit(5);
-                    if(agendas) agendas.forEach(ag => combinedData.push({ id: ag.id, type: 'agenda', title: ag.title, sub: `Jadwal: ${ag.date}` }));
-                } catch(e) {}
+        // 3. Ambil dari tabel Digital Office (Dokumen/Surat)
+        try {
+            const { data: docs } = await supabaseClient.from('digital_office')
+                .select('id, judul_surat, status').eq('workspace_id', currentWorkspaceId).ilike('judul_surat', `%${mentionQuery}%`).limit(5);
+            if(docs) docs.forEach(d => combinedData.push({ id: d.id, type: 'doc', title: d.judul_surat, sub: `Surat: ${d.status}` }));
+        } catch(e) {}
 
-                allMembers.forEach(m => {
-                    if(m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(mentionQuery)) {
-                        combinedData.push({ id: m.user_id, type: 'user', title: m.nama_user, sub: m.role || 'Member' });
-                    }
-                });
+        // 4. Ambil dari daftar pengguna
+        allMembers.forEach(m => {
+            if(m.user_id !== currentUser.id && m.nama_user.toLowerCase().includes(mentionQuery)) {
+                combinedData.push({ id: m.user_id, type: 'user', title: m.nama_user, sub: m.role || 'Member' });
+            }
+        });
 
-                // FIX 4: Pastikan filter aman, abaikan item yang undefined/null
-                if(mentionQuery.length > 0) {
-                     combinedData = combinedData.filter(item => item && item.title && item.title.toLowerCase().includes(mentionQuery));
-                }
-
-                mentionList.innerHTML = '';
-                if(combinedData.length === 0) {
-                    mentionList.innerHTML = '<div style="padding: 15px; font-size:0.85rem; text-align:center; color:#94a3b8;"><i class="fa-solid fa-folder-open fa-2x"></i><br>Tidak ada data di sistem yang cocok.</div>';
-                } else {
-                    combinedData.forEach((item, index) => {
-                        let iconHtml = '';
-                        if(item.type === 'prog') iconHtml = '<div class="mention-item-icon type-prog"><i class="fa-solid fa-list-check"></i></div>';
-                        else if(item.type === 'fin') iconHtml = '<div class="mention-item-icon type-fin"><i class="fa-solid fa-wallet"></i></div>';
-                        else if(item.type === 'doc') iconHtml = '<div class="mention-item-icon type-doc"><i class="fa-solid fa-file-signature"></i></div>';
-                        else if(item.type === 'task') iconHtml = '<div class="mention-item-icon type-task"><i class="fa-solid fa-clipboard-check"></i></div>';
-                        else if(item.type === 'agenda') iconHtml = '<div class="mention-item-icon type-agenda"><i class="fa-solid fa-calendar-day"></i></div>';
-                        else iconHtml = `<div class="mention-item-icon type-user">${item.title.charAt(0)}</div>`;
-
-                        const div = document.createElement('div');
-                        div.className = `mention-item ${index === 0 ? 'selected' : ''}`;
-                        div.innerHTML = `
-                            ${iconHtml}
-                            <div class="mention-item-text">
-                                <span class="mention-item-title">${escapeHtml(item.title)}</span>
-                                <span class="mention-item-sub">${escapeHtml(item.sub)}</span>
-                            </div>
-                        `;
-                        div.onclick = () => insertMention(item);
-                        mentionList.appendChild(div);
-                    });
-                }
-            } catch (e) { console.error("Mention System DB Fetch Error:", e); }
+        if(mentionQuery.length > 0) {
+             combinedData = combinedData.filter(item => item && item.title && item.title.toLowerCase().includes(mentionQuery));
         }
+
+        mentionList.innerHTML = '';
+        if(combinedData.length === 0) {
+            mentionList.innerHTML = '<div style="padding: 15px; font-size:0.85rem; text-align:center; color:#94a3b8;"><i class="fa-solid fa-folder-open fa-2x"></i><br>Tidak ada data di sistem yang cocok.</div>';
+        } else {
+            combinedData.forEach((item, index) => {
+                let iconHtml = '';
+                if(item.type === 'prog') iconHtml = '<div class="mention-item-icon type-prog"><i class="fa-solid fa-list-check"></i></div>';
+                else if(item.type === 'doc') iconHtml = '<div class="mention-item-icon type-doc"><i class="fa-solid fa-file-signature"></i></div>';
+                else if(item.type === 'agenda') iconHtml = '<div class="mention-item-icon type-agenda"><i class="fa-solid fa-calendar-day"></i></div>';
+                else iconHtml = `<div class="mention-item-icon type-user">${item.title.charAt(0)}</div>`;
+
+                const div = document.createElement('div');
+                div.className = `mention-item ${index === 0 ? 'selected' : ''}`;
+                div.innerHTML = `
+                    ${iconHtml}
+                    <div class="mention-item-text">
+                        <span class="mention-item-title">${escapeHtml(item.title)}</span>
+                        <span class="mention-item-sub">${escapeHtml(item.sub)}</span>
+                    </div>
+                `;
+                div.onclick = () => insertMention(item);
+                mentionList.appendChild(div);
+            });
+        }
+    } catch (e) { console.error("Mention System DB Fetch Error:", e); }
+}
 
         function handleMentionNavigation(e) {
             if(!isMentioning || !mentionDropdown.classList.contains('active')) return;

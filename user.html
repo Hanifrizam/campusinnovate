@@ -2595,17 +2595,20 @@
         }
 
         async function loadWorkspaceUsers() {
-            const { data } = await supabaseClient.from('attendances').select('user_id, nama_user').eq('workspace_id', globalWorkspaceId);
-            if(data) {
-                const uniqueUsers = []; const map = new Map();
-                for (const item of data) {
-                    if(!map.has(item.user_id)) { map.set(item.user_id, true); uniqueUsers.push({ id: item.user_id, name: item.nama_user }); }
-                }
-                globalWorkspaceUsers = uniqueUsers;
-                const selectPenerima = document.getElementById('do-penerima');
-                if(selectPenerima) { selectPenerima.innerHTML = '<option value="">-- Pilih Penerima --</option>' + uniqueUsers.map(u => `<option value="${u.id}">${u.name}</option>`).join(''); }
-            }
+    // FIX: Tarik data dari workspace_members secara langsung, bukan dari log absensi
+    const { data } = await supabaseClient.from('workspace_members')
+        .select('user_id, nama_user, role')
+        .eq('workspace_id', globalWorkspaceId);
+        
+    if(data) {
+        globalWorkspaceUsers = data.map(u => ({ id: u.user_id, name: u.nama_user, role: u.role || 'Member' }));
+        const selectPenerima = document.getElementById('do-penerima');
+        if(selectPenerima) { 
+            selectPenerima.innerHTML = '<option value="">-- Pilih Penerima --</option>' + 
+            globalWorkspaceUsers.map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join(''); 
         }
+    }
+}
 
         async function loadDigitalOffice() {
             const { data, error } = await supabaseClient.from('digital_office').select('*').eq('workspace_id', globalWorkspaceId).order('created_at', { ascending: false });
