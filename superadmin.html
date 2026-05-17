@@ -68,7 +68,7 @@
         .panel h2 { color: var(--primary); font-size: 1.4rem; font-weight: 800; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;}
         
         /* TABLES */
-        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; min-width: 800px; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 15px; min-width: 1000px; }
         th, td { padding: 18px 15px; text-align: left; font-size: 0.95rem; }
         th { background: #f8fafc; color: var(--primary); font-weight: 800; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;}
         th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
@@ -76,11 +76,17 @@
         td { border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 500;}
         tr:hover td { background-color: #f8fafc; }
         
-        /* HIDDEN DATA TOGGLE UI */
+        /* HIDDEN DATA & FILTER UI */
         .hidden-data { font-family: monospace; letter-spacing: 2px; color: #94a3b8; font-weight: bold; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; min-width: 120px; text-align: center;}
         .hidden-data.revealed { letter-spacing: normal; color: var(--primary); font-weight: 700; background: #e0f2fe; border: 1px solid #bae6fd;}
         .btn-toggle-eye { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; margin-left: 8px; transition: 0.2s;}
         .btn-toggle-eye:hover { color: var(--blue); transform: scale(1.1);}
+        
+        .filter-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;}
+        .filter-item { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px;}
+        .filter-item label { font-size: 0.8rem; font-weight: 700; color: var(--primary);}
+        .filter-item select, .filter-item input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: 'Plus Jakarta Sans'; font-size: 0.9rem;}
+        .filter-item select:focus, .filter-item input:focus { border-color: var(--blue);}
 
         /* BUTTONS & BADGES */
         .btn-action { padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
@@ -230,12 +236,41 @@
 
         <div id="view-users" class="view-section">
             <div class="panel">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
                     <div>
                         <h2><i class="fa-solid fa-users-gear"></i> Kontrol Hak Akses Pengguna (Users)</h2>
                         <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Manajemen seluruh identitas, pengubahan strata *role*, dan penghapusan akses anggota dari sistem.</p>
                     </div>
                     <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalDirectCreateUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
+                </div>
+
+                <div class="filter-container">
+                    <div class="filter-item">
+                        <label>Filter Workspace</label>
+                        <select id="filter-workspace" onchange="applyUserFilter()">
+                            <option value="all">Semua Organisasi</option>
+                            </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>Filter Role / Peran</label>
+                        <select id="filter-role" onchange="applyUserFilter()">
+                            <option value="all">Semua Role</option>
+                            <option value="admin">Admin Organisasi</option>
+                            <option value="user">Anggota Biasa (User)</option>
+                            <option value="superadmin">Super Administrator</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <label>Status Aktivitas</label>
+                        <select id="filter-status" onchange="applyUserFilter()">
+                            <option value="all">Semua Status</option>
+                            <option value="active">Aktif (< 7 Hari)</option>
+                            <option value="inactive">Tidak Aktif (> 7 Hari)</option>
+                        </select>
+                    </div>
+                    <div class="filter-item" style="flex: 0.5; justify-content: flex-end;">
+                        <button class="btn-action" style="background: #e2e8f0; color: var(--primary); width: 100%;" onclick="resetUserFilter()"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+                    </div>
                 </div>
 
                 <div style="background: #fef9c3; border-left: 4px solid #f59e0b; padding: 15px 20px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; color: #92400e; font-weight: 500;">
@@ -248,15 +283,16 @@
                             <tr>
                                 <th>ID User (UUID)</th>
                                 <th>Nama Pengguna</th>
+                                <th>Organisasi / Workspace</th>
                                 <th>Email Akun</th>
                                 <th>Kata Sandi</th>
-                                <th>Waktu Terdaftar</th>
+                                <th>Terkahir Dilihat</th>
                                 <th>Strata Role Akses</th>
-                                <th style="text-align: center;">Tindakan Eksekusi</th>
+                                <th style="text-align: center;">Tindakan</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
+                            <tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -489,6 +525,18 @@
             }
         }
 
+        // FUNGSI JAVASCRIPT UNTUK COPY TEXT
+        function copyToClipboard(elementId) {
+            const span = document.getElementById(elementId);
+            const textToCopy = span.getAttribute('data-real');
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showToast("Tersalin", `Data telah disalin ke clipboard.`, "info");
+            }).catch(err => {
+                showToast("Gagal menyalin", err, "error");
+            });
+        }
+
         // 1. KONEKSI SUPABASE
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
@@ -497,7 +545,6 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Client Sekunder (Bypass Session)
-        // Diperlukan agar signUp dari frontend tidak menimpa cookie session Super Admin dan me-logout-nya
         const supabaseSecondary = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: {
                 persistSession: false,
@@ -507,16 +554,17 @@
         });
 
         // Variabel global
-        let globalData = [];
+        let globalData = []; // workspaces data
         let analyticsChartInstance = null;
         let activeModalWsId = null;
         
         let pendingRequests = [];
         let activeRequestId = null;
         
-        let globalUsersData = [];
+        // Variabel Penyimpanan Data Pengguna untuk Filter
+        let masterUsersData = []; 
 
-        // TOAST ALERT SYSTEM (Pengganti window.alert)
+        // TOAST ALERT SYSTEM
         function showToast(title, message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -544,7 +592,6 @@
                 return;
             }
 
-            // Validasi apakah user ini benar-benar Super Admin
             const { data: roleData } = await supabaseClient
                 .from('user_roles')
                 .select('role')
@@ -557,22 +604,18 @@
                 return;
             }
 
-            // Jika aman, muat data dashboard utama dan sambut admin
             loadDashboardData();
             showToast("Otentikasi Berhasil", "Selamat datang kembali, Tuan Super Admin.", "info");
         });
 
         // FUNGSI NAVIGASI TAB
         function switchMenu(menuId) {
-            // Update Sidebar UI
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
-            // Update View Content
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + menuId).classList.add('active');
 
-            // Trigger spesifik data fetch saat tab dibuka
             if (menuId === 'requests') loadRegistrationRequests();
             if (menuId === 'users') loadAllUsersData();
             if (menuId === 'features') renderFeaturesTable();
@@ -627,13 +670,13 @@
         // ==========================================
         async function loadAllUsersData() {
             const tableBody = document.getElementById('usersTableBody');
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
 
             // 1. Tarik seluruh data dari tabel user_roles
             const { data: userRoles, error } = await supabaseClient.from('user_roles').select('*').order('created_at', { ascending: false });
             
             if (error) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
                 return;
             }
 
@@ -649,7 +692,6 @@
                     emailMap[u.user_id] = u.email || "Email tidak ditemukan";
                 });
             } else {
-                // Fallback darurat jika fungsi RPC belum dijalankan di SQL Editor
                 const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
                 if(membersInfo) membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
             }
@@ -663,59 +705,178 @@
                 });
             }
 
-            globalUsersData = userRoles || [];
-            tableBody.innerHTML = '';
+            // 4. Tarik data Workspace Members untuk melihat keterkaitan dengan Workspace dan Last Seen
+            const { data: wsMembers } = await supabaseClient.from('workspace_members').select('user_id, workspace_id, last_seen, workspaces(nama_organisasi)');
+            let wsMemberMap = {}; // Maps user_id -> array of workspace info
+            let lastSeenMap = {}; // Maps user_id -> last_seen timestamp
+            
+            // Siapkan dropdown opsi filter workspace
+            let uniqueWorkspacesForFilter = new Set();
+            let filterWorkspaceHtml = '<option value="all">Semua Organisasi</option>';
 
-            if (globalUsersData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
+            if (wsMembers) {
+                wsMembers.forEach(m => {
+                    if(!wsMemberMap[m.user_id]) wsMemberMap[m.user_id] = [];
+                    let orgName = m.workspaces ? m.workspaces.nama_organisasi : "Unknown Workspace";
+                    wsMemberMap[m.user_id].push({ id: m.workspace_id, name: orgName });
+                    
+                    // Simpan last seen terbaru
+                    if(m.last_seen) {
+                        if(!lastSeenMap[m.user_id] || new Date(m.last_seen) > new Date(lastSeenMap[m.user_id])) {
+                            lastSeenMap[m.user_id] = m.last_seen;
+                        }
+                    }
+
+                    // Tambahkan ke opsi filter jika belum ada
+                    if(!uniqueWorkspacesForFilter.has(m.workspace_id) && orgName !== "Unknown Workspace") {
+                        uniqueWorkspacesForFilter.add(m.workspace_id);
+                        filterWorkspaceHtml += `<option value="${m.workspace_id}">${orgName}</option>`;
+                    }
+                });
+            }
+            
+            // Populate Dropdown Filter Workspace
+            document.getElementById('filter-workspace').innerHTML = filterWorkspaceHtml;
+
+            // 5. Susun Master Data
+            masterUsersData = [];
+            
+            if (userRoles.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
                 return;
             }
 
-            globalUsersData.forEach(ur => {
-                const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
-                
-                // Mappings
-                let identifiedName = nameMap[ur.user_id] || "Identitas Disembunyikan / Baru Dibuat";
+            const now = new Date();
+
+            userRoles.forEach(ur => {
+                let identifiedName = nameMap[ur.user_id] || "Identitas Disembunyikan";
                 if(ur.role === 'superadmin') identifiedName = "Chief of System (Super Admin)";
                 
                 let userEmail = emailMap[ur.user_id] || "Tidak diketahui";
-                let userPwd = pwdMap[userEmail.toLowerCase()] || "Terenkripsi/Bawaan";
+                let userPwd = pwdMap[userEmail.toLowerCase()] || "Terenkripsi";
 
+                let userWorkspaces = wsMemberMap[ur.user_id] || [];
+                let joinedOrgNames = userWorkspaces.length > 0 ? userWorkspaces.map(w => w.name).join(', ') : "Belum terdaftar di Workspace mana pun";
+                // Array of IDs for filtering
+                let joinedOrgIds = userWorkspaces.map(w => w.id);
+
+                let lastSeenStr = "Belum pernah aktif";
+                let isInactive = true;
+                if(lastSeenMap[ur.user_id]) {
+                    const lsDate = new Date(lastSeenMap[ur.user_id]);
+                    lastSeenStr = lsDate.toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                    
+                    // Hitung selisih hari
+                    const diffTime = Math.abs(now - lsDate);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                    if(diffDays <= 7) isInactive = false;
+                }
+
+                masterUsersData.push({
+                    user_id: ur.user_id,
+                    name: identifiedName,
+                    email: userEmail,
+                    password: userPwd,
+                    role: ur.role,
+                    created_at: ur.created_at,
+                    workspaces: joinedOrgNames,
+                    workspaceIds: joinedOrgIds,
+                    last_seen: lastSeenStr,
+                    is_inactive: isInactive
+                });
+            });
+
+            // Render Awal tanpa Filter
+            renderFilteredUsersTable();
+        }
+
+        // FUNGSI RENDER TABEL BERDASARKAN FILTER
+        function renderFilteredUsersTable() {
+            const tableBody = document.getElementById('usersTableBody');
+            tableBody.innerHTML = '';
+
+            // Ambil Value dari Filter
+            const wsFilter = document.getElementById('filter-workspace').value;
+            const roleFilter = document.getElementById('filter-role').value;
+            const statusFilter = document.getElementById('filter-status').value;
+
+            // Proses Filter
+            let filteredData = masterUsersData.filter(user => {
+                let passWs = true;
+                let passRole = true;
+                let passStatus = true;
+
+                if(wsFilter !== 'all') {
+                    // Check if the user's workspaceIds array includes the filtered workspace
+                    passWs = user.workspaceIds.includes(wsFilter);
+                }
+
+                if(roleFilter !== 'all') {
+                    passRole = user.role === roleFilter;
+                }
+
+                if(statusFilter !== 'all') {
+                    if(statusFilter === 'active') passStatus = !user.is_inactive;
+                    else if(statusFilter === 'inactive') passStatus = user.is_inactive;
+                }
+
+                return passWs && passRole && passStatus;
+            });
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-folder-open" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>Tidak ada pengguna yang cocok dengan filter tersebut.</td></tr>';
+                return;
+            }
+
+            filteredData.forEach(ur => {
+                const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+                
                 // Class untuk warna dropdown sesuai role saat ini
                 let selectClass = 'select-role-table';
                 if(ur.role === 'admin') selectClass += ' role-admin';
                 else if(ur.role === 'user') selectClass += ' role-user';
                 else if(ur.role === 'superadmin') selectClass += ' role-superadmin';
                 
-                // Opsi Dropdown
                 let roleOptions = `
                     <option value="superadmin" ${ur.role === 'superadmin' ? 'selected' : ''}>Super Administrator</option>
                     <option value="admin" ${ur.role === 'admin' ? 'selected' : ''}>Admin Organisasi</option>
                     <option value="user" ${ur.role === 'user' ? 'selected' : ''}>Anggota Biasa (User)</option>
                 `;
 
-                // Nonaktifkan select jika dia superadmin (Mencegah Super Admin menghapus haknya sendiri dari frontend)
                 let disabledAttr = ur.role === 'superadmin' ? 'disabled title="Akses absolut tidak dapat diubah"' : '';
+                
+                // Styling Last Seen
+                let lastSeenColor = ur.is_inactive ? 'var(--red)' : 'var(--green)';
+                let lastSeenIcon = ur.is_inactive ? 'fa-solid fa-moon' : 'fa-solid fa-bolt';
 
                 tableBody.innerHTML += `
                     <tr id="row-user-${ur.user_id}">
                         <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
                             <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,12)}...
                         </td>
-                        <td><strong style="color: var(--primary);">${identifiedName}</strong></td>
+                        <td><strong style="color: var(--primary);">${ur.name}</strong></td>
                         
-                        <td style="white-space: nowrap;">
-                            <span id="email-${ur.user_id}" class="hidden-data" data-real="${userEmail}" data-placeholder="•••••••••••••••">•••••••••••••••</span>
-                            <button class="btn-toggle-eye" onclick="toggleHiddenData('email-${ur.user_id}', this)"><i class="fa-solid fa-eye"></i></button>
-                        </td>
-                        <td style="white-space: nowrap;">
-                            <span id="pwd-${ur.user_id}" class="hidden-data" data-real="${userPwd}" data-placeholder="••••••••">••••••••</span>
-                            <button class="btn-toggle-eye" onclick="toggleHiddenData('pwd-${ur.user_id}', this)"><i class="fa-solid fa-eye"></i></button>
+                        <td style="font-size: 0.85rem; max-width: 200px;">
+                            ${ur.workspaces !== 'Belum terdaftar di Workspace mana pun' 
+                              ? `<span class="badge badge-warning" style="white-space: normal; line-height: 1.4;"><i class="fa-solid fa-building"></i> ${ur.workspaces}</span>` 
+                              : `<span style="color: #94a3b8; font-style: italic;">${ur.workspaces}</span>`}
                         </td>
 
-                        <td style="color: var(--primary); font-size: 0.85rem;">
-                            <i class="fa-regular fa-clock"></i> ${joinDate}
+                        <td style="white-space: nowrap;">
+                            <span id="email-${ur.user_id}" class="hidden-data" data-real="${ur.email}" data-placeholder="•••••••••••••••">•••••••••••••••</span>
+                            <button class="btn-toggle-eye" onclick="toggleHiddenData('email-${ur.user_id}', this)" title="Lihat"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-toggle-eye" onclick="copyToClipboard('email-${ur.user_id}')" title="Salin" style="margin-left: 2px;"><i class="fa-regular fa-copy"></i></button>
                         </td>
+                        <td style="white-space: nowrap;">
+                            <span id="pwd-${ur.user_id}" class="hidden-data" data-real="${ur.password}" data-placeholder="••••••••">••••••••</span>
+                            <button class="btn-toggle-eye" onclick="toggleHiddenData('pwd-${ur.user_id}', this)" title="Lihat"><i class="fa-solid fa-eye"></i></button>
+                            <button class="btn-toggle-eye" onclick="copyToClipboard('pwd-${ur.user_id}')" title="Salin" style="margin-left: 2px;"><i class="fa-regular fa-copy"></i></button>
+                        </td>
+
+                        <td style="font-size: 0.85rem; color: ${lastSeenColor}; font-weight: 600;">
+                            <i class="${lastSeenIcon}"></i> ${ur.last_seen}
+                        </td>
+
                         <td>
                             <select class="${selectClass}" ${disabledAttr} onchange="changeUserRole('${ur.user_id}', this.value, this)">
                                 ${roleOptions}
@@ -731,11 +892,21 @@
             });
         }
 
+        // FUNGSI TRIGGER FILTER
+        function applyUserFilter() {
+            renderFilteredUsersTable();
+        }
+
+        function resetUserFilter() {
+            document.getElementById('filter-workspace').value = 'all';
+            document.getElementById('filter-role').value = 'all';
+            document.getElementById('filter-status').value = 'all';
+            renderFilteredUsersTable();
+        }
+
         async function changeUserRole(userId, newRole, selectElement) {
-            // Konfirmasi perubahan
             if(!confirm(`Anda yakin ingin mengubah strata otoritas pengguna ini menjadi [${newRole.toUpperCase()}]?`)) {
-                // Revert seleksi jika dibatalkan
-                loadAllUsersData(); 
+                renderFilteredUsersTable(); 
                 return;
             }
 
@@ -747,11 +918,13 @@
                 showToast("Update Gagal", error.message, "error");
             } else {
                 showToast("Otoritas Diperbarui", `Role pengguna berhasil dinaikkan/diturunkan menjadi ${newRole}.`, "success");
+                // Update Local Data
+                const userIdx = masterUsersData.findIndex(u => u.user_id === userId);
+                if(userIdx !== -1) masterUsersData[userIdx].role = newRole;
             }
             
-            // Render ulang untuk memperbaiki style warnanya
-            loadAllUsersData();
-            loadDashboardData(); // Refresh statistik angka admin/user di dashboard
+            renderFilteredUsersTable();
+            loadDashboardData(); 
         }
 
         async function revokeUserAccess(userId) {
@@ -759,25 +932,19 @@
                 showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
                 
                 try {
-                    // 1. Hapus dari keanggotaan workspace
                     await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
-                    
-                    // 2. Hapus workspace yang DIBUAT oleh orang ini (Cascade delete semua isinya)
                     await supabaseClient.from('workspaces').delete().eq('admin_id', userId);
 
-                    // 3. Cabut hak akses utamanya (Mencegah dia login selamanya)
                     const { data: deletedRole, error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId).select();
 
                     if(roleErr) throw roleErr;
 
-                    // Validasi apakah baris benar-benar terhapus (Menghindari Silent Fail RLS)
                     if (!deletedRole || deletedRole.length === 0) {
                         throw new Error("Gagal: Database menolak penghapusan. Pastikan RLS Policy 'DELETE' untuk tabel user_roles, workspaces, & workspace_members sudah aktif (true).");
                     }
 
                     showToast("Akses Dicabut", "Pengguna tersebut telah dihapus secara paksa dari sistem.", "success");
                     
-                    // HAPUS LANGSUNG DARI TAMPILAN (DOM) AGAR INSTAN
                     const rowToRemove = document.getElementById(`row-user-${userId}`);
                     if (rowToRemove) {
                         rowToRemove.style.transition = "0.5s";
@@ -786,10 +953,7 @@
                         setTimeout(() => rowToRemove.remove(), 500);
                     }
                     
-                    // Hapus dari state lokal
-                    globalUsersData = globalUsersData.filter(u => u.user_id !== userId);
-                    
-                    // Refresh statistik dashboard
+                    masterUsersData = masterUsersData.filter(u => u.user_id !== userId);
                     loadDashboardData();
 
                 } catch (err) {
@@ -811,13 +975,10 @@
             btn.disabled = true;
 
             try {
-                // Gunakan secondary client agar sesi Super Admin tidak tergantikan oleh akun yang baru dibuat!
                 const { data: newAuthData, error: authError } = await supabaseSecondary.auth.signUp({
                     email: email,
                     password: password,
-                    options: {
-                        data: { full_name: name }
-                    }
+                    options: { data: { full_name: name } }
                 });
 
                 if(authError) throw authError;
@@ -826,7 +987,6 @@
                     throw new Error("Gagal menerima ID User dari server. Cek apakah limit tercapai.");
                 }
 
-                // Masukkan ke tabel user_roles sebagai referensi akses sistem
                 const { error: insertError } = await supabaseClient.from('user_roles').insert([{ 
                     user_id: newAuthData.user.id, 
                     role: role 
@@ -834,12 +994,11 @@
 
                 if (insertError) throw insertError;
 
-                // Tambahan: Logika agar masuk track list registration dummy untuk visual history
                 await supabaseClient.from('registration_requests').insert([{
                     nama: name, 
                     dob: "Bypass Buat Langsung", 
                     email: email, 
-                    password: password, // Menyimpan histori plain text sebagaimana alur request index
+                    password: password,
                     organisasi: "Instalasi Mandiri Super Admin", 
                     status: 'approved'
                 }]);
@@ -866,7 +1025,6 @@
             const tableBody = document.getElementById('requestTableBody');
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i> Menyinkronkan antrean masuk...</td></tr>';
 
-            // Menampilkan request yang murni pending dari pendaftaran index.html
             const { data, error } = await supabaseClient.from('registration_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
             
             if (error) {
@@ -909,7 +1067,6 @@
             const req = pendingRequests.find(r => r.id === id);
             if(!req) return;
 
-            // Catatan: Asumsi index.html mengirim dan menyimpan data `password` pada tabel registration_requests
             let passToDisplay = req.password ? req.password : "Tidak Dilampirkan / Tersembunyi";
 
             document.getElementById('approve-info-box').innerHTML = `
@@ -927,7 +1084,7 @@
                 </div>
             `;
             
-            document.getElementById('approve-role-select').value = 'admin'; // Default suggestion
+            document.getElementById('approve-role-select').value = 'admin'; 
             openModal('modalApproveRequest');
         }
 
@@ -947,7 +1104,6 @@
                     throw new Error("Password pemohon tidak tercatat dalam database. Buat akun melalui menu Manajemen Pengguna saja.");
                 }
 
-                // MENGGUNAKAN SECONDARY CLIENT AGAR SESSION SUPER ADMIN TIDAK LOGOUT
                 const { data: newUser, error: authError } = await supabaseSecondary.auth.signUp({
                     email: req.email,
                     password: req.password,
@@ -956,16 +1112,13 @@
 
                 if (authError) throw authError;
 
-                // Masukkan Hak Akses ke user_roles
                 await supabaseClient.from('user_roles').insert([{ user_id: newUser.user.id, role: selectedRole }]);
-
-                // Update status in registration_requests table
                 await supabaseClient.from('registration_requests').update({ status: 'approved' }).eq('id', activeRequestId);
 
                 showToast("By-Pass Akun Berhasil!", `Sistem sukses mencetak identitas untuk ${req.email} dan mengubah status registrasi.`, "success");
 
                 closeModal('modalApproveRequest');
-                loadRegistrationRequests(); // refresh table view
+                loadRegistrationRequests(); 
 
             } catch (err) {
                 console.error(err);
@@ -1031,7 +1184,6 @@
             document.getElementById('modal-org-title').innerText = ws.nama_organisasi;
             document.getElementById('modal-ws-id').innerText = ws.id;
 
-            // In our UX Logic: Checked (true) means Unlocked/Tersedia. Unchecked (false) means Locked/Tidak Tersedia.
             let currentLocks = ws.locked_features || { finance: true, kpi: true, do: true, web: true };
 
             document.getElementById('lock-finance').checked = currentLocks.finance !== false;
@@ -1065,7 +1217,6 @@
                 showToast("Patch Berhasil Diterapkan", "Konfigurasi ketersediaan fitur (locks) berhasil diamankan di database.", "success");
                 closeModal('featureModal');
                 
-                // Update local memory
                 const idx = globalData.findIndex(w => w.id === activeModalWsId);
                 if(idx !== -1) globalData[idx].locked_features = newLocks;
                 renderFeaturesTable();
@@ -1082,7 +1233,6 @@
             const tableBody = document.getElementById('serverTableBody');
             tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-wifi fa-fade" style="font-size:2rem; margin-bottom:15px; display:block; color:var(--blue);"></i> Mengukur packet loss dan node network...</td></tr>';
             
-            // Visual simulated ping wait time to give the "feel" of a network trace
             await new Promise(r => setTimeout(r, 1200));
 
             const { data: landingPages } = await supabaseClient.from('landing_pages').select('workspace_id, is_published');
@@ -1098,12 +1248,11 @@
                     const webBadge = isWebUp ? '<span class="badge badge-active"><i class="fa-solid fa-satellite-dish"></i> 200 OK (Live)</span>' : '<span class="badge badge-down"><i class="fa-solid fa-triangle-exclamation"></i> 404/Draft (Down)</span>';
                     const dashBadge = '<span class="badge badge-active"><i class="fa-solid fa-server"></i> Responding</span>';
 
-                    // Ping Logic Simulation (More realistic range: 12ms - 75ms)
                     const pingMs = Math.floor(Math.random() * 63) + 12;
                     totalPing += pingMs;
                     
                     let pingColor = 'var(--blue)';
-                    if(pingMs > 50) pingColor = 'var(--secondary)'; // Yellow if a bit high
+                    if(pingMs > 50) pingColor = 'var(--secondary)';
                     
                     const timeNow = new Date().toLocaleTimeString('id-ID', { hour12: false });
 
@@ -1170,7 +1319,7 @@
                     datasets: [{
                         label: 'Total Kuantitas Activity (Absensi/Login)',
                         data: dataCounts,
-                        backgroundColor: '#0A3055', // Ganti ke primary color agar lebih elegan
+                        backgroundColor: '#0A3055',
                         hoverBackgroundColor: '#F6B23B',
                         borderRadius: 8,
                         borderWidth: 0
@@ -1215,7 +1364,6 @@
         // 8. FUNGSI HAPUS WORKSPACE (DESTRUKTIF)
         // ==========================================
         async function deleteWorkspace(workspaceId, namaOrg) {
-            // Kita harus sangat berhati-hati, ini fungsi destruktif (ON DELETE CASCADE di DB)
             const confirmName = prompt(`PERINGATAN BAHAYA: Tindakan ini akan melenyapkan secara permanen seluruh data database (RAB, Program, Surat, Web Publik, dll) milik organisasi "${namaOrg}".\n\nUntuk melanjutkan, ketik persis nama organisasi di bawah ini:`);
             
             if (confirmName === namaOrg) {
