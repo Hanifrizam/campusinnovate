@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Campus Innovate</title>
-    <link rel="icon" type="image/png" href="coreva_logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -77,6 +76,12 @@
         td { border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 500;}
         tr:hover td { background-color: #f8fafc; }
         
+        /* HIDDEN DATA TOGGLE UI */
+        .hidden-data { font-family: monospace; letter-spacing: 2px; color: #94a3b8; font-weight: bold; background: #f1f5f9; padding: 4px 8px; border-radius: 6px; display: inline-block; min-width: 120px; text-align: center;}
+        .hidden-data.revealed { letter-spacing: normal; color: var(--primary); font-weight: 700; background: #e0f2fe; border: 1px solid #bae6fd;}
+        .btn-toggle-eye { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; margin-left: 8px; transition: 0.2s;}
+        .btn-toggle-eye:hover { color: var(--blue); transform: scale(1.1);}
+
         /* BUTTONS & BADGES */
         .btn-action { padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
         .btn-del { background: #fee2e2; color: var(--red); }
@@ -137,7 +142,6 @@
 </head>
 <body>
 
-    <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
     <div class="sidebar">
@@ -147,7 +151,6 @@
         <div class="nav-item active" onclick="switchMenu('dashboard')"><i class="fa-solid fa-chart-line"></i> Monitoring Pusat</div>
         <div class="nav-item" onclick="switchMenu('requests')"><i class="fa-solid fa-user-clock"></i> Permintaan Registrasi</div>
         
-        <!-- MENU BARU: MANAJEMEN PENGGUNA (USERS) -->
         <div class="nav-item" onclick="switchMenu('users')"><i class="fa-solid fa-users-gear"></i> Manajemen Pengguna</div>
         
         <div class="nav-item" onclick="switchMenu('features')"><i class="fa-solid fa-lock"></i> Kontrol Fitur (Locks)</div>
@@ -163,7 +166,6 @@
             <div class="admin-badge"><i class="fa-solid fa-shield-halved" style="color: var(--secondary); font-size: 1.2rem;"></i> Super Administrator</div>
         </div>
 
-        <!-- VIEW 1: DASHBOARD UTAMA -->
         <div id="view-dashboard" class="view-section active">
             <div class="stats-grid">
                 <div class="stat-card"><h3>Total Organisasi (Workspace)</h3><p id="totalWorkspace"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem;"></i></p></div>
@@ -196,7 +198,6 @@
             </div>
         </div>
 
-        <!-- VIEW 1.5: PERMINTAAN REGISTRASI BARU -->
         <div id="view-requests" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -227,7 +228,6 @@
             </div>
         </div>
 
-        <!-- VIEW BARU: MANAJEMEN PENGGUNA (ALL USERS) -->
         <div id="view-users" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -248,20 +248,21 @@
                             <tr>
                                 <th>ID User (UUID)</th>
                                 <th>Nama Pengguna</th>
+                                <th>Email Akun</th>
+                                <th>Kata Sandi</th>
                                 <th>Waktu Terdaftar</th>
-                                <th>Strata Role Akses Saat Ini</th>
+                                <th>Strata Role Akses</th>
                                 <th style="text-align: center;">Tindakan Eksekusi</th>
                             </tr>
                         </thead>
                         <tbody id="usersTableBody">
-                            <tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
+                            <tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Memuat daftar identitas...</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         </div>
 
-        <!-- VIEW 2: MANAJEMEN FITUR (LOCKS) -->
         <div id="view-features" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -291,7 +292,6 @@
             </div>
         </div>
 
-        <!-- VIEW 3: STATUS SERVER & WEB -->
         <div id="view-server" class="view-section">
             <div class="stats-grid">
                 <div class="stat-card" style="border-bottom-color: var(--green);">
@@ -330,7 +330,6 @@
             </div>
         </div>
 
-        <!-- VIEW 4: ANALITIK PENGGUNA GLOBAL -->
         <div id="view-analytics" class="view-section">
             <div class="panel">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px;">
@@ -347,7 +346,6 @@
 
     </div>
 
-    <!-- MODAL PERSETUJUAN AKUN (REQUESTS) -->
     <div class="modal-overlay" id="modalApproveRequest">
         <div class="modal-content">
             <div class="modal-header">
@@ -359,8 +357,7 @@
             </div>
             
             <div class="info-box" id="approve-info-box">
-                <!-- Detail Info akan masuk di sini via JS -->
-            </div>
+                </div>
 
             <form onsubmit="confirmApproveRequest(event)">
                 <div class="input-group">
@@ -383,7 +380,6 @@
         </div>
     </div>
 
-    <!-- MODAL PEMBUATAN PENGGUNA BARU LANGSUNG -->
     <div class="modal-overlay" id="modalDirectCreateUser">
         <div class="modal-content">
             <div class="modal-header">
@@ -426,7 +422,6 @@
         </div>
     </div>
 
-    <!-- MODAL PENGATURAN FITUR (LOCKS) -->
     <div class="modal-overlay" id="featureModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -475,6 +470,25 @@
     </div>
 
     <script>
+        // FUNGSI JAVASCRIPT UNTUK TOGGLE MATA (MUNCULKAN/SEMBUNYIKAN DATA)
+        function toggleHiddenData(elementId, btnElement) {
+            const span = document.getElementById(elementId);
+            const icon = btnElement.querySelector('i');
+            const realData = span.getAttribute('data-real');
+            
+            if(span.innerText.includes('••••')) {
+                span.innerText = realData;
+                span.classList.add('revealed');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                span.innerText = span.getAttribute('data-placeholder');
+                span.classList.remove('revealed');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
         // 1. KONEKSI SUPABASE
         const SUPABASE_URL = 'https://wnhftesxaicqffnyrdkn.supabase.co'; 
         const SUPABASE_KEY = 'sb_publishable_i2-_17x_KOh0HxNw4DaaNA_vqXMBO2R'; 
@@ -613,43 +627,59 @@
         // ==========================================
         async function loadAllUsersData() {
             const tableBody = document.getElementById('usersTableBody');
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size:2rem; margin-bottom:15px; display:block;"></i> Menyinkronkan identitas pengguna...</td></tr>';
 
             // 1. Tarik seluruh data dari tabel user_roles
             const { data: userRoles, error } = await supabaseClient.from('user_roles').select('*').order('created_at', { ascending: false });
             
             if (error) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--red); padding: 20px;">Gagal memuat data pengguna. Database tertolak.</td></tr>';
                 return;
             }
 
-            // 2. FIX: Panggil fungsi RPC rahasia yang baru kita buat untuk mendapatkan nama asli
-            const { data: authUsers, error: authError } = await supabaseClient.rpc('get_all_auth_users');
+            // 2. Panggil fungsi RPC untuk mendapatkan nama & email akun dari auth.users
+            const { data: authUsers } = await supabaseClient.rpc('get_all_auth_users');
             
             let nameMap = {};
+            let emailMap = {};
+            
             if(authUsers) {
-                // Mapping nama asli. Jika tidak ada full_name, gunakan emailnya.
-                authUsers.forEach(u => nameMap[u.user_id] = u.full_name || u.email || "Pengguna Tanpa Nama");
+                authUsers.forEach(u => {
+                    nameMap[u.user_id] = u.full_name || u.email || "Pengguna Tanpa Nama";
+                    emailMap[u.user_id] = u.email || "Email tidak ditemukan";
+                });
             } else {
                 // Fallback darurat jika fungsi RPC belum dijalankan di SQL Editor
                 const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
                 if(membersInfo) membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
             }
 
+            // 3. Tarik data dari tabel registration_requests untuk mencocokkan Password berdasarkan Email
+            const { data: regRequests } = await supabaseClient.from('registration_requests').select('email, password');
+            let pwdMap = {};
+            if(regRequests) {
+                regRequests.forEach(r => {
+                    if(r.email) pwdMap[r.email.toLowerCase()] = r.password || "Tidak Dicatat";
+                });
+            }
+
             globalUsersData = userRoles || [];
             tableBody.innerHTML = '';
 
             if (globalUsersData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 30px;">Belum ada entitas yang terdaftar.</td></tr>';
                 return;
             }
 
             globalUsersData.forEach(ur => {
                 const joinDate = new Date(ur.created_at).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' });
                 
-                // Cek Map Nama menggunakan sistem baru yang 100% akurat
+                // Mappings
                 let identifiedName = nameMap[ur.user_id] || "Identitas Disembunyikan / Baru Dibuat";
                 if(ur.role === 'superadmin') identifiedName = "Chief of System (Super Admin)";
+                
+                let userEmail = emailMap[ur.user_id] || "Tidak diketahui";
+                let userPwd = pwdMap[userEmail.toLowerCase()] || "Terenkripsi/Bawaan";
 
                 // Class untuk warna dropdown sesuai role saat ini
                 let selectClass = 'select-role-table';
@@ -670,9 +700,19 @@
                 tableBody.innerHTML += `
                     <tr id="row-user-${ur.user_id}">
                         <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
-                            <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,18)}...
+                            <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,12)}...
                         </td>
                         <td><strong style="color: var(--primary);">${identifiedName}</strong></td>
+                        
+                        <td style="white-space: nowrap;">
+                            <span id="email-${ur.user_id}" class="hidden-data" data-real="${userEmail}" data-placeholder="•••••••••••••••">•••••••••••••••</span>
+                            <button class="btn-toggle-eye" onclick="toggleHiddenData('email-${ur.user_id}', this)"><i class="fa-solid fa-eye"></i></button>
+                        </td>
+                        <td style="white-space: nowrap;">
+                            <span id="pwd-${ur.user_id}" class="hidden-data" data-real="${userPwd}" data-placeholder="••••••••">••••••••</span>
+                            <button class="btn-toggle-eye" onclick="toggleHiddenData('pwd-${ur.user_id}', this)"><i class="fa-solid fa-eye"></i></button>
+                        </td>
+
                         <td style="color: var(--primary); font-size: 0.85rem;">
                             <i class="fa-regular fa-clock"></i> ${joinDate}
                         </td>
