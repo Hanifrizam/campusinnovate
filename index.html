@@ -40,9 +40,7 @@
         body { background: var(--canvas); color: var(--text-main); overflow-x: hidden; font-size: 16px; line-height: 1.6; }
         ::selection { background: var(--brand-yellow); color: var(--brand-navy); }
 
-        /* =========================================
-           GLOBAL UTILS
-        ========================================= */
+        /* GLOBAL UTILS */
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
         .reveal.active { opacity: 1; transform: translateY(0); }
 
@@ -53,18 +51,16 @@
         @keyframes pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; transform: scale(1.15); } }
         @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes progressFill { from { width: 0; } to { width: var(--target-w); } }
         @keyframes countUp { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
         @keyframes cursorClick { 0%,100% { transform: scale(1); } 50% { transform: scale(.85); } }
         @keyframes ripple { 0% { transform: scale(0); opacity: .6; } 100% { transform: scale(3); opacity: 0; } }
-        @keyframes typewriter { from { width: 0; } to { width: 100%; } }
         @keyframes messagePop { from { opacity: 0; transform: translateY(12px) scale(.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
         @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
         @keyframes dropIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes highlight { 0%,100% { background: transparent; } 50% { background: rgba(246,178,59,.25); } }
 
         /* =========================================
-           TOAST
+           GLOBAL TOAST (untuk halaman umum, di luar showcase)
         ========================================= */
         #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999999; display: flex; flex-direction: column; gap: 12px; pointer-events: none; }
         .toast { background: var(--canvas); border-left: 4px solid var(--brand-navy); box-shadow: 0 10px 25px rgba(10,48,85,.1); padding: 16px 20px; border-radius: var(--radius-btn); display: flex; align-items: flex-start; gap: 12px; min-width: 320px; pointer-events: auto; transform: translateX(120%); animation: slideInToast .5s cubic-bezier(.175,.885,.32,1.275) forwards, fadeOutToast .4s forwards 3.6s; }
@@ -80,8 +76,44 @@
         @keyframes fadeOutToast { to { opacity: 0; transform: translateY(20px); visibility: hidden; } }
 
         /* =========================================
-           BUTTONS
+           SHOWCASE INTERNAL TOAST (di dalam demo box)
         ========================================= */
+        .showcase-toast-layer {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+            max-width: 280px;
+        }
+        .showcase-toast-item {
+            background: var(--canvas);
+            border-left: 4px solid var(--brand-navy);
+            box-shadow: 0 8px 20px rgba(10,48,85,.15);
+            padding: 10px 14px;
+            border-radius: var(--radius-btn);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            pointer-events: auto;
+            opacity: 0;
+            transform: translateX(20px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .showcase-toast-item.show { opacity: 1; transform: translateX(0); }
+        .showcase-toast-item.error { border-left-color: var(--semantic-error); }
+        .showcase-toast-item.success { border-left-color: var(--semantic-success); }
+        .showcase-toast-item i { font-size: 1rem; margin-top: 1px; }
+        .showcase-toast-item.success i { color: var(--semantic-success); }
+        .showcase-toast-item.error i { color: var(--semantic-error); }
+        .showcase-toast-item .stc { display: flex; flex-direction: column; gap: 1px; }
+        .showcase-toast-item .stt { font-weight: 700; font-size: .8rem; color: var(--text-main); }
+        .showcase-toast-item .stm { font-size: .72rem; color: var(--text-muted); }
+
+        /* BUTTONS */
         .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 24px; border-radius: var(--radius-btn); font-weight: 600; font-size: 14px; text-decoration: none; cursor: pointer; transition: all .3s ease; border: 1px solid transparent; }
         .btn:active { transform: scale(.97); }
         .btn-yellow { background: var(--brand-yellow); color: var(--brand-navy); }
@@ -91,9 +123,7 @@
         .btn-navy { background: var(--brand-navy); color: var(--text-on-dark); }
         .btn-navy:hover { background: var(--brand-navy-dark); box-shadow: 0 4px 15px rgba(10,48,85,.2); transform: translateY(-2px); }
 
-        /* =========================================
-           NAVBAR
-        ========================================= */
+        /* NAVBAR */
         .navbar { position: fixed; top: 0; left: 0; width: 100%; height: 72px; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; background: transparent; transition: all .4s ease; z-index: 10000; }
         .navbar.scrolled { background: rgba(255,255,255,.95); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,.05); border-bottom: 1px solid var(--hairline); }
         .navbar.scrolled .nav-links a { color: var(--text-main); }
@@ -106,9 +136,7 @@
         .mobile-menu-btn { display: none; font-size: 1.5rem; background: none; border: none; color: var(--text-on-dark); cursor: pointer; transition: .3s; }
         .navbar.scrolled .mobile-menu-btn { color: var(--brand-navy); }
 
-        /* =========================================
-           HERO
-        ========================================= */
+        /* HERO */
         .hero { position: relative; background: var(--brand-navy); color: var(--text-on-dark); padding: 180px 5% 260px; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; }
         .hero-bg-glow { position: absolute; top: -100px; right: -100px; width: 500px; height: 500px; background: radial-gradient(circle, rgba(246,178,59,.15) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
         .hero-bg-glow2 { position: absolute; bottom: -50px; left: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(59,130,246,.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
@@ -123,15 +151,12 @@
         .hero-badge { background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.8); display: flex; align-items: center; gap: 8px; }
         .hero-badge i { color: var(--brand-yellow); }
 
-        /* =========================================
-           FEATURE TABS SECTION
-        ========================================= */
+        /* FEATURES TABS SECTION */
         .features-section { background: var(--surface-light); padding: 0 5% 100px; }
         .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--brand-yellow); margin-bottom: 12px; }
         .section-title { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; color: var(--brand-navy); letter-spacing: -1px; line-height: 1.2; margin-bottom: 16px; }
         .section-sub { font-size: 1rem; color: var(--text-muted); max-width: 560px; line-height: 1.7; }
 
-        /* Feature Tab Switcher */
         .feature-tabs-wrapper { margin-top: -140px; position: relative; z-index: 20; }
         .feature-tab-nav { display: flex; gap: 8px; margin-bottom: 0; justify-content: center; flex-wrap: wrap; }
         .feature-tab-btn { padding: 12px 20px; border-radius: 12px 12px 0 0; background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2); border-bottom: none; color: rgba(255,255,255,.7); font-weight: 700; font-size: 13px; cursor: pointer; transition: all .3s; display: flex; align-items: center; gap: 8px; }
@@ -139,7 +164,7 @@
         .feature-tab-btn.active { background: var(--canvas); color: var(--brand-navy); border-color: var(--hairline); }
         .feature-tab-btn:not(.active):hover { background: rgba(255,255,255,.25); color: white; }
 
-        /* Showcase Container */
+        /* SHOWCASE CONTAINER */
         .showcase-container { background: var(--canvas); border-radius: 0 16px 16px 16px; border: 1px solid var(--hairline); box-shadow: 0 30px 60px rgba(10,48,85,.2); overflow: hidden; position: relative; min-height: 560px; }
         .showcase-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 24px; border-bottom: 1px solid var(--hairline); background: var(--surface-light); }
         .showcase-dots { display: flex; gap: 8px; }
@@ -147,12 +172,11 @@
         .live-badge { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--brand-navy); background: rgba(246,178,59,.2); padding: 4px 12px; border-radius: 20px; }
         .live-badge i { color: var(--brand-yellow); animation: pulse 1.5s infinite; }
 
-        /* Showcase panels */
         .showcase-panel { display: none; animation: fadeIn .4s ease; }
         .showcase-panel.active { display: flex; }
 
         /* =========================================
-           SHOWCASE 1 – DASHBOARD (Animated Cursor)
+           SHOWCASE 1 – DASHBOARD
         ========================================= */
         .dash-layout { display: grid; grid-template-columns: 240px 1fr; min-height: 520px; width: 100%; }
         .dash-sidebar { background: var(--surface-light); padding: 20px 14px; border-right: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 4px; }
@@ -164,7 +188,6 @@
 
         .dash-content { padding: 28px; background: var(--canvas); position: relative; overflow: hidden; }
 
-        /* Animated Cursor DIUBAH MENJADI ABSOLUTE DI DALAM SHOWCASE-CONTAINER */
         .cursor-layer { position: absolute; inset: 0; pointer-events: none; z-index: 9999; overflow: hidden; }
         .ani-cursor { position: absolute; width: 20px; height: 20px; pointer-events: none; z-index: 999; filter: drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
         .cursor-ripple { position: absolute; width: 30px; height: 30px; border-radius: 50%; background: rgba(246,178,59,.4); transform: scale(0); pointer-events: none; z-index: 998; }
@@ -205,16 +228,6 @@
         .badge-blue { background: rgba(59,130,246,.12); color: #1d4ed8; }
         .badge-red { background: rgba(239,68,68,.1); color: #b91c1c; }
 
-        /* Surat pane */
-        .surat-row { display: flex; gap: 14px; align-items: center; }
-        .surat-type-badge { background: rgba(10,48,85,.08); color: var(--brand-navy); padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 800; white-space: nowrap; }
-
-        /* Presensi pane */
-        .presensi-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
-        .pre-stat { background: var(--surface-light); border: 1px solid var(--hairline); border-radius: 10px; padding: 14px; text-align: center; }
-        .pre-stat-num { font-size: 22px; font-weight: 800; color: var(--brand-navy); }
-        .pre-stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
-
         /* Edit popup overlay */
         .edit-popup { position: absolute; background: white; border: 1px solid var(--hairline); border-radius: 12px; padding: 16px 20px; box-shadow: 0 20px 40px rgba(10,48,85,.15); width: 260px; opacity: 0; visibility: hidden; transform: translateY(-10px) scale(.96); transition: all .3s cubic-bezier(.175,.885,.32,1.275); z-index: 100; }
         .edit-popup.show { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
@@ -226,6 +239,12 @@
         .edit-popup-btn { flex: 1; padding: 8px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: .2s; }
         .edit-popup-btn.save { background: var(--brand-navy); color: white; }
         .edit-popup-btn.cancel { background: var(--surface-light); color: var(--text-muted); }
+
+        /* Presensi pane */
+        .presensi-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 16px; }
+        .pre-stat { background: var(--surface-light); border: 1px solid var(--hairline); border-radius: 10px; padding: 14px; text-align: center; }
+        .pre-stat-num { font-size: 22px; font-weight: 800; color: var(--brand-navy); }
+        .pre-stat-label { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 3px; }
 
         /* =========================================
            SHOWCASE 2 – CHAT
@@ -253,7 +272,6 @@
         .chat-item-preview { font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
         .unread-count { background: var(--semantic-error); color: white; border-radius: 10px; padding: 1px 6px; font-size: 10px; font-weight: 800; }
 
-        /* Chat main area */
         .chat-main-col { display: flex; flex-direction: column; }
         .chat-header-bar { padding: 14px 20px; border-bottom: 1px solid var(--hairline); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.95); }
         .chat-header-info { display: flex; align-items: center; gap: 12px; }
@@ -297,7 +315,6 @@
         .chat-send-btn { background: linear-gradient(135deg,var(--brand-navy),#1e40af); color: white; border: none; padding: 8px 18px; border-radius: 10px; font-weight: 700; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: .3s; box-shadow: 0 4px 10px rgba(10,48,85,.2); }
         .chat-send-btn:hover { transform: translateY(-2px); }
 
-        /* Mention dropdown preview */
         .mention-dropdown-preview { position: absolute; bottom: calc(100% + 10px); left: 0; right: 0; background: white; border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.1); opacity: 0; visibility: hidden; transform: translateY(8px); transition: all .3s; z-index: 50; }
         .mention-dropdown-preview.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .mention-dd-header { padding: 8px 14px; background: #f8fafc; border-bottom: 1px solid var(--hairline); font-size: 11px; font-weight: 700; color: var(--brand-navy); text-transform: uppercase; }
@@ -306,13 +323,6 @@
         .mention-dd-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; }
         .mention-dd-name { font-weight: 700; color: var(--text-main); }
         .mention-dd-sub { font-size: 11px; color: var(--text-muted); }
-
-        /* Notification toast in showcase */
-        .showcase-notif { position: absolute; top: 16px; right: 16px; background: white; border: 1px solid var(--hairline); border-radius: 10px; padding: 12px 14px; box-shadow: 0 8px 20px rgba(0,0,0,.1); display: flex; align-items: flex-start; gap: 10px; min-width: 240px; opacity: 0; visibility: hidden; transform: translateX(30px); transition: all .4s; z-index: 200; }
-        .showcase-notif.show { opacity: 1; visibility: visible; transform: translateX(0); }
-        .showcase-notif i { color: var(--semantic-success); font-size: 16px; margin-top: 1px; }
-        .showcase-notif-title { font-size: 12px; font-weight: 700; color: var(--text-main); }
-        .showcase-notif-sub { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
 
         /* =========================================
            SHOWCASE 3 – WEB BUILDER
@@ -329,7 +339,6 @@
         .builder-canvas-toolbar-title { font-size: 13px; font-weight: 700; color: var(--brand-navy); }
         .builder-canvas-viewport { flex: 1; padding: 12px; overflow: hidden; display: flex; flex-direction: column; gap: 8px; position: relative; }
 
-        /* Canvas blocks */
         .canvas-block { background: white; border-radius: 10px; border: 2px solid transparent; position: relative; overflow: hidden; transition: all .3s; cursor: pointer; }
         .canvas-block:hover { border-color: rgba(246,178,59,.4); }
         .canvas-block.selected { border-color: var(--brand-yellow); box-shadow: 0 0 0 3px rgba(246,178,59,.2); }
@@ -353,10 +362,8 @@
         .drop-zone-indicator { border: 2px dashed var(--brand-yellow); border-radius: 10px; padding: 16px; text-align: center; font-size: 12px; color: var(--brand-yellow); font-weight: 600; background: rgba(246,178,59,.05); opacity: 0; visibility: hidden; transition: all .3s; }
         .drop-zone-indicator.active { opacity: 1; visibility: visible; }
 
-        /* MENGGANTI MENJADI ABSOLUTE DI DALAM SHOWCASE-CONTAINER AGAR PRESISI */
         .builder-drag-ghost { position: absolute; pointer-events: none; z-index: 9999; background: white; border: 2px solid var(--brand-yellow); border-radius: 10px; padding: 10px 14px; font-size: 12px; font-weight: 700; color: var(--brand-navy); box-shadow: 0 10px 30px rgba(0,0,0,.2); opacity: 0; display: flex; align-items: center; gap: 8px; }
 
-        /* Properties panel */
         .builder-props-col { background: white; border-left: 4px solid var(--brand-yellow); padding: 16px; overflow: hidden; }
         .builder-props-title { font-size: 13px; font-weight: 800; color: var(--brand-navy); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
         .prop-row { margin-bottom: 12px; }
@@ -371,7 +378,6 @@
         .prop-save-btn:hover { background: var(--brand-navy-dark); }
         .prop-save-btn.saving { background: var(--semantic-success); }
 
-        /* Publish overlay */
         .publish-overlay { position: absolute; inset: 0; background: rgba(10,48,85,.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; opacity: 0; visibility: hidden; transition: all .4s; z-index: 50; border-radius: inherit; }
         .publish-overlay.show { opacity: 1; visibility: visible; }
         .publish-overlay-card { background: white; border-radius: 16px; padding: 30px 40px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,.3); }
@@ -379,6 +385,81 @@
         .publish-title { font-size: 20px; font-weight: 800; color: var(--brand-navy); margin-bottom: 6px; }
         .publish-url { background: var(--surface-light); border: 1px solid var(--hairline); border-radius: 8px; padding: 10px 14px; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-top: 12px; }
         .publish-url span { color: var(--brand-navy); }
+
+        /* =========================================
+           SHOWCASE 4 – DIGITAL OFFICE
+        ========================================= */
+        .do-layout { display: grid; grid-template-columns: 1fr 1fr; min-height: 520px; width: 100%; gap: 0; }
+        .do-left-col { padding: 24px; border-right: 1px solid var(--hairline); display: flex; flex-direction: column; gap: 16px; background: var(--canvas); }
+        .do-right-col { padding: 24px; display: flex; flex-direction: column; gap: 14px; background: var(--surface-light); }
+        .do-page-preview { background: white; border: 1px solid var(--hairline); border-radius: 10px; flex: 1; position: relative; overflow: hidden; }
+        .do-page-inner { padding: 20px; font-size: 11px; line-height: 1.7; color: var(--text-main); }
+        .do-page-inner .do-letterhead { text-align: center; border-bottom: 2px solid var(--brand-navy); padding-bottom: 12px; margin-bottom: 14px; }
+        .do-page-inner .do-letterhead h3 { font-size: 14px; font-weight: 800; color: var(--brand-navy); }
+        .do-page-inner .do-letterhead p { font-size: 9px; color: var(--text-muted); }
+        .do-page-inner .do-nomor { font-size: 11px; font-weight: 700; color: var(--brand-navy); margin-bottom: 10px; }
+        .do-page-inner .do-body { font-size: 10px; color: var(--text-muted); line-height: 1.8; }
+        .do-sig-overlay { position: absolute; border: 2px dashed var(--brand-yellow); background: rgba(246,178,59,.08); border-radius: 6px; width: 120px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #B45309; cursor: move; transition: .3s; }
+        .do-sig-overlay.placed { border-style: solid; background: rgba(246,178,59,.15); }
+        .do-sig-overlay.signed { border-color: var(--semantic-success); background: rgba(16,185,129,.1); color: #047857; }
+
+        .do-number-checker { background: #e0f7fa; border: 1px solid #00acc1; border-radius: 10px; padding: 14px; }
+        .do-number-checker h5 { font-size: 11px; font-weight: 800; color: var(--brand-navy); margin-bottom: 8px; }
+        .do-number-display { background: white; border: 1px dashed #00acc1; border-radius: 6px; padding: 8px 12px; font-family: monospace; font-size: 12px; font-weight: 700; color: var(--brand-navy); margin-top: 6px; }
+
+        .do-status-table { background: white; border: 1px solid var(--hairline); border-radius: 10px; overflow: hidden; }
+        .do-status-table .dost-header { background: var(--brand-navy); color: white; padding: 10px 14px; font-size: 12px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+        .do-status-row { padding: 11px 14px; border-bottom: 1px solid var(--hairline); display: flex; justify-content: space-between; align-items: center; font-size: 12px; transition: .2s; }
+        .do-status-row:last-child { border-bottom: none; }
+        .do-status-row.active-row { background: #eff6ff; }
+        .do-status-row .do-doc-name { font-weight: 600; color: var(--text-main); max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .do-status-row .do-doc-from { font-size: 11px; color: var(--text-muted); }
+        .do-sign-btn { background: var(--semantic-success); color: white; border: none; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; cursor: pointer; transition: .2s; }
+        .do-sign-btn:hover { background: #059669; }
+        .do-sign-btn.approved { background: #059669; }
+
+        /* =========================================
+           SHOWCASE 5 – KALENDER & WORKSPACE
+        ========================================= */
+        .cal-showcase-layout { display: grid; grid-template-columns: 1fr 320px; min-height: 520px; width: 100%; }
+        .cal-main-col { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+        .cal-side-col { background: var(--surface-light); border-left: 1px solid var(--hairline); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+
+        .cal-widget { background: white; border: 1px solid var(--hairline); border-radius: 12px; overflow: hidden; }
+        .cal-widget-header { background: var(--brand-navy); color: white; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+        .cal-widget-header h4 { font-size: 14px; font-weight: 800; }
+        .cal-widget-header span { font-size: 12px; color: rgba(255,255,255,.7); }
+        .cal-day-row { display: grid; grid-template-columns: repeat(7,1fr); background: #f8fafc; border-bottom: 1px solid var(--hairline); }
+        .cal-day-name { text-align: center; padding: 8px 0; font-weight: 700; font-size: 11px; color: var(--brand-navy); }
+        .cal-grid-showcase { display: grid; grid-template-columns: repeat(7,1fr); }
+        .cal-cell-s { border-right: 1px solid #f1f5f9; border-bottom: 1px solid #f1f5f9; padding: 4px; min-height: 68px; position: relative; transition: .2s; cursor: pointer; }
+        .cal-cell-s:nth-child(7n) { border-right: none; }
+        .cal-cell-s:hover { background: #eff6ff; }
+        .cal-cell-s.today-s { background: rgba(10,48,85,.04); }
+        .cal-cell-s.today-s .cal-date-s { background: var(--brand-yellow); color: var(--brand-navy); border-radius: 50%; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-weight: 800; }
+        .cal-date-s { font-size: 11px; font-weight: 700; color: var(--text-muted); margin-bottom: 3px; display: inline-block; }
+        .cal-event-s { font-size: 9px; font-weight: 700; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; border-left: 2px solid; }
+        .cal-event-s.ev-program { background: rgba(246,178,59,.2); color: #B45309; border-left-color: var(--brand-yellow); }
+        .cal-event-s.ev-rapat { background: rgba(59,130,246,.12); color: #1d4ed8; border-left-color: #3b82f6; }
+        .cal-event-s.ev-tugas { background: rgba(16,185,129,.12); color: #047857; border-left-color: var(--semantic-success); }
+        .cal-event-s.ev-lain { background: rgba(139,92,246,.12); color: #6d28d9; border-left-color: #8b5cf6; }
+        .cal-event-s.highlight-s { animation: highlight .8s ease; }
+
+        .cal-agenda-list { display: flex; flex-direction: column; gap: 8px; }
+        .cal-agenda-item { background: white; border: 1px solid var(--hairline); border-radius: 8px; padding: 10px 12px; border-left: 3px solid var(--brand-yellow); transition: .2s; }
+        .cal-agenda-item.ev-rapat-ag { border-left-color: #3b82f6; }
+        .cal-agenda-item.ev-tugas-ag { border-left-color: var(--semantic-success); }
+        .cal-agenda-item.ev-lain-ag { border-left-color: #8b5cf6; }
+        .cal-agenda-item.highlight-ag { animation: dropIn .4s ease; }
+        .cal-agenda-item h5 { font-size: 12px; font-weight: 700; color: var(--brand-navy); margin-bottom: 3px; }
+        .cal-agenda-item p { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+        .cal-add-form { background: white; border: 1px solid var(--hairline); border-radius: 10px; padding: 14px; }
+        .cal-add-form h5 { font-size: 12px; font-weight: 800; color: var(--brand-navy); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .cal-input-fake { background: var(--surface-light); border: 1px solid var(--hairline); border-radius: 6px; padding: 8px 10px; font-size: 12px; font-weight: 600; color: var(--brand-navy); margin-bottom: 8px; min-height: 32px; display: flex; align-items: center; gap: 4px; }
+        .cal-input-fake.typing-focus { border-color: var(--brand-navy); background: white; }
+        .cal-save-btn { width: 100%; padding: 9px; background: var(--brand-navy); color: white; border: none; border-radius: 7px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: .2s; }
+        .cal-save-btn.saving { background: var(--semantic-success); }
 
         /* =========================================
            STATS BAR
@@ -389,9 +470,7 @@
         .stat-num { font-size: 3rem; font-weight: 900; color: var(--brand-yellow); line-height: 1; letter-spacing: -2px; }
         .stat-label { font-size: 14px; color: rgba(255,255,255,.6); margin-top: 8px; font-weight: 500; }
 
-        /* =========================================
-           HOW IT WORKS
-        ========================================= */
+        /* HOW IT WORKS */
         .hiw-section { padding: 96px 5%; background: var(--canvas); }
         .hiw-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 32px; max-width: 1100px; margin: 48px auto 0; }
         .hiw-step { text-align: center; padding: 32px 24px; border-radius: 16px; border: 1px solid var(--hairline); transition: .3s; }
@@ -400,9 +479,7 @@
         .hiw-step h3 { font-size: 16px; font-weight: 700; color: var(--brand-navy); margin-bottom: 10px; }
         .hiw-step p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
 
-        /* =========================================
-           CTA BANNER
-        ========================================= */
+        /* CTA BANNER */
         .section-banner { padding: 96px 5%; display: flex; justify-content: center; background: var(--surface-light); }
         .trial-banner { background: var(--brand-yellow); padding: 56px; border-radius: var(--radius-panel); width: 100%; max-width: 1100px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 32px; box-shadow: 0 20px 40px rgba(246,178,59,.2); position: relative; overflow: hidden; }
         .trial-banner::before { content: ''; position: absolute; top: -50%; right: -10%; width: 300px; height: 300px; background: rgba(255,255,255,.2); border-radius: 50%; }
@@ -410,9 +487,7 @@
         .trial-text h2 { font-size: 36px; font-weight: 800; color: var(--brand-navy); line-height: 1.2; margin-bottom: 12px; letter-spacing: -1px; }
         .trial-text p { font-size: 16px; color: var(--brand-navy-dark); max-width: 500px; font-weight: 500; }
 
-        /* =========================================
-           FOOTER
-        ========================================= */
+        /* FOOTER */
         footer { border-top: 1px solid var(--hairline); padding: 80px 5% 32px; background: var(--canvas); }
         .footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 48px; max-width: 1100px; margin: 0 auto 64px; }
         .footer-brand h2 { color: var(--brand-navy); font-size: 22px; font-weight: 800; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
@@ -426,9 +501,7 @@
         .contact-info li i { color: var(--brand-yellow); margin-top: 3px; }
         .footer-bottom { text-align: center; border-top: 1px solid var(--hairline); padding-top: 24px; font-size: 13px; color: var(--text-muted); font-weight: 500; }
 
-        /* =========================================
-           AUTH MODALS (DIKEMBALIKAN KE KODE ASLI 100%)
-        ========================================= */
+        /* AUTH MODALS */
         .auth-overlay { position: fixed; inset: 0; background: rgba(10,48,85,.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 999999; opacity: 0; visibility: hidden; transition: .4s ease; padding: 20px; overflow-y: auto; }
         .auth-overlay.active { opacity: 1; visibility: visible; }
         .auth-container { width: 100%; max-width: 480px; background: var(--canvas); border-radius: var(--radius-panel); border: 1px solid var(--hairline); box-shadow: 0 24px 48px rgba(0,0,0,.2); padding: 48px; position: relative; margin: auto; transform: translateY(30px); transition: .4s cubic-bezier(.175,.885,.32,1.275); }
@@ -451,7 +524,6 @@
         .switch-text span { color: var(--brand-navy); font-weight: 700; cursor: pointer; border-bottom: 1px solid transparent; transition: .2s; }
         .switch-text span:hover { border-color: var(--brand-navy); }
 
-        /* Modal T&C */
         .modal-tc-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: .3s; z-index: 10000000; }
         .modal-tc-overlay.active { opacity: 1; visibility: visible; }
         .modal-tc-content { background: var(--canvas); width: 90%; max-width: 500px; border-radius: var(--radius-card); padding: 32px; transform: scale(.95); transition: .3s; }
@@ -459,12 +531,14 @@
         .modal-tc-content h3 { font-size: 20px; font-weight: 800; color: var(--brand-navy); margin-bottom: 16px; }
         .modal-tc-content p { font-size: 14px; color: var(--text-muted); margin-bottom: 12px; }
 
-        /* =========================================
-           RESPONSIVE
-        ========================================= */
+        /* RESPONSIVE */
         @media (max-width: 1024px) {
             .builder-layout { grid-template-columns: 180px 1fr; }
             .builder-props-col { display: none; }
+            .do-layout { grid-template-columns: 1fr; }
+            .do-right-col { border-top: 1px solid var(--hairline); }
+            .cal-showcase-layout { grid-template-columns: 1fr; }
+            .cal-side-col { border-top: 1px solid var(--hairline); border-left: none; }
         }
         @media (max-width: 768px) {
             .nav-links { position: fixed; top: 72px; left: 0; width: 100%; background: var(--canvas); flex-direction: column; align-items: flex-start; padding: 24px 5%; border-bottom: 1px solid var(--hairline); display: none; }
@@ -474,7 +548,7 @@
             .hero { padding: 140px 5% 180px; }
             .feature-tabs-wrapper { margin-top: -60px; }
             .feature-tab-btn span { display: none; }
-            .dash-layout, .chat-layout, .builder-layout { grid-template-columns: 1fr; }
+            .dash-layout, .chat-layout, .builder-layout, .do-layout, .cal-showcase-layout { grid-template-columns: 1fr; }
             .dash-sidebar, .chat-list-col, .builder-tools-col { display: none; }
             .kpi-row { grid-template-columns: 1fr; gap: 10px; }
             .presensi-stats { grid-template-columns: repeat(2,1fr); }
@@ -483,6 +557,7 @@
             .footer-grid { grid-template-columns: 1fr; gap: 32px; }
             .trial-banner { padding: 40px 24px; text-align: center; justify-content: center; }
             .auth-container { padding: 32px 24px; }
+            .cal-grid-showcase { display: none; }
         }
     </style>
 </head>
@@ -539,14 +614,20 @@
 <section class="features-section" id="showcase">
     <div class="feature-tabs-wrapper reveal">
         <div class="feature-tab-nav">
-            <button class="feature-tab-btn active" onclick="switchShowcase('dashboard',this)" id="tab-btn-dash">
+            <button class="feature-tab-btn active" onclick="switchShowcase('dashboard',this)">
                 <i class="fa-solid fa-chart-line"></i> <span>Dashboard & Manajemen</span>
             </button>
-            <button class="feature-tab-btn" onclick="switchShowcase('chat',this)" id="tab-btn-chat">
+            <button class="feature-tab-btn" onclick="switchShowcase('chat',this)">
                 <i class="fa-solid fa-comments"></i> <span>Workspace Chat</span>
             </button>
-            <button class="feature-tab-btn" onclick="switchShowcase('builder',this)" id="tab-btn-builder">
+            <button class="feature-tab-btn" onclick="switchShowcase('builder',this)">
                 <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Web Builder Studio</span>
+            </button>
+            <button class="feature-tab-btn" onclick="switchShowcase('digitaloffice',this)">
+                <i class="fa-solid fa-file-signature"></i> <span>Digital Office</span>
+            </button>
+            <button class="feature-tab-btn" onclick="switchShowcase('kalender',this)">
+                <i class="fa-regular fa-calendar-days"></i> <span>Kalender & Workspace</span>
             </button>
         </div>
 
@@ -561,6 +642,7 @@
                 <div style="font-size:12px;font-weight:600;color:var(--text-muted);">campus-innovate.id/dashboard</div>
             </div>
 
+            <!-- Cursor Layer & Toast Layer: SELALU ADA DI DALAM CONTAINER -->
             <div class="cursor-layer" id="cursor-layer">
                 <div class="ani-cursor" id="ani-cursor">
                     <svg width="20" height="24" viewBox="0 0 20 24" fill="none">
@@ -572,7 +654,10 @@
                     <i class="fa-solid fa-newspaper" style="color:#3b82f6;"></i> Grid Berita
                 </div>
             </div>
+            <!-- SHOWCASE INTERNAL TOAST - tidak keluar dari container -->
+            <div class="showcase-toast-layer" id="showcase-toast-layer"></div>
 
+            <!-- PANEL 1: DASHBOARD -->
             <div class="showcase-panel active" id="panel-dashboard">
                 <div class="dash-layout">
                     <div class="dash-sidebar">
@@ -588,6 +673,7 @@
                     </div>
                     <div class="dash-content" id="dash-content-area">
 
+                        <!-- Pane Dashboard -->
                         <div class="dash-tab-pane active" id="pane-dash">
                             <h3 style="font-size:18px;font-weight:800;color:var(--brand-navy);">Overview Organisasi</h3>
                             <div class="kpi-row">
@@ -613,6 +699,7 @@
                             </div>
                         </div>
 
+                        <!-- Pane Finance -->
                         <div class="dash-tab-pane" id="pane-fin">
                             <div class="fin-header-row">
                                 <h3 style="font-size:18px;font-weight:800;color:var(--brand-navy);">Rencana Anggaran (RAB)</h3>
@@ -636,7 +723,7 @@
                                 <table class="m-table">
                                     <thead><tr><th>Detail Pengeluaran</th><th>Kategori</th><th>Nominal</th><th>Status</th></tr></thead>
                                     <tbody>
-                                        <tr id="fin-row-1"><td><strong>Sewa Tenda & Sound System</strong></td><td>Logistik</td><td style="font-weight:700;color:var(--brand-navy);">Rp 2.500.000</td><td><span class="badge badge-yellow">Menunggu ACC</span></td></tr>
+                                        <tr id="fin-row-1"><td><strong>Sewa Tenda & Sound System</strong></td><td>Logistik</td><td style="font-weight:700;color:var(--brand-navy);">Rp 2.500.000</td><td><span class="badge badge-yellow" id="fin-row-1-badge">Menunggu ACC</span></td></tr>
                                         <tr><td><strong>Konsumsi Peserta H-1</strong></td><td>Konsumsi</td><td style="font-weight:700;color:var(--brand-navy);">Rp 1.200.000</td><td><span class="badge badge-green">Disetujui</span></td></tr>
                                         <tr><td><strong>Banner Publikasi 4×2m</strong></td><td>Publikasi</td><td style="font-weight:700;color:var(--brand-navy);">Rp 350.000</td><td><span class="badge badge-green">Selesai</span></td></tr>
                                     </tbody>
@@ -644,6 +731,7 @@
                             </div>
                         </div>
 
+                        <!-- Pane Surat -->
                         <div class="dash-tab-pane" id="pane-surat">
                             <div class="fin-header-row">
                                 <h3 style="font-size:18px;font-weight:800;color:var(--brand-navy);">Arsip Surat Digital</h3>
@@ -670,6 +758,7 @@
                             </div>
                         </div>
 
+                        <!-- Pane Presensi -->
                         <div class="dash-tab-pane" id="pane-hadir">
                             <div class="fin-header-row">
                                 <h3 style="font-size:18px;font-weight:800;color:var(--brand-navy);">Monitor Presensi Rapat</h3>
@@ -693,6 +782,7 @@
                             </div>
                         </div>
 
+                        <!-- Pane Proker -->
                         <div class="dash-tab-pane" id="pane-proker">
                             <div class="fin-header-row">
                                 <h3 style="font-size:18px;font-weight:800;color:var(--brand-navy);">Status Program Kerja</h3>
@@ -722,6 +812,7 @@
                 </div>
             </div>
 
+            <!-- PANEL 2: CHAT -->
             <div class="showcase-panel" id="panel-chat">
                 <div class="chat-layout">
                     <div class="chat-list-col">
@@ -783,8 +874,7 @@
                                 <div class="chat-header-btn"><i class="fa-solid fa-circle-info"></i></div>
                             </div>
                         </div>
-                        <div class="chat-messages" id="chat-messages-area">
-                            </div>
+                        <div class="chat-messages" id="chat-messages-area"></div>
                         <div class="typing-bar" id="typing-bar" style="display:none;">
                             <span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>
                             <span id="typing-name">Nisa sedang mengetik...</span>
@@ -822,12 +912,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="showcase-notif" id="chat-notif">
-                    <i class="fa-solid fa-bell"></i>
-                    <div><div class="showcase-notif-title" id="chat-notif-title">Pesan Baru Masuk!</div><div class="showcase-notif-sub" id="chat-notif-sub">Budi: Update agenda besok...</div></div>
-                </div>
             </div>
 
+            <!-- PANEL 3: WEB BUILDER -->
             <div class="showcase-panel" id="panel-builder">
                 <div class="builder-layout">
                     <div class="builder-tools-col">
@@ -941,8 +1028,178 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+
+            <!-- PANEL 4: DIGITAL OFFICE -->
+            <div class="showcase-panel" id="panel-digitaloffice">
+                <div class="do-layout">
+                    <div class="do-left-col">
+                        <div class="fin-header-row">
+                            <h3 style="font-size:16px;font-weight:800;color:var(--brand-navy);">
+                                <i class="fa-solid fa-file-signature" style="color:var(--brand-yellow);margin-right:6px;"></i>
+                                Preview & E-Sign Dokumen
+                            </h3>
+                            <span class="badge badge-green"><i class="fa-solid fa-lock-open"></i> OCR Aktif</span>
+                        </div>
+                        <div class="do-number-checker">
+                            <h5><i class="fa-solid fa-magnifying-glass"></i> Cek Nomor Surat Tersedia</h5>
+                            <div style="font-size:11px;color:#555;margin-bottom:4px;">Sistem mendeteksi nomor otomatis dari PDF Anda</div>
+                            <div class="do-number-display" id="do-number-display">Pilih konteks surat untuk melihat nomor...</div>
+                        </div>
+                        <div class="do-page-preview" id="do-page-preview">
+                            <div class="do-page-inner">
+                                <div class="do-letterhead">
+                                    <h3>BADAN EKSEKUTIF MAHASISWA</h3>
+                                    <p>Universitas Nusantara | Jl. Kampus No.1 | Telp. (021) 555-0100</p>
+                                </div>
+                                <div class="do-nomor" id="do-nomor-text">Nomor: <span style="color:var(--brand-navy);">025/SK-BEM/UNS/V/2025</span></div>
+                                <div class="do-body">
+                                    Perihal: <strong>Undangan Rapat Koordinasi BPH</strong><br><br>
+                                    Dengan hormat, kami mengundang Saudara/i untuk menghadiri rapat koordinasi yang akan dilaksanakan pada:<br><br>
+                                    Hari/Tanggal: <strong>Selasa, 20 Mei 2025</strong><br>
+                                    Waktu: <strong>19.00 WIB - Selesai</strong><br>
+                                    Tempat: <strong>Ruang BEM Lt. 3</strong><br><br>
+                                    Atas perhatian dan kehadiran Saudara/i, kami ucapkan terima kasih.
+                                </div>
+                            </div>
+                            <div class="do-sig-overlay" id="do-sig-overlay" style="bottom:24px;right:20px;">
+                                <span id="do-sig-text"><i class="fa-solid fa-pen-nib"></i> Area TTD</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="do-right-col">
+                        <h3 style="font-size:14px;font-weight:800;color:var(--brand-navy);"><i class="fa-solid fa-inbox" style="color:var(--brand-yellow);margin-right:6px;"></i> Inbox Pengajuan</h3>
+                        <div class="do-status-table">
+                            <div class="dost-header">
+                                <span>Menunggu Tanda Tangan</span>
+                                <span class="badge badge-yellow" id="do-inbox-count">2 Dokumen</span>
+                            </div>
+                            <div class="do-status-row active-row" id="do-row-1">
+                                <div>
+                                    <div class="do-doc-name">Proposal Seminar Nasional IT</div>
+                                    <div class="do-doc-from">Dari: Dept. Kominfo</div>
+                                </div>
+                                <button class="do-sign-btn" id="do-btn-1">Review & TTD</button>
+                            </div>
+                            <div class="do-status-row" id="do-row-2">
+                                <div>
+                                    <div class="do-doc-name">SK Panitia PORSENI 2025</div>
+                                    <div class="do-doc-from">Dari: Dept. Minat Bakat</div>
+                                </div>
+                                <button class="do-sign-btn" id="do-btn-2">Review & TTD</button>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size:14px;font-weight:800;color:var(--brand-navy);margin-top:4px;"><i class="fa-solid fa-clock-rotate-left" style="color:var(--brand-yellow);margin-right:6px;"></i> Riwayat Dokumen</h3>
+                        <div class="do-status-table">
+                            <div class="dost-header">
+                                <span>Historis Surat Organisasi</span>
+                                <span class="badge badge-blue">Database Surat</span>
+                            </div>
+                            <div class="do-status-row">
+                                <div>
+                                    <div class="do-doc-name">024/BEM/EXT/V – Peminjaman GS</div>
+                                    <div class="do-doc-from">Tanda tangan: Ketua Umum</div>
+                                </div>
+                                <span class="badge badge-green">✓ Signed</span>
+                            </div>
+                            <div class="do-status-row">
+                                <div>
+                                    <div class="do-doc-name">022/BEM/EXT/V – Proposal Sponsor</div>
+                                    <div class="do-doc-from">Tanda tangan: Ketua Umum</div>
+                                </div>
+                                <span class="badge badge-green">✓ Signed</span>
+                            </div>
+                            <div class="do-status-row" id="do-history-new" style="display:none;">
+                                <div>
+                                    <div class="do-doc-name" id="do-history-name">025/SK-BEM/UNS/V – Rapat BPH</div>
+                                    <div class="do-doc-from">Baru saja ditandatangani</div>
+                                </div>
+                                <span class="badge badge-green">✓ Signed</span>
+                            </div>
+                        </div>
+
+                        <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#047857;margin-top:4px;">
+                            <i class="fa-solid fa-circle-check" style="margin-right:6px;"></i>
+                            <strong>Database Surat Aktif.</strong> Setiap PDF diverifikasi nomor otomatis sebelum masuk arsip.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL 5: KALENDER & WORKSPACE -->
+            <div class="showcase-panel" id="panel-kalender">
+                <div class="cal-showcase-layout">
+                    <div class="cal-main-col">
+                        <div class="fin-header-row">
+                            <h3 style="font-size:16px;font-weight:800;color:var(--brand-navy);">
+                                <i class="fa-regular fa-calendar-days" style="color:var(--brand-yellow);margin-right:6px;"></i>
+                                Kalender Program Kerja
+                            </h3>
+                            <span class="badge badge-green"><i class="fa-solid fa-rotate fa-spin"></i> Auto-Sync</span>
+                        </div>
+                        <div class="cal-widget">
+                            <div class="cal-widget-header">
+                                <h4 id="cal-s-month">Mei 2025</h4>
+                                <span>BEM Universitas Nusantara</span>
+                            </div>
+                            <div class="cal-day-row">
+                                <div class="cal-day-name">Min</div><div class="cal-day-name">Sen</div><div class="cal-day-name">Sel</div><div class="cal-day-name">Rab</div><div class="cal-day-name">Kam</div><div class="cal-day-name">Jum</div><div class="cal-day-name">Sab</div>
+                            </div>
+                            <div class="cal-grid-showcase" id="cal-grid-s"></div>
+                        </div>
+                    </div>
+                    <div class="cal-side-col">
+                        <h3 style="font-size:14px;font-weight:800;color:var(--brand-navy);">
+                            <i class="fa-solid fa-list-check" style="color:var(--brand-yellow);margin-right:6px;"></i>
+                            Agenda Mendatang
+                        </h3>
+                        <div class="cal-agenda-list" id="cal-agenda-list">
+                            <div class="cal-agenda-item ev-rapat-ag">
+                                <h5><i class="fa-solid fa-users" style="font-size:10px;margin-right:4px;color:#3b82f6;"></i> Rapat Pleno BPH</h5>
+                                <p><i class="fa-regular fa-calendar"></i> Selasa, 20 Mei 2025 · 19:00 WIB</p>
+                            </div>
+                            <div class="cal-agenda-item">
+                                <h5><i class="fa-solid fa-star" style="font-size:10px;margin-right:4px;color:var(--brand-yellow);"></i> Seminar Nasional IT</h5>
+                                <p><i class="fa-regular fa-calendar"></i> Sabtu, 24 Mei 2025 · 08:00 WIB</p>
+                            </div>
+                            <div class="cal-agenda-item ev-tugas-ag">
+                                <h5><i class="fa-solid fa-list-check" style="font-size:10px;margin-right:4px;color:var(--semantic-success);"></i> Deadline Laporan Bulanan</h5>
+                                <p><i class="fa-regular fa-calendar"></i> Kamis, 29 Mei 2025</p>
+                            </div>
+                        </div>
+
+                        <div style="border-top:1px solid var(--hairline);padding-top:14px;margin-top:4px;">
+                            <h3 style="font-size:13px;font-weight:800;color:var(--brand-navy);margin-bottom:10px;">
+                                <i class="fa-solid fa-plus" style="color:var(--brand-yellow);margin-right:6px;"></i>
+                                Tambah Jadwal Baru
+                            </h3>
+                            <div class="cal-add-form">
+                                <div class="cal-input-fake" id="cal-input-judul">
+                                    <span id="cal-typed-judul" style="color:var(--brand-navy);font-weight:600;"></span>
+                                    <span id="cal-cursor-judul" style="display:none;width:2px;height:13px;background:var(--brand-navy);animation:blink .7s infinite;display:inline-block;vertical-align:middle;"></span>
+                                    <span id="cal-placeholder-judul" style="color:#94a3b8;">Judul kegiatan...</span>
+                                </div>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;">
+                                    <div class="cal-input-fake" style="font-size:11px;" id="cal-input-tgl">
+                                        <i class="fa-regular fa-calendar" style="font-size:10px;margin-right:4px;color:var(--text-muted);"></i>
+                                        <span id="cal-typed-tgl" style="color:var(--brand-navy);font-weight:600;"></span>
+                                        <span id="cal-placeholder-tgl" style="color:#94a3b8;">Tanggal</span>
+                                    </div>
+                                    <div class="cal-input-fake" style="font-size:11px;" id="cal-input-tipe">
+                                        <i class="fa-solid fa-tag" style="font-size:10px;margin-right:4px;color:var(--text-muted);"></i>
+                                        <span id="cal-typed-tipe" style="color:var(--brand-navy);font-weight:600;"></span>
+                                        <span id="cal-placeholder-tipe" style="color:#94a3b8;">Tipe</span>
+                                    </div>
+                                </div>
+                                <button class="cal-save-btn" id="cal-save-btn"><i class="fa-solid fa-cloud-arrow-up"></i> <span id="cal-save-text">Simpan ke Kalender</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- end showcase-container -->
+    </div><!-- end feature-tabs-wrapper -->
 
     <div style="max-width:1100px;margin:64px auto 0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;" class="reveal">
         <div style="padding:28px;border:1px solid var(--hairline);border-radius:16px;transition:.3s;" onmouseenter="this.style.borderColor='var(--brand-yellow)';this.style.boxShadow='0 12px 30px rgba(246,178,59,.1)'" onmouseleave="this.style.borderColor='var(--hairline)';this.style.boxShadow='none'">
@@ -1105,6 +1362,7 @@
 // =============================================
 let captchaAnswer = 0;
 
+// Global page toast (outside showcase)
 window.showToast = function(title, message, type = 'success') {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
@@ -1115,22 +1373,35 @@ window.showToast = function(title, message, type = 'success') {
     setTimeout(() => toast.remove(), 4000);
 };
 
+// Showcase internal toast (stays inside demo container)
+function showShowcaseToast(title, message, type = 'success') {
+    const layer = document.getElementById('showcase-toast-layer');
+    if (!layer) return;
+    const item = document.createElement('div');
+    item.className = `showcase-toast-item ${type}`;
+    const icon = type === 'error' ? 'fa-circle-exclamation' : 'fa-check-circle';
+    item.innerHTML = `<i class="fa-solid ${icon}"></i><div class="stc"><span class="stt">${title}</span><span class="stm">${message}</span></div>`;
+    layer.appendChild(item);
+    requestAnimationFrame(() => item.classList.add('show'));
+    setTimeout(() => {
+        item.classList.remove('show');
+        setTimeout(() => item.remove(), 400);
+    }, 3000);
+}
+
 // Navbar scroll
 const nav = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 20);
 });
 
-// Mobile nav
-const navLinks = document.getElementById('nav-links');
-const menuIcon = document.getElementById('mobile-menu-icon');
 function toggleMobileNav() {
     if (window.innerWidth > 768) return;
+    const navLinks = document.getElementById('nav-links');
     navLinks.classList.toggle('active');
-    menuIcon.className = navLinks.classList.contains('active') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+    document.getElementById('mobile-menu-icon').className = navLinks.classList.contains('active') ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
 }
 
-// Scroll reveal
 function initScrollReveal() {
     const observer = new IntersectionObserver(entries => {
         entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('active'); });
@@ -1138,7 +1409,6 @@ function initScrollReveal() {
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
-// Auth helpers
 function generateCaptcha() {
     const a = Math.floor(Math.random() * 9) + 1, b = Math.floor(Math.random() * 9) + 1;
     captchaAnswer = a + b;
@@ -1168,26 +1438,20 @@ async function handleLogin(e) {
     const email = document.getElementById('login-email').value;
     const password = document.getElementById('login-password').value;
     const btn = document.getElementById('btn-login'); 
-
     btn.disabled = true; btn.innerText = "Mengecek otoritas..."; 
-
     const { data: authData, error: authError } = await supabaseClient.auth.signInWithPassword({ email, password });
-
     if (authError) {
         window.showToast("Login Gagal", authError.message, "error");
         btn.disabled = false; btn.innerText = "Masuk ke Sistem";
         return;
     }
-
     const { data: roleData, error: roleError } = await supabaseClient.from('user_roles').select('role').eq('user_id', authData.user.id).single();
-
     if (roleError || !roleData) {
         window.showToast("Akses Ditolak", "Akun Anda belum disetujui atau role belum diatur oleh Sistem.", "error");
         await supabaseClient.auth.signOut();
         btn.disabled = false; btn.innerText = "Masuk ke Sistem";
         return;
     }
-
     window.showToast("Berhasil Masuk", "Kredensial valid. Mengalihkan ke ruang kerja...", "success");
     setTimeout(() => {
         const userRole = roleData.role;
@@ -1202,75 +1466,61 @@ async function submitRegistrationRequest(e) {
     if (parseInt(document.getElementById('captcha-answer').value) !== captchaAnswer) {
         window.showToast("Validasi Gagal", "Jawaban matematika salah.", "error"); generateCaptcha(); return;
     }
-
     const name = document.getElementById('req-name').value;
     const dob = document.getElementById('req-dob').value;
     const email = document.getElementById('req-email').value;
     const org = document.getElementById('req-org').value;
     const password = document.getElementById('req-password').value; 
-
     const btn = document.getElementById('btn-register'); 
     btn.disabled = true; btn.innerText = "Mengirim Blok Data..."; 
-
     const { error } = await supabaseClient.from('registration_requests').insert([{
         nama: name, dob: dob, email: email, password: password, organisasi: org, status: 'pending'
     }]);
-
     if (error) {
         window.showToast("Sistem Menolak Pengajuan", error.message, "error");
         btn.disabled = false; btn.innerText = "Kirim Formulir Pengajuan";
-        generateCaptcha();
-        return;
+        generateCaptcha(); return;
     }
-
-    window.showToast("Terkirim ke Server Pusat!", "Formulir Anda sedang ditinjau. Jika disetujui, Anda dapat langsung login.", "success");
+    window.showToast("Terkirim ke Server Pusat!", "Formulir Anda sedang ditinjau.", "success");
     e.target.reset();
-    setTimeout(() => {
-        switchForm('login');
-        btn.disabled = false; btn.innerText = "Kirim Formulir Pengajuan";
-    }, 3000);
+    setTimeout(() => { switchForm('login'); btn.disabled = false; btn.innerText = "Kirim Formulir Pengajuan"; }, 3000);
 }
 
-
 // =============================================
-// SHOWCASE TAB SWITCHER & SMART CURSOR ENGINE
+// SHOWCASE TAB SWITCHER
 // =============================================
 let activeShowcase = 'dashboard';
-let dashInterval = null, chatInterval = null, builderInterval = null;
+let dashInterval = null, chatInterval = null, builderInterval = null, doInterval = null, calInterval = null;
 
 function switchShowcase(name, btn) {
     document.querySelectorAll('.feature-tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.showcase-panel').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('panel-' + name).classList.add('active');
-    
     clearAllIntervals();
     activeShowcase = name;
 
     const cursorEl = getCursorEl();
-    if(cursorEl) {
-        cursorEl.style.opacity = '1';
-        // reset posisi ke tengah saat pindah tab
-        cursorEl.style.left = '50%';
-        cursorEl.style.top = '50%';
-    }
+    if(cursorEl) { cursorEl.style.opacity = '1'; cursorEl.style.left = '50%'; cursorEl.style.top = '50%'; }
 
     if (name === 'dashboard') startDashboardShowcase();
     else if (name === 'chat') startChatShowcase();
     else if (name === 'builder') startBuilderShowcase();
+    else if (name === 'digitaloffice') startDigitalOfficeShowcase();
+    else if (name === 'kalender') startKalenderShowcase();
 }
 
 function clearAllIntervals() {
-    if (dashInterval) { clearInterval(dashInterval); dashInterval = null; }
-    if (chatInterval) { clearInterval(chatInterval); chatInterval = null; }
-    if (builderInterval) { clearInterval(builderInterval); builderInterval = null; }
-    
-    // Matikan typing animation timeout jika ada sisa dari chat
+    [dashInterval, chatInterval, builderInterval, doInterval, calInterval].forEach(id => { if(id) clearInterval(id); });
+    dashInterval = chatInterval = builderInterval = doInterval = calInterval = null;
+    // Clear pending timeouts
     let id = window.setTimeout(function(){}, 0);
     while (id--) window.clearTimeout(id);
 }
 
-// === FUNGSI SMART CURSOR (ANTI-BUG MOBILE & DESKTOP) ===
+// =============================================
+// CURSOR ENGINE
+// =============================================
 function getCursorEl() { return document.getElementById('ani-cursor'); }
 function getRippleEl() { return document.getElementById('cursor-ripple'); }
 
@@ -1278,27 +1528,20 @@ function getTargetPos(elementId) {
     const el = document.getElementById(elementId);
     const container = document.getElementById('showcase-container');
     if (!el || !container) return { x: 0, y: 0 };
-    
     const elRect = el.getBoundingClientRect();
     const contRect = container.getBoundingClientRect();
-    
-    // Menghitung koordinat relatif dari .showcase-container
     return {
         x: elRect.left - contRect.left + (elRect.width / 2),
         y: elRect.top - contRect.top + (elRect.height / 2)
     };
 }
 
-// Offset digunakan agar kursor tidak persis menutupi elemen, misalnya saat drag ghost
 function moveCursorToTarget(elementId, duration = 600, offsetX = 0, offsetY = 0) {
     return new Promise(resolve => {
         const cursor = getCursorEl();
         if (!cursor) { resolve(); return; }
-        
         const pos = getTargetPos(elementId);
-        // Jika element tidak ketemu/hidden posisinya 0,0, abaikan pergerakan agar tak loncat aneh
         if(pos.x === 0 && pos.y === 0) { resolve(); return; }
-
         cursor.style.transition = `left ${duration}ms cubic-bezier(0.4,0,0.2,1), top ${duration}ms cubic-bezier(0.4,0,0.2,1)`;
         cursor.style.left = (pos.x + offsetX) + 'px';
         cursor.style.top = (pos.y + offsetY) + 'px';
@@ -1311,19 +1554,12 @@ function clickCursorTarget(elementId) {
         const cursor = getCursorEl();
         const ripple = getRippleEl();
         if (!cursor || !ripple) { resolve(); return; }
-        
         const pos = getTargetPos(elementId);
-        
         cursor.style.animation = 'cursorClick 0.2s ease';
-        ripple.style.left = (pos.x - 15) + 'px'; // Center ripple
+        ripple.style.left = (pos.x - 15) + 'px';
         ripple.style.top = (pos.y - 15) + 'px';
         ripple.classList.add('fire');
-        
-        setTimeout(() => {
-            cursor.style.animation = '';
-            ripple.classList.remove('fire');
-            resolve();
-        }, 500);
+        setTimeout(() => { cursor.style.animation = ''; ripple.classList.remove('fire'); resolve(); }, 500);
     });
 }
 
@@ -1378,7 +1614,6 @@ function activateDashTab(idx) {
     });
 }
 
-// Logic Animasi Penghitung Angka KPI
 function animNum(el, from, to, dur) {
     if (!el) return;
     let start = null;
@@ -1394,7 +1629,6 @@ function animNum(el, from, to, dur) {
     requestAnimationFrame(step);
 }
 
-// Sequences Modul
 async function runKpiAnimation() {
     await moveCursorToTarget('kpi-dana', 800);
     await new Promise(r => setTimeout(r, 200));
@@ -1409,14 +1643,10 @@ async function runRabAnimation() {
     if (row) {
         await clickCursorTarget('fin-row-1');
         row.classList.add('row-highlight');
-        
         await new Promise(r => setTimeout(r, 500));
-        const badge = row.querySelector('.badge');
-        if (badge) {
-            badge.className = 'badge badge-green';
-            badge.innerText = 'Disetujui';
-            window.showToast("RAB Diperbarui", "Sewa Tenda: Status → Disetujui", "success");
-        }
+        const badge = document.getElementById('fin-row-1-badge');
+        if (badge) { badge.className = 'badge badge-green'; badge.innerText = 'Disetujui'; }
+        showShowcaseToast("RAB Diperbarui", "Sewa Tenda: Status → Disetujui", "success");
         setTimeout(() => row.classList.remove('row-highlight'), 1500);
     }
 }
@@ -1426,64 +1656,46 @@ async function runSuratAnimation() {
     const field = document.getElementById('surat-field-display');
     const newRow = document.getElementById('surat-new-row');
     if (!popup || !field) return;
-    
-    // Tampilkan baris baru
     newRow.style.display = '';
     newRow.style.animation = 'dropIn 0.4s ease';
     await new Promise(r => setTimeout(r, 600));
-    
-    // Kursor klik baris baru
     await moveCursorToTarget('surat-new-row', 600);
     await clickCursorTarget('surat-new-row');
-    
-    // Tampilkan Popup di dekat cursor (absolute)
     const pos = getTargetPos('surat-new-row');
     popup.style.top = `${pos.y + 10}px`;
     popup.style.right = 'auto';
     popup.style.left = `${pos.x - 50}px`;
     popup.classList.add('show');
-    
-    // Efek ngetik di popup
-    const texts = ['Undangan Rapat Pleno BPH'];
+    const texts = 'Undangan Rapat Pleno BPH';
     field.innerHTML = '';
     const fieldInput = document.getElementById('surat-new-title');
-    
-    for (let i = 0; i <= texts[0].length; i++) {
+    for (let i = 0; i <= texts.length; i++) {
         await new Promise(r => setTimeout(r, 60));
-        const t = texts[0].substring(0, i);
+        const t = texts.substring(0, i);
         field.innerHTML = t + '<span class="cursor-blink"></span>';
         if (fieldInput) fieldInput.innerText = t;
     }
-    
     await new Promise(r => setTimeout(r, 500));
-    
-    // Kursor klik save di popup
     await moveCursorToTarget('surat-save-btn', 400);
     await clickCursorTarget('surat-save-btn');
-    
     popup.classList.remove('show');
-    window.showToast("Surat Tersimpan", "025/BEM/INT/V berhasil dibuat.", "success");
+    showShowcaseToast("Surat Tersimpan", "025/BEM/INT/V berhasil dibuat.", "success");
 }
 
 async function runPresensiAnimation() {
     await moveCursorToTarget('pre-new-row', 600);
-    
     const scanTime = document.getElementById('pre-scan-time');
     const badge = document.getElementById('pre-status-badge');
     const preHadir = document.getElementById('pre-hadir');
-    
-    // Simulasi Scan Masuk
     if (scanTime) scanTime.innerText = '19:15 WIB';
     if (badge) { badge.innerText = 'Hadir Terlambat'; badge.className = 'badge badge-yellow'; }
-    
     await new Promise(r => setTimeout(r, 600));
-    
     if (preHadir) {
         preHadir.style.animation = 'countUp 0.4s ease';
         preHadir.innerText = '19';
         setTimeout(() => { if(preHadir) preHadir.style.animation = ''; }, 500);
     }
-    window.showToast("Presensi Tercatat", "Budi Santoso: Hadir (Terlambat 20 mnt)", "success");
+    showShowcaseToast("Presensi Tercatat", "Budi Santoso: Hadir (Terlambat 20 mnt)", "success");
 }
 
 const dashSequences = [
@@ -1497,27 +1709,23 @@ const dashSequences = [
 function startDashboardShowcase() {
     initDashChart();
     dashSeqIdx = 0;
-    
     async function runNextSeq() {
         if (activeShowcase !== 'dashboard') return;
         try { await dashSequences[dashSeqIdx](); } catch(e) {}
         dashSeqIdx = (dashSeqIdx + 1) % dashSequences.length;
     }
-    
     runNextSeq();
     dashInterval = setInterval(runNextSeq, 5500);
 }
 
 // =============================================
-// SHOWCASE 2 – CHAT ANIMATION (Diperbaiki Limitnya)
+// SHOWCASE 2 – CHAT
 // =============================================
 let chatSeqIdx = 0;
 const chatSequences = [
-    // Seq 1: RESET CHAT & Tampilkan Nisa mengetik pesan
     async () => {
         const area = document.getElementById('chat-messages-area');
         if (area) {
-            // Membatasi loop chat agar tidak panjang terus ke bawah!
             area.innerHTML = `
                 <div class="msg-row other">
                     <div class="msg-avatar" style="background:linear-gradient(135deg,#10b981,#059669);">N</div>
@@ -1529,19 +1737,13 @@ const chatSequences = [
                 </div>`;
             area.scrollTop = area.scrollHeight;
         }
-
         const typingBar = document.getElementById('typing-bar');
         const typingName = document.getElementById('typing-name');
-        
-        await new Promise(r => setTimeout(r, 1000)); // Jeda sebentar sebelum ngetik
-
+        await new Promise(r => setTimeout(r, 1000));
         if (typingName) typingName.innerText = 'Nisa sedang mengetik...';
         if (typingBar) typingBar.style.display = 'flex';
-        
         await new Promise(r => setTimeout(r, 2000));
         if (typingBar) typingBar.style.display = 'none';
-        
-        // Add new message dari Nisa
         if (area) {
             area.innerHTML += `
                 <div class="msg-row other">
@@ -1553,59 +1755,39 @@ const chatSequences = [
                 </div>`;
             area.scrollTop = area.scrollHeight;
         }
-        
         await new Promise(r => setTimeout(r, 800));
-        const notif = document.getElementById('chat-notif');
-        if (notif) { notif.classList.add('show'); setTimeout(() => notif.classList.remove('show'), 2500); }
     },
-    
-    // Seq 2: Pindah Kursor & Ketik Teks @ mention
     async () => {
         const inputBox = document.getElementById('chat-input-box');
         const typed = document.getElementById('chat-typed');
         const cursorEl = document.getElementById('chat-cursor');
         const placeholder = document.getElementById('chat-placeholder');
         const mentionDd = document.getElementById('mention-dd');
-        
         await moveCursorToTarget('chat-input-box', 600);
         await clickCursorTarget('chat-input-box');
-
         if (inputBox) inputBox.classList.add('focused');
         if (placeholder) placeholder.style.display = 'none';
         if (cursorEl) cursorEl.style.display = 'inline-block';
-        
         const typeText = 'Siapp kak! Ini datanya ya ';
         for (let i = 0; i <= typeText.length; i++) {
             await new Promise(r => setTimeout(r, 50));
             if (typed) typed.innerText = typeText.substring(0, i);
         }
-        
         await new Promise(r => setTimeout(r, 200));
         if (typed) typed.innerText = typeText + '@';
-        
-        // Show mention dropdown
         if (mentionDd) mentionDd.classList.add('show');
         await new Promise(r => setTimeout(r, 1500));
-        
-        // Pilih RAB dari dropdown
         await moveCursorToTarget('mention-rab', 500);
         await clickCursorTarget('mention-rab');
-
         if (mentionDd) mentionDd.classList.remove('show');
         const chip = `<span class="mention-chip"><i class="fa-solid fa-wallet"></i> RAB Seminar 2025</span>`;
         if (typed) typed.innerHTML = typeText + chip;
     },
-    
-    // Seq 3: Send message
     async () => {
         const inputBox = document.getElementById('chat-input-box');
         const typed = document.getElementById('chat-typed');
         const cursorEl = document.getElementById('chat-cursor');
         const placeholder = document.getElementById('chat-placeholder');
-        
-        // Kirim pesannya (kursor bisa diam atau ke tombol send, saya buat ke tombol send)
-        await moveCursorToTarget('chat-input-box', 300); // Dummy move buat nahan
-
         const msgContent = typed ? typed.innerHTML : '';
         if (msgContent) {
             const area = document.getElementById('chat-messages-area');
@@ -1620,113 +1802,80 @@ const chatSequences = [
                 area.scrollTop = area.scrollHeight;
             }
         }
-        
-        // Reset input
-        if (typed) { typed.innerHTML = ''; }
+        if (typed) typed.innerHTML = '';
         if (cursorEl) cursorEl.style.display = 'none';
         if (placeholder) placeholder.style.display = '';
         if (inputBox) inputBox.classList.remove('focused');
-        
-        window.showToast("Pesan Terkirim", "Berhasil tautkan RAB ke chat Nisa", "success");
+        showShowcaseToast("Pesan Terkirim", "Berhasil tautkan RAB ke chat Nisa", "success");
         await new Promise(r => setTimeout(r, 1000));
     }
 ];
 
 function startChatShowcase() {
     chatSeqIdx = 0;
-    
     async function runNextChatSeq() {
         if (activeShowcase !== 'chat') return;
         try { await chatSequences[chatSeqIdx](); } catch(e) {}
         chatSeqIdx = (chatSeqIdx + 1) % chatSequences.length;
     }
-    
     setTimeout(runNextChatSeq, 500);
     chatInterval = setInterval(runNextChatSeq, 5500);
 }
 
 // =============================================
-// SHOWCASE 3 – WEB BUILDER ANIMATION
+// SHOWCASE 3 – WEB BUILDER
 // =============================================
 let builderStep = 0;
 const builderSteps = [
-    // Step 1: Drag "Grid Berita" to canvas
     async () => {
         const toolNews = document.getElementById('tool-news');
         const ghost = document.getElementById('drag-ghost');
         const dropZone = document.getElementById('drop-zone-ind');
-        
-        // Cek target pos dari Toolbar Kiri
         const startPos = getTargetPos('tool-news');
-        
-        // Kursor ke posisi tool berita
         await moveCursorToTarget('tool-news', 500);
-        
-        if (toolNews) { toolNews.classList.add('dragging'); }
-        
+        if (toolNews) toolNews.classList.add('dragging');
         if (ghost && toolNews) {
-            // Karena ghost ini "Absolute" terhadap showcase-container, 
-            // set posisinya agar menumpuk persis dengan cursor
             ghost.style.left = (startPos.x - 30) + 'px';
             ghost.style.top = (startPos.y - 15) + 'px';
             ghost.style.opacity = '1';
             ghost.innerHTML = '<i class="fa-solid fa-newspaper" style="color:#3b82f6;"></i> Grid Berita';
-            
             if (dropZone) dropZone.classList.add('active');
-            
-            // Animate ghost dan cursor BARENGAN menuju Drop Zone Canvas
             const targetPos = getTargetPos('drop-zone-ind');
-            
             const cursorEl = getCursorEl();
             if(cursorEl) {
                 cursorEl.style.transition = 'left 0.8s cubic-bezier(0.4,0,0.2,1), top 0.8s cubic-bezier(0.4,0,0.2,1)';
                 cursorEl.style.left = targetPos.x + 'px';
                 cursorEl.style.top = targetPos.y + 'px';
             }
-
             ghost.style.transition = 'left 0.8s cubic-bezier(0.4,0,0.2,1), top 0.8s cubic-bezier(0.4,0,0.2,1)';
             ghost.style.left = (targetPos.x - 30) + 'px';
             ghost.style.top = (targetPos.y - 15) + 'px';
-            
             await new Promise(r => setTimeout(r, 900));
-            
-            // Lepas komponen di canvas
             ghost.style.opacity = '0';
             if (dropZone) dropZone.classList.remove('active');
             if (toolNews) toolNews.classList.remove('dragging');
-            
-            // Tampilkan block news di canvas
             const cbNews = document.getElementById('cb-news');
             if (cbNews) {
                 cbNews.style.display = '';
-                cbNews.classList.add('dropping');
-                cbNews.classList.add('selected');
+                cbNews.classList.add('dropping', 'selected');
                 document.getElementById('cb-hero').classList.remove('selected');
                 document.getElementById('cb-text').classList.remove('selected');
                 setTimeout(() => cbNews.classList.remove('dropping'), 500);
             }
-            window.showToast("Blok Ditambahkan", "Grid Berita berhasil masuk ke canvas!", "success");
+            showShowcaseToast("Blok Ditambahkan", "Grid Berita berhasil masuk ke canvas!", "success");
         }
         await new Promise(r => setTimeout(r, 500));
     },
-    
-    // Step 2: Edit hero title in properties panel
     async () => {
         const propInput = document.getElementById('prop-hero-title');
         const cbHeroTitle = document.getElementById('cb-hero-title');
-        
-        // Pindah kursor ke input properties sebelah kanan
-        await moveCursorToTarget('prop-hero-title', 600, 50, 0); // geser x dikit biar pas di text
+        await moveCursorToTarget('prop-hero-title', 600, 50, 0);
         await clickCursorTarget('prop-hero-title');
-
         if (propInput) {
             propInput.classList.add('typing');
-            
-            // Clear and retype
             const newTitle = 'BEM FT 2025';
             propInput.value = '';
             if (cbHeroTitle) cbHeroTitle.innerText = '';
-            
             for (let i = 0; i <= newTitle.length; i++) {
                 await new Promise(r => setTimeout(r, 70));
                 const t = newTitle.substring(0, i);
@@ -1737,54 +1886,37 @@ const builderSteps = [
         }
         await new Promise(r => setTimeout(r, 500));
     },
-    
-    // Step 3: Change color chip & Publish
     async () => {
         await moveCursorToTarget('chip-blue', 400);
         await clickCursorTarget('chip-blue');
-
         document.querySelectorAll('.prop-color-chip').forEach(c => c.classList.remove('selected'));
         const chip = document.getElementById('chip-blue');
         if (chip) chip.classList.add('selected');
-
         const cbHeroPreview = document.querySelector('.block-hero-preview');
         if (cbHeroPreview) {
             cbHeroPreview.style.transition = 'background 0.4s ease';
             cbHeroPreview.style.background = `linear-gradient(135deg, #1e40af, #3b82f6)`;
         }
-        
         await new Promise(r => setTimeout(r, 600));
-
-        // Publish
         await moveCursorToTarget('prop-save-btn', 500);
         await clickCursorTarget('prop-save-btn');
-
         const saveBtn = document.getElementById('prop-save-btn');
         const saveText = document.getElementById('prop-save-text');
         const overlay = document.getElementById('publish-overlay');
-        
         if (saveBtn) saveBtn.classList.add('saving');
         if (saveText) saveText.innerText = 'Publishing...';
-        
         await new Promise(r => setTimeout(r, 1200));
-        
         if (saveBtn) saveBtn.classList.remove('saving');
         if (saveText) saveText.innerText = 'Publish ke Website';
-        
         if (overlay) {
             overlay.classList.add('show');
             await new Promise(r => setTimeout(r, 2500));
             overlay.classList.remove('show');
         }
-        
-        window.showToast("Website Published!", "bem-univ.campusinnovate.id diperbarui", "success");
-        
-        // Reset news block visibility untuk siklus ulang
+        showShowcaseToast("Website Published!", "bem-univ.campusinnovate.id diperbarui", "success");
         await new Promise(r => setTimeout(r, 500));
         const cbNews = document.getElementById('cb-news');
         if (cbNews) cbNews.style.display = 'none';
-        
-        // Kembalikan teks dan warna untuk awal loop
         document.getElementById('prop-hero-title').value = 'BEM Universitas Nusantara';
         if (cbHeroPreview) cbHeroPreview.style.background = `linear-gradient(135deg, #0A3055, #1e40af)`;
         document.getElementById('cb-hero-title').innerText = 'BEM Universitas Nusantara';
@@ -1795,27 +1927,276 @@ const builderSteps = [
 
 function startBuilderShowcase() {
     builderStep = 0;
-    
     async function runNextBuilderStep() {
         if (activeShowcase !== 'builder') return;
         try { await builderSteps[builderStep](); } catch(e) {}
         builderStep = (builderStep + 1) % builderSteps.length;
     }
-    
     setTimeout(runNextBuilderStep, 500);
     builderInterval = setInterval(runNextBuilderStep, 5500);
 }
 
-// INIT Observer & Session Check
+// =============================================
+// SHOWCASE 4 – DIGITAL OFFICE
+// =============================================
+let doStep = 0;
+const doSteps = [
+    // Step 1: Kursor ke inbox row 1, highlight
+    async () => {
+        // Reset state
+        const histNew = document.getElementById('do-history-new');
+        if(histNew) histNew.style.display = 'none';
+        const sig = document.getElementById('do-sig-overlay');
+        const sigText = document.getElementById('do-sig-text');
+        if(sig) { sig.classList.remove('placed','signed'); }
+        if(sigText) sigText.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Area TTD';
+        const btn1 = document.getElementById('do-btn-1');
+        const btn2 = document.getElementById('do-btn-2');
+        if(btn1) { btn1.innerText = 'Review & TTD'; btn1.classList.remove('approved'); }
+        if(btn2) { btn2.innerText = 'Review & TTD'; btn2.classList.remove('approved'); }
+        const doRow1 = document.getElementById('do-row-1');
+        if(doRow1) doRow1.classList.add('active-row');
+
+        // Animasi nomor surat
+        const numDisplay = document.getElementById('do-number-display');
+        if(numDisplay) {
+            numDisplay.style.color = '#aaa';
+            numDisplay.innerText = 'Memuat konteks surat...';
+            await new Promise(r => setTimeout(r, 800));
+            numDisplay.style.color = 'var(--brand-navy)';
+            numDisplay.innerHTML = '<span style="color:#10b981;font-weight:700;">Tersedia:</span> 025/SK-BEM/UNS/V/2025';
+        }
+        await moveCursorToTarget('do-row-1', 700);
+        await clickCursorTarget('do-row-1');
+        await new Promise(r => setTimeout(r, 400));
+    },
+    // Step 2: Kursor ke area TTD, tempatkan tanda tangan
+    async () => {
+        await moveCursorToTarget('do-page-preview', 600, 40, 60);
+        await new Promise(r => setTimeout(r, 400));
+        const sig = document.getElementById('do-sig-overlay');
+        if(sig) {
+            sig.classList.add('placed');
+            const sigText = document.getElementById('do-sig-text');
+            if(sigText) sigText.innerHTML = '<i class="fa-solid fa-pen-nib"></i> Geser TTD...';
+        }
+        await new Promise(r => setTimeout(r, 600));
+        await moveCursorToTarget('do-sig-overlay', 500);
+        await clickCursorTarget('do-sig-overlay');
+        await new Promise(r => setTimeout(r, 300));
+    },
+    // Step 3: Approve dokumen
+    async () => {
+        await moveCursorToTarget('do-btn-1', 500);
+        await clickCursorTarget('do-btn-1');
+        const btn1 = document.getElementById('do-btn-1');
+        if(btn1) { btn1.innerText = 'Menyetujui...'; btn1.disabled = true; }
+        await new Promise(r => setTimeout(r, 1000));
+        const sig = document.getElementById('do-sig-overlay');
+        const sigText = document.getElementById('do-sig-text');
+        if(sig) sig.classList.add('signed');
+        if(sigText) sigText.innerHTML = '<i class="fa-solid fa-check-circle"></i> Ditandatangani';
+        if(btn1) { btn1.innerText = '✓ Disetujui'; btn1.classList.add('approved'); btn1.disabled = false; }
+        showShowcaseToast("Dokumen Disetujui", "Proposal Seminar Nasional IT berhasil di-sign", "success");
+        const doRow1 = document.getElementById('do-row-1');
+        if(doRow1) doRow1.classList.remove('active-row');
+        await new Promise(r => setTimeout(r, 600));
+        const histNew = document.getElementById('do-history-new');
+        if(histNew) {
+            histNew.style.display = '';
+            histNew.style.animation = 'dropIn 0.4s ease';
+        }
+        await new Promise(r => setTimeout(r, 1200));
+    }
+];
+
+function startDigitalOfficeShowcase() {
+    doStep = 0;
+    async function runNextDoStep() {
+        if (activeShowcase !== 'digitaloffice') return;
+        try { await doSteps[doStep](); } catch(e) {}
+        doStep = (doStep + 1) % doSteps.length;
+    }
+    setTimeout(runNextDoStep, 500);
+    doInterval = setInterval(runNextDoStep, 5000);
+}
+
+// =============================================
+// SHOWCASE 5 – KALENDER & WORKSPACE
+// =============================================
+const CAL_EVENTS = [
+    { day: 5, type: 'ev-rapat', label: 'Rapat BPH' },
+    { day: 10, type: 'ev-tugas', label: 'Deadline KPI' },
+    { day: 15, type: 'ev-program', label: 'Seminar Nasional' },
+    { day: 20, type: 'ev-rapat', label: 'Rapat Pleno' },
+    { day: 24, type: 'ev-program', label: 'PORSENI 2025' },
+    { day: 29, type: 'ev-tugas', label: 'Lap. Bulanan' },
+];
+
+function buildCalendarShowcase() {
+    const grid = document.getElementById('cal-grid-s');
+    if(!grid) return;
+    grid.innerHTML = '';
+    // May 2025 starts on Thursday (day index 4)
+    const firstDay = 4;
+    const daysInMonth = 31;
+    const today = 18; // simulate today = 18 May
+    for(let i = 0; i < firstDay; i++) {
+        grid.innerHTML += `<div class="cal-cell-s" style="background:#fafafa;"></div>`;
+    }
+    for(let d = 1; d <= daysInMonth; d++) {
+        const isToday = d === today;
+        let evHtml = '';
+        CAL_EVENTS.forEach(ev => {
+            if(ev.day === d) evHtml += `<span class="cal-event-s ${ev.type}" id="cal-ev-day-${d}">${ev.label}</span>`;
+        });
+        grid.innerHTML += `<div class="cal-cell-s ${isToday ? 'today-s' : ''}" id="cal-cell-${d}">
+            <span class="cal-date-s">${d}</span>
+            ${evHtml}
+        </div>`;
+    }
+}
+
+let calSeqIdx = 0;
+const NEW_EVENTS = [
+    { title: 'Rapat Evaluasi Sponsor', date: '27 Mei 2025', tipe: 'Rapat', agClass: 'ev-rapat-ag', calDay: 27, calType: 'ev-rapat', calLabel: 'Rapat Evaluasi' },
+    { title: 'Workshop Fotografi BEM', date: '31 Mei 2025', tipe: 'Program', agClass: '', calDay: 31, calType: 'ev-program', calLabel: 'Workshop Foto' },
+];
+
+const calSequences = [
+    // Seq 1: Highlight event existing di kalender
+    async () => {
+        buildCalendarShowcase();
+        // Highlight cell 15 (Seminar Nasional)
+        const cell15 = document.getElementById('cal-cell-15');
+        if(cell15) {
+            cell15.style.background = 'rgba(246,178,59,.15)';
+            cell15.style.transition = 'background 0.4s';
+        }
+        await moveCursorToTarget('cal-cell-15', 700);
+        await clickCursorTarget('cal-cell-15');
+        await new Promise(r => setTimeout(r, 800));
+        if(cell15) cell15.style.background = '';
+        // Highlight agenda item
+        const agList = document.getElementById('cal-agenda-list');
+        if(agList) {
+            const items = agList.querySelectorAll('.cal-agenda-item');
+            if(items[1]) { items[1].style.background = 'rgba(246,178,59,.15)'; setTimeout(() => items[1].style.background = '', 1500); }
+        }
+        await new Promise(r => setTimeout(r, 1200));
+    },
+    // Seq 2: Animasi input form tambah jadwal baru
+    async () => {
+        const ev = NEW_EVENTS[calSeqIdx % NEW_EVENTS.length];
+        calSeqIdx++;
+
+        const inputJudul = document.getElementById('cal-input-judul');
+        const typedJudul = document.getElementById('cal-typed-judul');
+        const placeholderJudul = document.getElementById('cal-placeholder-judul');
+        const typedTgl = document.getElementById('cal-typed-tgl');
+        const placeholderTgl = document.getElementById('cal-placeholder-tgl');
+        const typedTipe = document.getElementById('cal-typed-tipe');
+        const placeholderTipe = document.getElementById('cal-placeholder-tipe');
+        const saveBtn = document.getElementById('cal-save-btn');
+        const saveText = document.getElementById('cal-save-text');
+
+        // Reset form
+        if(typedJudul) typedJudul.innerText = '';
+        if(typedTgl) typedTgl.innerText = '';
+        if(typedTipe) typedTipe.innerText = '';
+        if(placeholderJudul) placeholderJudul.style.display = '';
+        if(placeholderTgl) placeholderTgl.style.display = '';
+        if(placeholderTipe) placeholderTipe.style.display = '';
+
+        await moveCursorToTarget('cal-input-judul', 600);
+        await clickCursorTarget('cal-input-judul');
+        if(inputJudul) inputJudul.classList.add('typing-focus');
+        if(placeholderJudul) placeholderJudul.style.display = 'none';
+
+        // Type judul
+        for(let i = 0; i <= ev.title.length; i++) {
+            await new Promise(r => setTimeout(r, 55));
+            if(typedJudul) typedJudul.innerText = ev.title.substring(0, i);
+        }
+        if(inputJudul) inputJudul.classList.remove('typing-focus');
+
+        // Fill tanggal
+        await new Promise(r => setTimeout(r, 200));
+        if(placeholderTgl) placeholderTgl.style.display = 'none';
+        if(typedTgl) typedTgl.innerText = ev.date;
+
+        // Fill tipe
+        await new Promise(r => setTimeout(r, 200));
+        if(placeholderTipe) placeholderTipe.style.display = 'none';
+        if(typedTipe) typedTipe.innerText = ev.tipe;
+
+        await moveCursorToTarget('cal-save-btn', 500);
+        await new Promise(r => setTimeout(r, 300));
+        await clickCursorTarget('cal-save-btn');
+
+        if(saveBtn) saveBtn.classList.add('saving');
+        if(saveText) saveText.innerText = 'Menyimpan...';
+        await new Promise(r => setTimeout(r, 1000));
+        if(saveBtn) saveBtn.classList.remove('saving');
+        if(saveText) saveText.innerText = 'Simpan ke Kalender';
+
+        showShowcaseToast("Jadwal Ditambahkan", `${ev.title} berhasil disimpan`, "success");
+
+        // Tambahkan ke calendar grid dan agenda
+        const cell = document.getElementById(`cal-cell-${ev.calDay}`);
+        if(cell) {
+            const evSpan = document.createElement('span');
+            evSpan.className = `cal-event-s ${ev.calType} highlight-s`;
+            evSpan.innerText = ev.calLabel;
+            cell.appendChild(evSpan);
+            cell.style.background = 'rgba(16,185,129,.06)';
+            setTimeout(() => { cell.style.background = ''; evSpan.classList.remove('highlight-s'); }, 1500);
+        }
+
+        const agList = document.getElementById('cal-agenda-list');
+        if(agList) {
+            const newAg = document.createElement('div');
+            newAg.className = `cal-agenda-item ${ev.agClass} highlight-ag`;
+            newAg.innerHTML = `<h5><i class="fa-solid fa-star" style="font-size:10px;margin-right:4px;color:var(--brand-yellow);"></i> ${ev.title}</h5><p><i class="fa-regular fa-calendar"></i> ${ev.date}</p>`;
+            agList.appendChild(newAg);
+            setTimeout(() => newAg.classList.remove('highlight-ag'), 1000);
+            if(agList.children.length > 5) agList.removeChild(agList.children[0]);
+        }
+
+        // Reset form display
+        await new Promise(r => setTimeout(r, 800));
+        if(typedJudul) typedJudul.innerText = '';
+        if(typedTgl) typedTgl.innerText = '';
+        if(typedTipe) typedTipe.innerText = '';
+        if(placeholderJudul) placeholderJudul.style.display = '';
+        if(placeholderTgl) placeholderTgl.style.display = '';
+        if(placeholderTipe) placeholderTipe.style.display = '';
+    }
+];
+
+let calScIdx = 0;
+function startKalenderShowcase() {
+    buildCalendarShowcase();
+    calScIdx = 0;
+    async function runNextCalSeq() {
+        if (activeShowcase !== 'kalender') return;
+        try { await calSequences[calScIdx](); } catch(e) {}
+        calScIdx = (calScIdx + 1) % calSequences.length;
+    }
+    setTimeout(runNextCalSeq, 500);
+    calInterval = setInterval(runNextCalSeq, 5500);
+}
+
+// =============================================
+// INIT
+// =============================================
 document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('year').innerText = new Date().getFullYear();
     initScrollReveal();
     generateCaptcha();
     
-    // Auto-check jika user sudah memiliki sesi login aktif (opsional)
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) {
-        // Cek Role dan Langsung Arahkan ke Dashboard yang Sesuai
         const { data: roleData } = await supabaseClient.from('user_roles').select('role').eq('user_id', session.user.id).single();
         if (roleData) {
             if (roleData.role === 'superadmin') window.location.href = 'superadmin.html';
