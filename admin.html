@@ -623,30 +623,29 @@
         }
 
         /* ==========================================
-           FIX BUGS: STRUKTUR ORGANISASI DI WEB BUILDER
-           (Menggunakan CSS Org-Chart Method dengan ::before & ::after)
+           FIX BUGS: STRUKTUR ORGANISASI (FULL WIDTH & NO CUT OFF)
            ========================================== */
+        
+        /* Container utama full-width */
         .tree-preview-wrapper { 
             width: 100%; 
             overflow-x: auto; 
-            padding: 20px 0 40px 0; 
-            display: block; 
-            text-align: center; 
-            white-space: nowrap; 
+            padding: 40px 0; 
+            display: flex; 
+            justify-content: flex-start; /* Ganti dari center agar tidak cut-off saat overflow */
+            -webkit-overflow-scrolling: touch;
         }
         
-        .tree-preview-wrapper::-webkit-scrollbar { height: 8px; }
-        .tree-preview-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .tree-preview-wrapper::-webkit-scrollbar { height: 10px; }
+        .tree-preview-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
         .tree-preview-wrapper::-webkit-scrollbar-track { background: transparent; }
 
-        /* Bungkus seluruh tree untuk mencegah terpotong (cut-off bug) */
+        /* Inner container dengan auto margin agar center saat layar lebar, namun tidak terpotong saat layar sempit */
         .tree-container-inner {
+            margin: 0 auto; 
             display: inline-flex; 
             flex-direction: column; 
             align-items: center;
-            min-width: min-content; 
-            margin: 0 auto; 
-            padding: 0 20px;
         }
 
         /* Pembungkus cabang anak (memiliki garis horizontal di atasnya) */
@@ -654,18 +653,19 @@
             display: flex; 
             justify-content: center; 
             position: relative; 
-            padding-top: 20px; 
+            padding-top: 30px; 
+            /* PENTING: DILARANG MENGGUNAKAN GAP AGAR GARIS TERHUBUNG SEMPURNA */
         }
 
-        /* Garis vertikal panjang dari Card Parent (Atasan) ke garis horizontal Children */
+        /* Garis vertikal yang turun dari Parent ke children container */
         .tree-children-preview::before { 
             content: ''; 
             position: absolute; 
             top: 0; 
             left: 50%; 
-            border-left: 2px solid #d3d3d1; 
+            border-left: 3px solid #cbd5e1; 
             width: 0; 
-            height: 20px; 
+            height: 30px; 
             transform: translateX(-50%); 
         }
 
@@ -675,33 +675,34 @@
             flex-direction: column; 
             align-items: center; 
             position: relative; 
-            padding: 20px 10px 0 10px; 
+            padding: 30px 15px 0 15px; /* Menggantikan gap dengan padding agar garis bersentuhan */
             transition: 0.3s;
+            flex: 0 0 auto; /* Mencegah kartu mengecil tidak beraturan */
         }
 
-        /* Garis horizontal (pembagi) di atas setiap node (anak) */
+        /* Garis horizontal pembagi anak-anak */
         .tree-node-preview::before { 
             content: ''; 
             position: absolute; 
             top: 0; 
             left: 0; 
             right: 0; 
-            border-top: 2px solid #d3d3d1; 
+            border-top: 3px solid #cbd5e1; 
         }
 
-        /* Garis vertikal kecil dari garis horizontal turun ke Card (anak) */
+        /* Garis vertikal turun ke card anak */
         .tree-node-preview::after { 
             content: ''; 
             position: absolute; 
             top: 0; 
             left: 50%; 
-            border-left: 2px solid #d3d3d1; 
+            border-left: 3px solid #cbd5e1; 
             width: 0; 
-            height: 20px; 
+            height: 30px; 
             transform: translateX(-50%); 
         }
 
-        /* Menghapus garis horizontal berlebih di Node Pertama dan Terakhir */
+        /* Logika memotong garis berlebih untuk anak pertama dan terakhir */
         .tree-node-preview:first-child::before { left: 50%; }
         .tree-node-preview:last-child::before { right: 50%; }
         /* Jika hanya ada 1 anak, hilangkan garis horizontal sama sekali */
@@ -723,66 +724,70 @@
             padding-top: 0; 
         }
         
-        /* STYLE KARTU DPH (Minimalis ala Notion) */
+        /* STYLE KARTU DPH (Responsive & Automatic Shrink) */
         .tree-card-preview { 
-            background: #ffffff; 
-            padding: 15px; 
-            border-radius: 6px; 
-            border: 1px solid #d3d3d1; 
+            background: white; 
+            padding: clamp(10px, 2vw, 25px) clamp(10px, 1.5vw, 20px); 
+            border-radius: clamp(12px, 2vw, 20px); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+            border-top: 5px solid var(--theme-color); 
             text-align: center; 
-            min-width: 200px; 
+            width: clamp(140px, 18vw, 260px); /* Kunci agar proporsional di HP & Desktop */
+            white-space: normal;
             position: relative; 
             z-index: 2; 
-            transition: 0.2s;
+            transition: 0.3s;
         }
         .tree-card-preview:hover { 
-            background: #f7f7f5; 
-            box-shadow: rgba(15, 15, 15, 0.05) 0px 2px 4px; 
-            transform: translateY(-2px);
+            transform: translateY(-5px); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1); 
+            border-color: var(--secondary); 
         }
         
         .tree-avatar-preview { 
-            width: 45px; 
-            height: 45px; 
-            background: #f7f7f5; 
+            width: clamp(45px, 6vw, 80px); 
+            height: clamp(45px, 6vw, 80px); 
+            background: #f1f5f9; 
             border-radius: 50%; 
-            margin: 0 auto 10px; 
+            margin: 0 auto clamp(8px, 1vw, 15px); 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 1rem; 
-            color: #787774; 
-            border: 1px solid #e9e9e7;
+            font-size: clamp(1.2rem, 2vw, 2.2rem); 
+            color: #cbd5e1; 
+            border: 4px solid white; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.06);
         }
         
         .tree-name-preview { 
-            font-weight: 700; 
-            font-size: 0.95rem; 
-            color: #37352f; 
-            margin-bottom: 2px;
+            font-weight: 800; 
+            font-size: clamp(0.85rem, 1.2vw, 1.15rem); 
+            color: var(--theme-color); 
+            margin-bottom: 2px; 
+            line-height: 1.2;
         }
         
         .tree-role-preview { 
-            font-size: 0.7rem; 
-            color: #787774; 
-            font-weight: 500; 
+            font-size: clamp(0.65rem, 0.9vw, 0.85rem); 
+            color: #64748b; 
+            font-weight: 700; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
         }
         
         .bph-badge-preview { 
             position:absolute; 
-            top:-10px; 
+            top:-12px; 
             left:50%; 
             transform:translateX(-50%); 
-            background:#37352f; 
-            color:white; 
-            padding:3px 10px; 
-            border-radius:4px; 
-            font-weight:600; 
-            font-size:0.65rem; 
+            background:var(--secondary); 
+            color:var(--primary); 
+            padding:4px 12px; 
+            border-radius:20px; 
+            font-weight:800; 
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem); 
             white-space:nowrap; 
-            letter-spacing:0.5px;
+            box-shadow:0 4px 10px rgba(246, 178, 59, 0.4);
         }
     </style>
 </head>
@@ -1919,6 +1924,7 @@
             setTimeout(() => { document.getElementById('preview-window').scrollTop = document.getElementById('preview-window').scrollHeight; }, 100);
         }
 
+        // FUNGSI RENDER CANVAS (FIX FULL WIDTH LAYOUT)
         function renderCanvas() {
             const previewWindow = document.getElementById('preview-window');
             const currentScroll = previewWindow.scrollTop;
@@ -1950,45 +1956,71 @@
             layoutBlocks.forEach((block, index) => {
                 const isSelected = activeBlockId === block.id ? 'selected' : '';
                 let bgStyle = block.styles.bg !== '#ffffff' ? block.styles.bg : 'transparent';
-                let inlineStyle = `background-color: ${bgStyle}; padding: ${block.styles.padding} 20px; border-radius: ${block.styles.borderRadius}; margin-bottom: 10px;`;
+                
+                // Menerapkan Full-Width Wrapper untuk semua elemen
+                let wrapperStyle = `background-color: ${bgStyle}; padding: ${block.styles.padding} 0; margin-bottom: 10px; width: 100%;`;
+                
                 let blockContent = '';
                 
                 if (block.type === 'hero') {
                     let bgImg = block.data.url ? `background-image: url('${escapeHtml(block.data.url)}');` : `background-color: var(--primary);`;
                     blockContent = `
-                        <div style="position: relative; border-radius: inherit; ${bgImg} background-size: cover; background-position: center; min-height: 350px; display: flex; align-items: center; justify-content: center; text-align: center; color: white;">
-                            <div style="position: absolute; inset:0; background: linear-gradient(135deg, rgba(10,48,85,0.85), rgba(0,0,0,0.5)); border-radius: inherit;"></div>
-                            <div style="position: relative; z-index: 2; padding: 20px; max-width: 600px;">
-                                <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">${escapeHtml(block.data.title)}</h1>
-                                <p style="font-size: 1.1rem; opacity: 0.9;">${escapeHtml(block.data.subtitle)}</p>
+                        <div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;">
+                            <div style="position: relative; border-radius: ${block.styles.borderRadius}; ${bgImg} background-size: cover; background-position: center; min-height: 350px; display: flex; align-items: center; justify-content: center; text-align: center; color: white;">
+                                <div style="position: absolute; inset:0; background: linear-gradient(135deg, rgba(10,48,85,0.85), rgba(0,0,0,0.5)); border-radius: inherit;"></div>
+                                <div style="position: relative; z-index: 2; padding: 20px; max-width: 600px;">
+                                    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.3);">${escapeHtml(block.data.title)}</h1>
+                                    <p style="font-size: 1.1rem; opacity: 0.9;">${escapeHtml(block.data.subtitle)}</p>
+                                </div>
                             </div>
                         </div>`;
                 } 
-                else if (block.type === 'text') { blockContent = `<div style="font-size:1rem; line-height:1.8; color:#334155;">${block.data.content || ''}</div>`; }
-                else if (block.type === 'image') { blockContent = `<div style="text-align:${escapeHtml(block.data.align) || 'center'};"><img src="${escapeHtml(block.data.url)}" style="width:${escapeHtml(block.data.width) || '100%'}; border-radius:${block.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:400px; object-fit:cover;"></div>`; }
-                else if (block.type === 'video') { blockContent = `<div><iframe src="${escapeHtml(block.data.url)}" style="width:100%; height:300px; border-radius:${block.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1); pointer-events:none;"></iframe></div>`; }
-                else if (block.type === 'newsletter') { blockContent = `<div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> WIDGET: Banner Pengumuman Terhubung Live</h3><p style="color:#64748b; font-size:0.9rem;">(Akan di-override dengan data dari Menu Berita & Pengumuman)</p></div>`; }
-                else if (block.type === 'divider') { blockContent = `<hr style="border:0; border-top: 3px ${escapeHtml(block.data.style) || 'solid'} #cbd5e1; margin: 0;">`; }
-                else if (block.type === 'grid-news') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid rgba(10,48,85,0.1); padding-bottom: 10px;">${escapeHtml(block.data.title)}</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-newspaper" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Berita Terhubung Live</b><br>Jumlah dan isi berita akan langsung mengambil dari database Menu Berita di Admin HTML.</div>`; }
+                else if (block.type === 'text') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><div style="font-size:1rem; line-height:1.8; color:#334155;">${block.data.content || ''}</div></div>`; 
+                }
+                else if (block.type === 'image') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><div style="text-align:${escapeHtml(block.data.align) || 'center'};"><img src="${escapeHtml(block.data.url)}" style="width:${escapeHtml(block.data.width) || '100%'}; border-radius:${block.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:400px; object-fit:cover;"></div></div>`; 
+                }
+                else if (block.type === 'video') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><div><iframe src="${escapeHtml(block.data.url)}" style="width:100%; height:300px; border-radius:${block.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1); pointer-events:none;"></iframe></div></div>`; 
+                }
+                else if (block.type === 'newsletter') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: ${block.styles.borderRadius}; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> WIDGET: Banner Pengumuman Terhubung Live</h3><p style="color:#64748b; font-size:0.9rem;">(Akan di-override dengan data dari Menu Berita & Pengumuman)</p></div></div>`; 
+                }
+                else if (block.type === 'divider') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><hr style="border:0; border-top: 3px ${escapeHtml(block.data.style) || 'solid'} #cbd5e1; margin: 0;"></div>`; 
+                }
+                else if (block.type === 'grid-news') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid rgba(10,48,85,0.1); padding-bottom: 10px;">${escapeHtml(block.data.title)}</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-newspaper" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Berita Terhubung Live</b><br>Jumlah dan isi berita akan langsung mengambil dari database Menu Berita di Admin HTML.</div></div>`; 
+                }
                 else if (block.type === 'struktur') {
                     let treeHtml = '';
                     if (globalOrgStructure.length > 0) { treeHtml = buildPublicOrgTreeHTML(null, 0); } 
                     else { treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`; }
                     
-                    // FIX: IMPLEMENTASI UI BARU UNTUK PREVIEW STRUKTUR
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; text-align: center; color:var(--text);">${escapeHtml(block.data.title)}</h2>
-                                    <div class="tree-preview-wrapper">
-                                        <div class="tree-container-inner">
-                                            ${treeHtml}
-                                        </div>
-                                    </div>`;
+                    // FIX: IMPLEMENTASI FULL WIDTH WRAPPER UNTUK STRUKTUR ORGANISASI PREVIEW
+                    blockContent = `
+                        <div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;">
+                            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; text-align: center; color:var(--text);">${escapeHtml(block.data.title)}</h2>
+                        </div>
+                        <div class="tree-preview-wrapper">
+                            <div class="tree-container-inner">
+                                ${treeHtml}
+                            </div>
+                        </div>`;
                 }
-                else if (block.type === 'finance') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Transparansi Keuangan Auto-Sync)</div>`; }
-                else if (block.type === 'kpi') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-bullseye"></i> Capaian KPI Target</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget KPI Organisasi Auto-Sync)</div>`; }
-                else if (block.type === 'program') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Update Jadwal/Timeline Auto-Sync)</div>`; }
+                else if (block.type === 'finance') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Transparansi Keuangan Auto-Sync)</div></div>`; 
+                }
+                else if (block.type === 'kpi') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-bullseye"></i> Capaian KPI Target</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget KPI Organisasi Auto-Sync)</div></div>`; 
+                }
+                else if (block.type === 'program') { 
+                    blockContent = `<div style="max-width: 1150px; margin: 0 auto; padding: 0 20px;"><h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Update Jadwal/Timeline Auto-Sync)</div></div>`; 
+                }
 
                 htmlString += `
-                    <div id="section-${block.id}" class="preview-section ${isSelected}" onclick="event.stopPropagation(); selectBlock('${block.id}')" style="${inlineStyle}">
+                    <div id="section-${block.id}" class="preview-section ${isSelected}" onclick="event.stopPropagation(); selectBlock('${block.id}')" style="${wrapperStyle}">
                         ${blockContent}
                         <div class="preview-actions">
                             <button onclick="event.stopPropagation(); moveBlock(${index}, -1)" title="Pindah Ke Atas"><i class="fa-solid fa-arrow-up"></i></button>
@@ -1998,7 +2030,8 @@
                     </div>`;
             });
 
-            previewWindow.innerHTML = `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
+            // Container menggunakan lebar penuh (100%) agar padding bekerja dengan benar
+            previewWindow.innerHTML = `<div style="width: 100%; margin: 0;">${htmlString}</div>`;
             previewWindow.scrollTop = currentScroll;
         }
 
