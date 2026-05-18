@@ -66,21 +66,63 @@
         .section-heading { font-size: 2.2rem; font-weight: 800; color: var(--theme-color); margin-bottom: 40px; display: flex; align-items: center; gap: 15px; text-transform: capitalize; letter-spacing: -0.5px;}
         .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.15; border-radius: 5px;}
 
-        /* STRUKTUR ORGANISASI (HIERARKI TREE) */
-        .tree-wrapper { width: 100%; overflow-x: auto; padding: 20px 0 40px 0; display: flex; justify-content: center; }
-        .tree-node { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: 30px; width: 100%; transition: 0.3s;}
-        .tree-node::before { content: ''; position: absolute; top: -30px; left: 50%; border-left: 3px solid #cbd5e1; width: 0; height: 30px; }
-        .tree-node:first-child::before { display: none; }
+        /* ==========================================
+           FIX BUGS: STRUKTUR ORGANISASI (NOTION AESTHETIC & PERFECT LINES)
+           ========================================== */
+        .tree-preview-wrapper { 
+            width: 100%; overflow-x: auto; padding: 20px 0 40px 0; 
+            display: block; text-align: center; white-space: nowrap; 
+        }
         
-        .tree-card { background: white; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border-top: 5px solid var(--theme-color); text-align: center; width: 260px; position: relative; z-index: 2; transition: 0.3s;}
-        .tree-card:hover { transform: translateY(-8px); box-shadow: 0 15px 40px rgba(0,0,0,0.1); border-color: var(--secondary); }
-        .tree-avatar { width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #cbd5e1; border: 4px solid white; box-shadow: 0 8px 20px rgba(0,0,0,0.06);}
-        .tree-name { font-weight: 800; font-size: 1.15rem; color: var(--theme-color); margin-bottom: 5px; line-height: 1.3;}
-        .tree-role { font-size: 0.85rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
-        .member-parent { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--secondary); color: var(--primary); font-size: 0.7rem; padding: 4px 15px; border-radius: 20px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 10px rgba(246, 178, 59, 0.4); display: none;}
+        .tree-preview-wrapper::-webkit-scrollbar { height: 8px; }
+        .tree-preview-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .tree-preview-wrapper::-webkit-scrollbar-track { background: transparent; }
+
+        .tree-container-inner {
+            display: inline-flex; flex-direction: column; align-items: center;
+            min-width: min-content; margin: 0 auto; padding: 0 20px;
+        }
+
+        .tree-children-preview { 
+            display: flex; justify-content: center; position: relative; padding-top: 20px; 
+        }
         
-        .tree-children { display: flex; justify-content: center; gap: 30px; width: 100%; position: relative; padding-top: 30px; }
-        .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 3px solid #cbd5e1; width: calc(100% - 260px); transform: translateX(-50%); }
+        /* Garis vertikal yang turun dari Parent ke children container */
+        .tree-children-preview::before { 
+            content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; transform: translateX(-50%); 
+        }
+
+        .tree-node-preview { 
+            display: flex; flex-direction: column; align-items: center; position: relative; padding: 20px 10px 0 10px; transition: 0.3s;
+        }
+        /* Garis horizontal pembagi anak-anak */
+        .tree-node-preview::before { 
+            content: ''; position: absolute; top: 0; left: 0; right: 0; border-top: 2px solid #cbd5e1; 
+        }
+        /* Garis vertikal turun ke card anak */
+        .tree-node-preview::after { 
+            content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; transform: translateX(-50%); 
+        }
+
+        /* Logika memotong garis berlebih untuk anak pertama dan terakhir */
+        .tree-node-preview:first-child::before { left: 50%; }
+        .tree-node-preview:last-child::before { right: 50%; }
+        /* Jika hanya ada 1 anak, hilangkan garis horizontal */
+        .tree-node-preview:first-child:last-child::before { display: none; }
+
+        /* Membersihkan garis pada Root Node (Atasan Tertinggi) */
+        .tree-container-inner > .tree-children-preview > .tree-node-preview::before,
+        .tree-container-inner > .tree-children-preview > .tree-node-preview::after { display: none; }
+        .tree-container-inner > .tree-children-preview > .tree-node-preview { padding-top: 0; }
+        .tree-container-inner > .tree-children-preview::before { display: none; }
+        .tree-container-inner > .tree-children-preview { padding-top: 0; }
+        
+        .tree-card-preview { background: white; padding: 20px 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; min-width: 220px; position: relative; z-index: 2; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
+        .tree-card-preview:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.08); transform: translateY(-3px); border-color: var(--secondary);}
+        .tree-avatar-preview { width: 60px; height: 60px; background: #f8fafc; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #cbd5e1; border: 2px solid #e2e8f0;}
+        .tree-name-preview { font-weight: 800; font-size: 1rem; color: var(--theme-color); margin-bottom: 2px;}
+        .tree-role-preview { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+        .bph-badge-preview { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--theme-color); color:white; padding:4px 15px; border-radius:20px; font-weight:700; font-size:0.7rem; white-space:nowrap; letter-spacing:0.5px; box-shadow: 0 4px 10px rgba(10,48,85,0.2);}
 
         /* WIDGETS KEUANGAN & KPI */
         .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
@@ -185,17 +227,11 @@
             }
             .public-nav-links a { width: 100%; border-bottom: 1px solid #f1f5f9; padding: 15px 5px; }
             .public-nav-links a::after { display: none; }
-
-            /* Tree Reset on Mobile */
-            .tree-children { flex-direction: column; align-items: center; }
-            .tree-children::before { display: none; }
-            .tree-node::before { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <!-- CUSTOM TOAST -->
     <div id="toast-container"></div>
 
     <div id="loader" class="loader-screen">
@@ -204,14 +240,12 @@
         <p style="color: #64748b; font-size: 0.9rem; margin-top: 10px;">Mengambil data langsung dari Dashboard Internal</p>
     </div>
 
-    <!-- BANNER DARURAT GLOBAL -->
     <div id="global-announcement">
         <strong id="ann-title">Pengumuman</strong>
         <div id="ann-desc">Deskripsi pengumuman.</div>
         <button id="close-ann" onclick="document.getElementById('global-announcement').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- DYNAMIC BLOCKS CONTAINER -->
     <div id="main-content"></div>
 
     <footer id="footer" style="display:none;">
@@ -219,16 +253,13 @@
             <h3 style="color: white; margin-bottom: 15px; font-weight: 800; font-size: 1.8rem;" id="footer-org-name">Campus Innovate</h3>
             <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus secara real-time.</p>
             
-            <!-- SOCIAL MEDIA LINKS -->
             <div id="footer-social-links" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
-                <!-- Akan diisi otomatis jika data tersedia -->
-            </div>
+                </div>
             
             <p style="margin-top: 40px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi. Powered by Campus Innovate Workspace.</p>
         </div>
     </footer>
 
-    <!-- MODAL BERITA -->
     <div class="modal-overlay" id="newsModal" onclick="closeNewsModal(event)">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="modal-close" onclick="closeNewsModal(event)"><i class="fa-solid fa-xmark"></i></button>
@@ -262,7 +293,6 @@
                  .replace(/'/g, "&#039;");
         };
 
-        // Variable global
         let globalNewsData = [];
         let currentWorkspaceId = null;
 
@@ -279,17 +309,14 @@
             toast.innerHTML = `<i class="fa-solid ${iconClass}"></i> <span>${msg}</span>`;
             container.appendChild(toast);
             
-            // Trigger animation
             setTimeout(() => toast.classList.add('show'), 10);
             
-            // Remove after 4s
             setTimeout(() => {
                 toast.classList.remove('show');
                 setTimeout(() => toast.remove(), 500);
             }, 4000);
         }
 
-        // MOBILE NAV TOGGLE
         function toggleMobileNav() {
             const nav = document.getElementById('public-nav-links');
             const btnIcon = document.querySelector('.mobile-menu-btn i');
@@ -306,7 +333,6 @@
             }
         }
 
-        // SCROLL ANIMATION (INTERSECTION OBSERVER)
         function initScrollAnimations() {
             const reveals = document.querySelectorAll('.reveal');
             const observer = new IntersectionObserver((entries) => {
@@ -320,7 +346,6 @@
             reveals.forEach(el => observer.observe(el));
         }
 
-        // NEWS MODAL LOGIC
         function openNewsModal(index) {
             const news = globalNewsData[index];
             if(!news) return;
@@ -329,7 +354,6 @@
             document.getElementById('modal-date').innerText = news.date;
             document.getElementById('modal-title').innerText = news.title;
             
-            // Render the raw HTML from the Rich Text Editor
             document.getElementById('modal-desc').innerHTML = news.desc;
             
             document.getElementById('newsModal').classList.add('active');
@@ -342,21 +366,21 @@
             document.body.style.overflow = 'auto';
         }
 
-        // RECURSIVE FUNCTION: ORG STRUCTURE TREE
+        // FUNGSI REKURSIF UNTUK TREE ORGANISASI (VERSI YANG SUDAH DIPERBAIKI)
         function buildPublicOrgTreeHTML(parentId, orgStructureData, level = 0) {
             const children = orgStructureData.filter(o => o.parentId === parentId);
             if(children.length === 0) return '';
             
-            let html = `<div class="tree-children">`;
+            let html = `<div class="tree-children-preview">`;
             children.forEach(m => {
-                let badge = level === 0 ? `<div style="position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--secondary); color:var(--theme-color); padding:6px 20px; border-radius:20px; font-weight:800; font-size:0.75rem; white-space:nowrap; box-shadow:0 4px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-crown"></i> BPH / Pimpinan</div>` : '';
+                let badge = level === 0 ? `<div class="bph-badge-preview">BPH / Pimpinan</div>` : '';
                 html += `
-                <div class="tree-node">
-                    <div class="tree-card">
+                <div class="tree-node-preview">
+                    <div class="tree-card-preview">
                         ${badge}
-                        <div class="tree-avatar"><i class="fa-solid fa-user"></i></div>
-                        <div class="tree-name">${escapeHtml(m.name)}</div>
-                        <div class="tree-role">${escapeHtml(m.role)}</div>
+                        <div class="tree-avatar-preview"><i class="fa-solid fa-user"></i></div>
+                        <div class="tree-name-preview">${escapeHtml(m.name)}</div>
+                        <div class="tree-role-preview">${escapeHtml(m.role)}</div>
                     </div>
                     ${buildPublicOrgTreeHTML(m.id, orgStructureData, level + 1)}
                 </div>`;
@@ -365,63 +389,60 @@
             return html;
         }
 
-        // MAIN INIT DENGAN URL ROUTING LOGIC BARU
+        // MAIN INIT DENGAN URL ROUTING LOGIC
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
-            
-            // Logika Pembacaan URL Parameter
             const orgNameParam = urlParams.get('org');
             const workspaceIdParam = urlParams.get('workspace');
-            
+            const currentDomain = window.location.hostname;
+
             let queryKey = '';
             let queryValue = '';
 
-            // Prioritaskan pencarian menggunakan '?org=Nama-BEM'
-            if (orgNameParam) {
-                // Mengubah 'bem-ipb' di URL menjadi 'BEM IPB' untuk pencarian case-insensitive (kurang lebih)
-                queryKey = 'nama_organisasi';
-                queryValue = orgNameParam.replace(/-/g, ' '); 
-            } else if (workspaceIdParam) {
+            // Prioritas 1: Parameter ID Eksplisit
+            if (workspaceIdParam) {
                 queryKey = 'id';
                 queryValue = workspaceIdParam;
-            } else {
-                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Parameter URL (org / workspace) Tidak Ditemukan!</h2>`; 
+            } 
+            // Prioritas 2: Parameter Nama Eksplisit
+            else if (orgNameParam) {
+                queryKey = 'nama_organisasi';
+                queryValue = orgNameParam.replace(/-/g, ' '); 
+            } 
+            // Prioritas 3: Custom Domain Mapping (Kecualikan .github.io dan .github.dev)
+            else if (currentDomain !== 'corevacampusinnovate.com' && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && !currentDomain.includes('github.io') && !currentDomain.includes('github.dev')) {
+                queryKey = 'custom_domain';
+                queryValue = currentDomain;
+            } 
+            else {
+                document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Parameter URL (org / workspace) Tidak Ditemukan!</h2><p style="color:#666; margin-top:10px;">Gunakan ?workspace=[ID] atau ?org=[Nama_Organisasi].</p>`; 
                 return;
             }
 
             try {
-                // Fetch Data Organisasi berdasarkan Nama (ilike agar tidak terlalu sensitif huruf besar/kecil)
-                // Atau berdasarkan ID jika org name tidak disediakan
                 let wsData;
                 
-                if (queryKey === 'nama_organisasi') {
-                    const { data } = await supabaseClient
-                        .from('workspaces')
-                        .select('id, nama_organisasi')
-                        .ilike('nama_organisasi', queryValue)
-                        .single();
+                if (queryKey === 'custom_domain') {
+                    const { data } = await supabaseClient.from('workspaces').select('id, nama_organisasi').eq('custom_domain', queryValue).single();
+                    wsData = data;
+                } else if (queryKey === 'nama_organisasi') {
+                    const { data } = await supabaseClient.from('workspaces').select('id, nama_organisasi').ilike('nama_organisasi', queryValue).single();
                     wsData = data;
                 } else {
-                    const { data } = await supabaseClient
-                        .from('workspaces')
-                        .select('id, nama_organisasi')
-                        .eq('id', queryValue)
-                        .single();
+                    const { data } = await supabaseClient.from('workspaces').select('id, nama_organisasi').eq('id', queryValue).single();
                     wsData = data;
                 }
                 
                 if (!wsData) {
-                    document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Organisasi "${queryValue}" tidak ditemukan di server!</h2><p style="color:#666; margin-top:10px;">Periksa kembali link URL Anda.</p>`; 
+                    document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Organisasi tidak ditemukan di server!</h2><p style="color:#666; margin-top:10px;">Domain atau link belum terdaftar.</p>`; 
                     return;
                 }
                 
                 currentWorkspaceId = wsData.id;
                 let orgName = wsData.nama_organisasi;
                 
-                // Ubah Title Web sesuai nama organisasi
                 document.title = `${orgName} - Portal Publik Campus Innovate`;
 
-                // Fetch Layout Data menggunakan ID yang telah ditemukan
                 const { data: config } = await supabaseClient.from('landing_pages').select('*').eq('workspace_id', currentWorkspaceId).single();
                 
                 if (!config || !config.is_published) {
@@ -435,10 +456,7 @@
                 let orgStructureData = [];
                 let announcementData = null;
                 let logoUrl = '';
-                
-                let globalIg = '';
-                let globalTiktok = '';
-                let globalEmail = '';
+                let globalIg = ''; let globalTiktok = ''; let globalEmail = '';
 
                 // EXTRACT GLOBAL CONFIG DATA
                 const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
@@ -449,16 +467,13 @@
                     globalNewsData = configBlock.newsData || [];
                     announcementData = configBlock.announcementData;
                     
-                    // Ekstrak data footer
                     globalIg = configBlock.footerData?.ig || '';
                     globalTiktok = configBlock.footerData?.tiktok || '';
                     globalEmail = configBlock.footerData?.email || '';
                 }
 
-                // Terapkan nama organisasi ke footer
                 document.getElementById('footer-org-name').innerText = orgName;
                 
-                // Terapkan Link Media Sosial ke Footer
                 let socialHtml = '';
                 if (globalIg) socialHtml += `<a href="${escapeHtml(globalIg)}" target="_blank" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-instagram"></i></a>`;
                 if (globalTiktok) socialHtml += `<a href="${escapeHtml(globalTiktok)}" target="_blank" style="color: #cbd5e1; transition: 0.3s;"><i class="fa-brands fa-tiktok"></i></a>`;
@@ -474,7 +489,6 @@
                     }
                 }
 
-                // Filter UI blocks
                 let blocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
                     if (!b.styles) b.styles = { bg: 'transparent', padding: '40px', borderRadius: '15px' };
                     if (!b.data) b.data = {};
@@ -485,7 +499,7 @@
                 if (announcementData && announcementData.active === 'true' && announcementData.title) {
                     const annBanner = document.getElementById('global-announcement');
                     document.getElementById('ann-title').innerText = announcementData.title;
-                    document.getElementById('ann-desc').innerHTML = announcementData.content; // Render rich text
+                    document.getElementById('ann-desc').innerHTML = announcementData.content; 
                     annBanner.style.display = 'block';
                 }
 
@@ -515,13 +529,12 @@
                     </div>
                 `;
 
-                // 3. GENERATE UI BLOCKS (Added .reveal class for scroll animations)
+                // 3. GENERATE UI BLOCKS
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
                     let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
                     let inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
                     
-                    // Pembungkus Section with Reveal
                     let htmlChunk = `<section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}"><div class="page-container">`;
 
                     if (b.type === 'hero') {
@@ -535,7 +548,6 @@
                         </section>`;
                     } 
                     else if (b.type === 'text') {
-                        // Render rich text directly
                         htmlChunk += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${b.data.content || ''}</div>`;
                     }
                     else if (b.type === 'image') {
@@ -553,8 +565,6 @@
                     else if (b.type === 'divider') {
                         htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #e2e8f0; margin: 10px 0;">`;
                     }
-                    
-                    // WIDGETS DATA DRIVEN
                     else if (b.type === 'grid-news') {
                         let cols = b.data.columns || '3';
                         htmlChunk += `
@@ -583,15 +593,18 @@
                     else if (b.type === 'struktur') {
                         let treeHtml = '';
                         if (orgStructureData.length > 0) {
-                            treeHtml = buildPublicOrgTreeHTML(null, orgStructureData, 0); // Render Rekursif Root Nodes
+                            treeHtml = buildPublicOrgTreeHTML(null, orgStructureData, 0); 
                         } else {
                             treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`;
                         }
                         
+                        // IMPLEMENTASI PERBAIKAN BUG TAMPILAN (Tidak terpotong dan garis terhubung)
                         htmlChunk += `
                         <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Organisasi'}</h2>
-                        <div class="tree-wrapper">
-                            ${treeHtml}
+                        <div class="tree-preview-wrapper">
+                            <div class="tree-container-inner">
+                                ${treeHtml}
+                            </div>
                         </div>`;
                     }
                     else if (b.type === 'finance') {
@@ -620,7 +633,6 @@
                                 </div>
                             </div>`;
                         
-                        // Fetch data directly from internal DB using currentWorkspaceId
                         supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single().then(({data: fData}) => {
                             let total = fData ? parseFloat(fData.total_rab) : 0; 
                             let real = fData ? parseFloat(fData.realisasi_rab) : 0;
@@ -705,16 +717,11 @@
 
                 containerHtml.innerHTML = blocksHTMLString;
 
-                // Matikan loading screen
                 document.getElementById('loader').style.opacity = '0';
                 setTimeout(() => {
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('footer').style.display = 'block';
-                    
-                    // Inisiasi trigger scroll reveal
                     initScrollAnimations();
-                    
-                    // Tampilkan Welcome Toast
                     showToast(`Selamat datang di portal ${orgName}`, 'success');
                 }, 500);
 

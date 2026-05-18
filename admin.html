@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Workspace - Campus Innovate</title>
-    <link rel="icon" type="image/png" href="coreva_logo.png">
     <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -581,14 +580,9 @@
         .mini-rte-editor { padding: 12px; min-height: 120px; max-height: 400px; overflow-y: auto; outline: none; font-size: 0.9rem; line-height: 1.6; color: #334155; }
         .mini-rte-editor ul, .mini-rte-editor ol { padding-left: 20px; margin: 10px 0;}
 
-        /* HIERARCHY TREE ADMIN */
-        .tree-node { display: flex; flex-direction: column; align-items: center; position: relative; margin-top: 20px; width: 100%;}
-        .tree-node::before { content: ''; position: absolute; top: -20px; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; }
-        .tree-node:first-child::before { display: none; }
-        .tree-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-top: 4px solid var(--theme-color); text-align: center; width: 220px; position: relative; z-index: 2;}
-        .tree-children { display: flex; justify-content: center; gap: 20px; width: 100%; position: relative; padding-top: 20px; }
-        .tree-children::before { content: ''; position: absolute; top: 0; left: 50%; border-top: 2px solid #cbd5e1; width: calc(100% - 220px); transform: translateX(-50%); }
-
+        /* DRAG AND DROP ORG TREE ADMIN */
+        .drag-over-org { background-color: #e0f2fe !important; outline: 2px dashed var(--blue); }
+        
         .pricing-card { border: 2px solid var(--secondary); border-radius: 15px; padding: 30px; text-align: center; background: linear-gradient(180deg, #fff, #fffdf8); position: relative; overflow: hidden;}
         .pricing-card .badge { position: absolute; top: 15px; right: -30px; background: var(--secondary); color: var(--primary); padding: 5px 40px; transform: rotate(45deg); font-weight: bold; font-size: 0.8rem;}
         
@@ -619,9 +613,6 @@
             .builder-wrapper:not(.builder-fullscreen) .builder-tools { width: 100%; flex-direction: row; flex-wrap: wrap; height: auto; padding: 15px;}
             .builder-wrapper:not(.builder-fullscreen) .builder-properties { width: 100%; border-left: none; border-top: 4px solid var(--secondary); margin-left: 0;}
             .builder-wrapper:not(.builder-fullscreen) .resizer { display: none; }
-            .tree-children { flex-direction: column; align-items: center; }
-            .tree-children::before { display: none; }
-            .tree-node::before { display: none; }
         }
         @media (max-width: 768px) {
             .mobile-header { display: flex; }
@@ -629,6 +620,169 @@
             .sidebar.active { transform: translateX(0); }
             .main-content { margin-left: 0; width: 100%; padding: 80px 15px 20px; height: auto;}
             .analytics-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ==========================================
+           FIX BUGS: STRUKTUR ORGANISASI DI WEB BUILDER
+           (Menggunakan CSS Org-Chart Method dengan ::before & ::after)
+           ========================================== */
+        .tree-preview-wrapper { 
+            width: 100%; 
+            overflow-x: auto; 
+            padding: 20px 0 40px 0; 
+            display: block; 
+            text-align: center; 
+            white-space: nowrap; 
+        }
+        
+        .tree-preview-wrapper::-webkit-scrollbar { height: 8px; }
+        .tree-preview-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .tree-preview-wrapper::-webkit-scrollbar-track { background: transparent; }
+
+        /* Bungkus seluruh tree untuk mencegah terpotong (cut-off bug) */
+        .tree-container-inner {
+            display: inline-flex; 
+            flex-direction: column; 
+            align-items: center;
+            min-width: min-content; 
+            margin: 0 auto; 
+            padding: 0 20px;
+        }
+
+        /* Pembungkus cabang anak (memiliki garis horizontal di atasnya) */
+        .tree-children-preview { 
+            display: flex; 
+            justify-content: center; 
+            position: relative; 
+            padding-top: 20px; 
+        }
+
+        /* Garis vertikal panjang dari Card Parent (Atasan) ke garis horizontal Children */
+        .tree-children-preview::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 50%; 
+            border-left: 2px solid #d3d3d1; 
+            width: 0; 
+            height: 20px; 
+            transform: translateX(-50%); 
+        }
+
+        /* Masing-masing Node (Atasan maupun Anak) */
+        .tree-node-preview { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative; 
+            padding: 20px 10px 0 10px; 
+            transition: 0.3s;
+        }
+
+        /* Garis horizontal (pembagi) di atas setiap node (anak) */
+        .tree-node-preview::before { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            right: 0; 
+            border-top: 2px solid #d3d3d1; 
+        }
+
+        /* Garis vertikal kecil dari garis horizontal turun ke Card (anak) */
+        .tree-node-preview::after { 
+            content: ''; 
+            position: absolute; 
+            top: 0; 
+            left: 50%; 
+            border-left: 2px solid #d3d3d1; 
+            width: 0; 
+            height: 20px; 
+            transform: translateX(-50%); 
+        }
+
+        /* Menghapus garis horizontal berlebih di Node Pertama dan Terakhir */
+        .tree-node-preview:first-child::before { left: 50%; }
+        .tree-node-preview:last-child::before { right: 50%; }
+        /* Jika hanya ada 1 anak, hilangkan garis horizontal sama sekali */
+        .tree-node-preview:first-child:last-child::before { display: none; }
+
+        /* KONDISI KHUSUS UNTUK ROOT NODE (Paling Atas) */
+        /* Kita tidak ingin Root Node punya garis di atasnya */
+        .tree-container-inner > .tree-children-preview > .tree-node-preview::before,
+        .tree-container-inner > .tree-children-preview > .tree-node-preview::after { 
+            display: none; 
+        }
+        .tree-container-inner > .tree-children-preview > .tree-node-preview { 
+            padding-top: 0; 
+        }
+        .tree-container-inner > .tree-children-preview::before { 
+            display: none; 
+        }
+        .tree-container-inner > .tree-children-preview { 
+            padding-top: 0; 
+        }
+        
+        /* STYLE KARTU DPH (Minimalis ala Notion) */
+        .tree-card-preview { 
+            background: #ffffff; 
+            padding: 15px; 
+            border-radius: 6px; 
+            border: 1px solid #d3d3d1; 
+            text-align: center; 
+            min-width: 200px; 
+            position: relative; 
+            z-index: 2; 
+            transition: 0.2s;
+        }
+        .tree-card-preview:hover { 
+            background: #f7f7f5; 
+            box-shadow: rgba(15, 15, 15, 0.05) 0px 2px 4px; 
+            transform: translateY(-2px);
+        }
+        
+        .tree-avatar-preview { 
+            width: 45px; 
+            height: 45px; 
+            background: #f7f7f5; 
+            border-radius: 50%; 
+            margin: 0 auto 10px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1rem; 
+            color: #787774; 
+            border: 1px solid #e9e9e7;
+        }
+        
+        .tree-name-preview { 
+            font-weight: 700; 
+            font-size: 0.95rem; 
+            color: #37352f; 
+            margin-bottom: 2px;
+        }
+        
+        .tree-role-preview { 
+            font-size: 0.7rem; 
+            color: #787774; 
+            font-weight: 500; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+        
+        .bph-badge-preview { 
+            position:absolute; 
+            top:-10px; 
+            left:50%; 
+            transform:translateX(-50%); 
+            background:#37352f; 
+            color:white; 
+            padding:3px 10px; 
+            border-radius:4px; 
+            font-weight:600; 
+            font-size:0.65rem; 
+            white-space:nowrap; 
+            letter-spacing:0.5px;
         }
     </style>
 </head>
@@ -1236,7 +1390,6 @@
 
             setTimeout(() => {
                 let basePrice = 0;
-                // Pricing Markup requested
                 if(ext === '.com') basePrice = 315000;
                 else if(ext === '.id') basePrice = 350000;
                 else if(ext === '.ac.id') basePrice = 320000;
@@ -1263,14 +1416,12 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // Setup GUI Resizers
             initResizers();
 
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
             currentAdminSession = session.user;
             
-            // FIX 406 ERROR: USE maybeSingle()
             const { data: wsData } = await supabaseClient.from('workspaces').select('*').eq('admin_id', currentAdminSession.id).maybeSingle(); 
             if (wsData) {
                 currentWorkspaceId = wsData.id;
@@ -1295,7 +1446,6 @@
             }
         });
 
-        // INIT RESIZERS LOGIC
         function initResizers() {
             const resizerLeft = document.getElementById('resizer-left');
             const resizerRight = document.getElementById('resizer-right');
@@ -1338,7 +1488,7 @@
                         toolsPanel.style.width = `${newLeftWidth}px`;
                     }
                 } else if (currentResizer === resizerRight) {
-                    const newRightWidth = rightWidth - dx; // geser ke kiri (dx negatif) artinya panel kanan membesar
+                    const newRightWidth = rightWidth - dx; 
                     if (newRightWidth > 200 && newRightWidth < 600) {
                         propPanel.style.width = `${newRightWidth}px`;
                     }
@@ -1365,7 +1515,6 @@
         function closePropertiesPanel() {
             document.getElementById('properties-panel').classList.remove('active');
             document.getElementById('resizer-right').style.display = 'none';
-            // Reset active state
             activeBlockId = null;
             renderCanvas();
         }
@@ -1420,40 +1569,13 @@
 
         function setupRealtimePresence() {
             const presenceChannel = supabaseClient.channel(`room_${currentWorkspaceId}`);
-            
             presenceChannel.on('presence', { event: 'sync' }, () => {
                 const state = presenceChannel.presenceState(); onlineUsers = {}; let count = 0;
-                for (const key in state) { 
-                    state[key].forEach(p => { 
-                        if(p.user_id !== currentAdminSession.id) { 
-                            onlineUsers[p.user_id] = true; 
-                            count++; 
-                            
-                            // FIX: Tangkap nama dari sinyal online jika namanya masih "User Tanpa Nama"
-                            const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
-                            if(idx !== -1 && p.nama_user && (!allMembersData[idx].nama_user || allMembersData[idx].nama_user === 'User Tanpa Nama')) {
-                                allMembersData[idx].nama_user = p.nama_user;
-                            }
-                        } 
-                    }); 
-                }
-                document.getElementById('online-count-badge').innerText = count; 
-                renderMembersTable();
-                
+                for (const key in state) { state[key].forEach(p => { if(p.user_id !== currentAdminSession.id) { onlineUsers[p.user_id] = true; count++; } }); }
+                document.getElementById('online-count-badge').innerText = count; renderMembersTable();
             }).on('presence', { event: 'join' }, ({ newPresences }) => { 
-                newPresences.forEach(p => { 
-                    if(p.user_id !== currentAdminSession.id) {
-                        showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); 
-                        
-                        // FIX: Update nama secara instan saat user join
-                        const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
-                        if(idx !== -1 && p.nama_user) allMembersData[idx].nama_user = p.nama_user;
-                        renderMembersTable();
-                    }
-                }); 
-                
+                newPresences.forEach(p => { if(p.user_id !== currentAdminSession.id) showToast(`${p.nama_user || 'Seseorang'} Online!`, 'success'); }); 
             }).on('presence', { event: 'leave' }, ({ leftPresences }) => { 
-                // Segera update timestamp last_seen secara lokal
                 const nowIso = new Date().toISOString();
                 leftPresences.forEach(p => {
                     const idx = allMembersData.findIndex(m => m.user_id === p.user_id);
@@ -1462,11 +1584,9 @@
                     }
                 });
                 renderMembersTable();
-                setTimeout(loadMembers, 2500); // Reload data utuh dari DB setelah 2.5 detik
+                setTimeout(loadMembers, 2500); 
             })
-            .subscribe(async (status) => { 
-                if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); 
-            });
+            .subscribe(async (status) => { if (status === 'SUBSCRIBED') await presenceChannel.track({ user_id: currentAdminSession.id, nama_user: 'Admin', online_at: new Date().toISOString() }); });
 
             supabaseClient.channel('db-changes')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'workspace_members', filter: `workspace_id=eq.${currentWorkspaceId}` }, payload => {
@@ -1475,8 +1595,6 @@
                     if(idx !== -1) {
                         allMembersData[idx] = updatedMember;
                         renderMembersTable();
-                    } else {
-                        loadMembers(); // Jika user baru tidak ada di daftar lokal, muat ulang semua
                     }
                 }).subscribe();
         }
@@ -1493,7 +1611,6 @@
             if (data) {
                 let rawBlocks = data.layout_data || [];
                 
-                // Extract Global Configs
                 const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
                 if (configBlock) {
                     globalOrgName = configBlock.orgName || globalOrgName;
@@ -1515,7 +1632,6 @@
                     document.getElementById('ann-status').value = globalAnnouncement.active;
                 }
                 
-                // Keep purely UI blocks
                 layoutBlocks = rawBlocks.filter(b => b.type !== 'global_data_config').map(b => {
                     if (!b.styles) b.styles = { bg: '#ffffff', padding: '40px', borderRadius: '15px' };
                     if (!b.data) b.data = {};
@@ -1542,9 +1658,7 @@
             draggedOrgId = id;
             e.dataTransfer.effectAllowed = "move";
         }
-        function allowDropOrg(e) {
-            e.preventDefault();
-        }
+        function allowDropOrg(e) { e.preventDefault(); }
         function dropOrg(e, targetId) {
             e.preventDefault();
             e.currentTarget.classList.remove('drag-over-org');
@@ -1558,7 +1672,7 @@
                 }
                 draggedNode.parentId = targetId;
                 renderOrgTable();
-                showToast("Struktur diubah! Klik Simpan Ke Publik untuk menyimpan secara online.", "info");
+                showToast("Struktur diubah! Klik Simpan Ke Publik untuk menyimpan.", "info");
             }
         }
         function dropToRoot(e) {
@@ -1605,13 +1719,11 @@
         function deleteOrgMember(id) {
             if(confirm("Hapus jabatan ini dari hierarki?")) {
                 globalOrgStructure = globalOrgStructure.filter(o => o.id !== id);
-                // remove references if parent deleted (make children top level)
                 globalOrgStructure.forEach(o => { if(o.parentId === id) o.parentId = null; });
                 renderOrgTable();
             }
         }
 
-        // Fungsi Rekursif Membuat List Dropdown
         function populateParentSelect(parentId, level = 0) {
             let options = '';
             const children = globalOrgStructure.filter(o => o.parentId === parentId);
@@ -1623,7 +1735,6 @@
             return options;
         }
 
-        // Fungsi Rekursif Merender Tabel Berundak
         function buildOrgTreeHTML(parentId, level = 0) {
             let html = '';
             const children = globalOrgStructure.filter(o => o.parentId === parentId);
@@ -1650,7 +1761,6 @@
         function renderOrgTable() {
             const tbody = document.getElementById('org-table-body');
             const pSelect = document.getElementById('org-parent-select');
-            
             pSelect.innerHTML = '<option value="">-- Tanpa Atasan (Posisi Tertinggi/BPH) --</option>' + populateParentSelect(null, 0);
 
             if(globalOrgStructure.length === 0) {
@@ -1660,21 +1770,23 @@
             }
         }
 
-        // Fungsi Rekursif Merender Bagan UI (Untuk Web Builder Preview)
+        // ==========================================
+        // FIX: RENDER STRUKTUR ORGANISASI PREVIEW DENGAN AESTHETIC NOTION (SEMPURNA)
+        // ==========================================
         function buildPublicOrgTreeHTML(parentId, level = 0) {
             const children = globalOrgStructure.filter(o => o.parentId === parentId);
             if(children.length === 0) return '';
             
-            let html = `<div class="tree-children">`;
+            let html = `<div class="tree-children-preview">`;
             children.forEach(m => {
-                let badge = level === 0 ? `<div style="position:absolute; top:-15px; left:50%; transform:translateX(-50%); background:var(--secondary); color:var(--primary); padding:4px 15px; border-radius:20px; font-weight:bold; font-size:0.75rem; white-space:nowrap; box-shadow:0 4px 10px rgba(0,0,0,0.1);"><i class="fa-solid fa-crown"></i> BPH / Pimpinan</div>` : '';
+                let badge = level === 0 ? `<div class="bph-badge-preview">BPH / Pimpinan</div>` : '';
                 html += `
-                <div class="tree-node">
-                    <div class="tree-card">
+                <div class="tree-node-preview">
+                    <div class="tree-card-preview">
                         ${badge}
-                        <div style="width:60px; height:60px; background:#e2e8f0; border-radius:50%; margin:0 auto 10px; display:flex; align-items:center; justify-content:center; font-size:1.5rem; color:#94a3b8;"><i class="fa-solid fa-user"></i></div>
-                        <div style="font-weight:800; font-size:0.95rem; color:var(--text); line-height: 1.2; margin-bottom:5px;">${escapeHtml(m.name)}</div>
-                        <div style="font-size:0.75rem; color:#64748b; font-weight:600; text-transform:uppercase;">${escapeHtml(m.role)}</div>
+                        <div class="tree-avatar-preview"><i class="fa-solid fa-user"></i></div>
+                        <div class="tree-name-preview">${escapeHtml(m.name)}</div>
+                        <div class="tree-role-preview">${escapeHtml(m.role)}</div>
                     </div>
                     ${buildPublicOrgTreeHTML(m.id, level + 1)}
                 </div>`;
@@ -1682,6 +1794,7 @@
             html += `</div>`;
             return html;
         }
+
 
         // --- NEWS LOGIC ---
         function addNewsItem(e) {
@@ -1696,7 +1809,7 @@
                 title: document.getElementById('news-title').value,
                 desc: descHtml
             };
-            globalNewsList.unshift(newItem); // put at top
+            globalNewsList.unshift(newItem); 
             
             document.getElementById('news-img').value = '';
             document.getElementById('news-date').value = '';
@@ -1739,7 +1852,6 @@
 
         // --- TRANSPARANSI & KPI ADMIN DASHBOARD LOGIC ---
         async function loadAdminTransparansi() {
-            // Fetch Keuangan
             const { data: finData } = await supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).maybeSingle(); 
             let t = 0; let r = 0; 
             if (finData) { t = parseFloat(finData.total_rab); r = parseFloat(finData.realisasi_rab); } 
@@ -1750,7 +1862,6 @@
             document.getElementById('adm-fin-sisa').innerText = formatRp(sisa);
             document.getElementById('adm-fin-persen').innerText = persentase + '%';
 
-            // Fetch KPI Detail
             const { data: kpis } = await supabaseClient.from('kpi_items').select('*, departments(nama_departemen), programs(nama_program)').eq('workspace_id', currentWorkspaceId);
             const kpiListContainer = document.getElementById('adm-kpi-list');
             kpiListContainer.innerHTML = '';
@@ -1786,9 +1897,7 @@
         function dragStartTool(e, type) { e.dataTransfer.setData('blockType', type); }
         function allowDrop(e) { e.preventDefault(); document.getElementById('canvas-dropzone').classList.add('drag-over'); }
         function dropToCanvas(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
+            e.preventDefault(); e.stopPropagation();
             document.getElementById('canvas-dropzone').classList.remove('drag-over');
             const type = e.dataTransfer.getData('blockType');
             if(!type) return;
@@ -1801,15 +1910,12 @@
             else if(type === 'video') { newBlock.data = { url: "https://www.youtube.com/embed/dQw4w9WgXcQ" }; }
             else if(type === 'newsletter') { newBlock.data = { title: "Pengumuman Live Terhubung", content: "Widget ini akan otomatis membaca Pengumuman dari Tab Berita." }; }
             else if(type === 'divider') { newBlock.data = { style: "solid" }; newBlock.styles.padding = '20px'; }
-            else if(type === 'grid-news') { 
-                newBlock.data = { title: "Berita & Agenda Terkini", columns: "3", items: [] }; 
-            }
+            else if(type === 'grid-news') { newBlock.data = { title: "Berita & Agenda Terkini", columns: "3", items: [] }; }
             else if(type === 'struktur') { newBlock.data = { title: "Struktur Organisasi BEM" }; }
             else if(['finance','kpi','program'].includes(type)) { newBlock.data = {}; }
             
             layoutBlocks.push(newBlock);
-            renderCanvas();
-            selectBlock(newBlock.id);
+            renderCanvas(); selectBlock(newBlock.id);
             setTimeout(() => { document.getElementById('preview-window').scrollTop = document.getElementById('preview-window').scrollHeight; }, 100);
         }
 
@@ -1834,26 +1940,17 @@
                 else if(b.type === 'kpi') linkTitle = 'KPI Target';
                 else if(b.type === 'program') linkTitle = 'Program Kerja';
                 else if(b.type === 'grid-news') linkTitle = 'Berita';
-                
-                if(linkTitle) {
-                    navLinks += `<a href="#section-${b.id}" onclick="event.preventDefault()">${escapeHtml(linkTitle)}</a>`;
-                }
+                if(linkTitle) navLinks += `<a href="#section-${b.id}" onclick="event.preventDefault()">${escapeHtml(linkTitle)}</a>`;
             });
             
             let navBrandContent = globalLogoUrl ? `<img src="${escapeHtml(globalLogoUrl)}" style="height:30px; object-fit:contain;"> ${escapeHtml(globalOrgName)}` : `<i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> ${escapeHtml(globalOrgName)}`;
             
-            htmlString += `
-                <div class="preview-navbar">
-                    <div class="brand">${navBrandContent}</div>
-                    <div class="preview-nav-links">${navLinks}</div>
-                </div>
-            `;
+            htmlString += `<div class="preview-navbar"><div class="brand">${navBrandContent}</div><div class="preview-nav-links">${navLinks}</div></div>`;
 
             layoutBlocks.forEach((block, index) => {
                 const isSelected = activeBlockId === block.id ? 'selected' : '';
                 let bgStyle = block.styles.bg !== '#ffffff' ? block.styles.bg : 'transparent';
                 let inlineStyle = `background-color: ${bgStyle}; padding: ${block.styles.padding} 20px; border-radius: ${block.styles.borderRadius}; margin-bottom: 10px;`;
-                
                 let blockContent = '';
                 
                 if (block.type === 'hero') {
@@ -1867,50 +1964,28 @@
                             </div>
                         </div>`;
                 } 
-                else if (block.type === 'text') {
-                    blockContent = `<div style="font-size:1rem; line-height:1.8; color:#334155;">${block.data.content || ''}</div>`;
-                }
-                else if (block.type === 'image') {
-                    blockContent = `<div style="text-align:${escapeHtml(block.data.align) || 'center'};"><img src="${escapeHtml(block.data.url)}" style="width:${escapeHtml(block.data.width) || '100%'}; border-radius:${block.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:400px; object-fit:cover;"></div>`;
-                }
-                else if (block.type === 'video') {
-                    blockContent = `<div><iframe src="${escapeHtml(block.data.url)}" style="width:100%; height:300px; border-radius:${block.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1); pointer-events:none;"></iframe></div>`;
-                }
-                else if (block.type === 'newsletter') {
-                    blockContent = `<div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> WIDGET: Banner Pengumuman Terhubung Live</h3><p style="color:#64748b; font-size:0.9rem;">(Akan di-override dengan data dari Menu Berita & Pengumuman)</p></div>`;
-                }
-                else if (block.type === 'divider') {
-                    blockContent = `<hr style="border:0; border-top: 3px ${escapeHtml(block.data.style) || 'solid'} #cbd5e1; margin: 0;">`;
-                }
-                else if (block.type === 'grid-news') {
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid rgba(10,48,85,0.1); padding-bottom: 10px;">${escapeHtml(block.data.title)}</h2>
-                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-newspaper" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Berita Terhubung Live</b><br>Jumlah dan isi berita akan langsung mengambil dari database Menu Berita di Admin HTML.</div>`;
-                }
+                else if (block.type === 'text') { blockContent = `<div style="font-size:1rem; line-height:1.8; color:#334155;">${block.data.content || ''}</div>`; }
+                else if (block.type === 'image') { blockContent = `<div style="text-align:${escapeHtml(block.data.align) || 'center'};"><img src="${escapeHtml(block.data.url)}" style="width:${escapeHtml(block.data.width) || '100%'}; border-radius:${block.styles.borderRadius}; box-shadow:0 10px 30px rgba(0,0,0,0.1); max-height:400px; object-fit:cover;"></div>`; }
+                else if (block.type === 'video') { blockContent = `<div><iframe src="${escapeHtml(block.data.url)}" style="width:100%; height:300px; border-radius:${block.styles.borderRadius}; border:none; box-shadow:0 5px 20px rgba(0,0,0,0.1); pointer-events:none;"></iframe></div>`; }
+                else if (block.type === 'newsletter') { blockContent = `<div style="background: white; padding: 20px; border-left: 5px solid #e67e22; border-radius: inherit; box-shadow: 0 4px 15px rgba(0,0,0,0.05);"><h3 style="margin-bottom:8px; color:#e67e22; font-weight:800;"><i class="fa-solid fa-bullhorn"></i> WIDGET: Banner Pengumuman Terhubung Live</h3><p style="color:#64748b; font-size:0.9rem;">(Akan di-override dengan data dari Menu Berita & Pengumuman)</p></div>`; }
+                else if (block.type === 'divider') { blockContent = `<hr style="border:0; border-top: 3px ${escapeHtml(block.data.style) || 'solid'} #cbd5e1; margin: 0;">`; }
+                else if (block.type === 'grid-news') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; border-bottom: 2px solid rgba(10,48,85,0.1); padding-bottom: 10px;">${escapeHtml(block.data.title)}</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;"><i class="fa-solid fa-newspaper" style="font-size:2rem; margin-bottom:10px;"></i><br><b>WIDGET: Berita Terhubung Live</b><br>Jumlah dan isi berita akan langsung mengambil dari database Menu Berita di Admin HTML.</div>`; }
                 else if (block.type === 'struktur') {
                     let treeHtml = '';
-                    if (globalOrgStructure.length > 0) {
-                        treeHtml = buildPublicOrgTreeHTML(null, 0); // Render Rekursif Root Nodes
-                    } else {
-                        treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`;
-                    }
+                    if (globalOrgStructure.length > 0) { treeHtml = buildPublicOrgTreeHTML(null, 0); } 
+                    else { treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`; }
                     
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; text-align: center;">${escapeHtml(block.data.title)}</h2>
-                                    <div style="width: 100%; overflow-x: auto; padding-bottom: 20px;">
-                                        ${treeHtml}
+                    // FIX: IMPLEMENTASI UI BARU UNTUK PREVIEW STRUKTUR
+                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 30px; text-align: center; color:var(--text);">${escapeHtml(block.data.title)}</h2>
+                                    <div class="tree-preview-wrapper">
+                                        <div class="tree-container-inner">
+                                            ${treeHtml}
+                                        </div>
                                     </div>`;
                 }
-                else if (block.type === 'finance') {
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
-                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Transparansi Keuangan Auto-Sync)</div>`;
-                }
-                else if (block.type === 'kpi') {
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-bullseye"></i> Capaian KPI Target</h2>
-                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget KPI Organisasi Auto-Sync)</div>`;
-                }
-                else if (block.type === 'program') {
-                    blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
-                                    <div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Update Jadwal/Timeline Auto-Sync)</div>`;
-                }
+                else if (block.type === 'finance') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Transparansi Keuangan Auto-Sync)</div>`; }
+                else if (block.type === 'kpi') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-bullseye"></i> Capaian KPI Target</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget KPI Organisasi Auto-Sync)</div>`; }
+                else if (block.type === 'program') { blockContent = `<h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px;"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2><div style="background: #e2e8f0; padding: 30px; text-align: center; border-radius:10px; color:#64748b;">(Widget Update Jadwal/Timeline Auto-Sync)</div>`; }
 
                 htmlString += `
                     <div id="section-${block.id}" class="preview-section ${isSelected}" onclick="event.stopPropagation(); selectBlock('${block.id}')" style="${inlineStyle}">
@@ -1920,8 +1995,7 @@
                             <button onclick="event.stopPropagation(); moveBlock(${index}, 1)" title="Pindah Ke Bawah"><i class="fa-solid fa-arrow-down"></i></button>
                             <button class="del-btn" onclick="event.stopPropagation(); removeBlock('${block.id}')" title="Hapus Bagian"><i class="fa-solid fa-trash"></i></button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
 
             previewWindow.innerHTML = `<div style="padding: 20px; max-width: 1000px; margin: 0 auto;">${htmlString}</div>`;
@@ -1929,19 +2003,15 @@
         }
 
         function selectBlock(id) {
-            if (activeBlockId === id) return; // Mencegah reset form (Bug Cursor Focus pada Video)
+            if (activeBlockId === id) return; 
             
-            activeBlockId = id;
-            renderCanvas(); 
-            
-            const block = layoutBlocks.find(b => b.id === id);
-            if (!block) return;
+            activeBlockId = id; renderCanvas(); 
+            const block = layoutBlocks.find(b => b.id === id); if (!block) return;
             
             document.getElementById('properties-panel').classList.add('active');
             document.getElementById('resizer-right').style.display = 'flex';
             document.getElementById('prop-empty').style.display = 'none';
-            const propForm = document.getElementById('prop-form');
-            propForm.style.display = 'block';
+            const propForm = document.getElementById('prop-form'); propForm.style.display = 'block';
             
             let html = `
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:#f1f5f9; padding:10px; border-radius:8px;">
@@ -1953,30 +2023,13 @@
                 <hr style="border:1px dashed #e2e8f0; margin:20px 0;"><h4 style="margin-bottom:15px; color:var(--primary); font-size:0.9rem; font-weight:800;">📝 Isi Konten (Auto-Update)</h4>
             `;
 
-            if(block.type === 'hero') {
-                html += `<div class="prop-group"><label>Judul Utama (Heading Besar)</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Sub Judul / Slogan</label><textarea rows="3" oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle || ''}</textarea></div><div class="prop-group"><label>URL Gambar Banner Background</label><input type="text" placeholder="https://..." value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`;
-            } 
-            else if (block.type === 'text') { 
-                html += `<div class="prop-group"><label>Teks Paragraf Panjang</label>
-                            <div class="mini-rte-container">
-                                <div class="mini-rte-toolbar">
-                                    <button type="button" onclick="document.execCommand('bold',false,null)"><i class="fa-solid fa-bold"></i></button>
-                                    <button type="button" onclick="document.execCommand('italic',false,null)"><i class="fa-solid fa-italic"></i></button>
-                                    <button type="button" onclick="document.execCommand('underline',false,null)"><i class="fa-solid fa-underline"></i></button>
-                                    <button type="button" onclick="document.execCommand('insertUnorderedList',false,null)"><i class="fa-solid fa-list-ul"></i></button>
-                                    <button type="button" onclick="document.execCommand('insertOrderedList',false,null)"><i class="fa-solid fa-list-ol"></i></button>
-                                </div>
-                                <div class="mini-rte-editor" contenteditable="true" oninput="updateBlockData('${id}', 'content', this.innerHTML)">${block.data.content || ''}</div>
-                            </div>
-                        </div>`; 
-            } 
+            if(block.type === 'hero') { html += `<div class="prop-group"><label>Judul Utama (Heading Besar)</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Sub Judul / Slogan</label><textarea rows="3" oninput="updateBlockData('${id}', 'subtitle', this.value)">${block.data.subtitle || ''}</textarea></div><div class="prop-group"><label>URL Gambar Banner Background</label><input type="text" placeholder="https://..." value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`; } 
+            else if (block.type === 'text') { html += `<div class="prop-group"><label>Teks Paragraf Panjang</label><div class="mini-rte-container"><div class="mini-rte-toolbar"><button type="button" onclick="document.execCommand('bold',false,null)"><i class="fa-solid fa-bold"></i></button><button type="button" onclick="document.execCommand('italic',false,null)"><i class="fa-solid fa-italic"></i></button><button type="button" onclick="document.execCommand('underline',false,null)"><i class="fa-solid fa-underline"></i></button><button type="button" onclick="document.execCommand('insertUnorderedList',false,null)"><i class="fa-solid fa-list-ul"></i></button><button type="button" onclick="document.execCommand('insertOrderedList',false,null)"><i class="fa-solid fa-list-ol"></i></button></div><div class="mini-rte-editor" contenteditable="true" oninput="updateBlockData('${id}', 'content', this.innerHTML)">${block.data.content || ''}</div></div></div>`; } 
             else if (block.type === 'image') { html += `<div class="prop-group"><label>URL Link Gambar</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div><div class="prop-group"><label>Lebar Gambar (%)</label><input type="number" min="10" max="100" value="${parseInt(block.data.width) || 100}" onchange="updateBlockData('${id}', 'width', this.value + '%')"></div><div class="prop-group"><label>Posisi Peletakan</label><select onchange="updateBlockData('${id}', 'align', this.value)"><option value="left" ${block.data.align==='left'?'selected':''}>Kiri</option><option value="center" ${block.data.align==='center'?'selected':''}>Tengah</option><option value="right" ${block.data.align==='right'?'selected':''}>Kanan</option></select></div>`; }
             else if (block.type === 'video') { html += `<div class="prop-group"><label>Link Embed YouTube Khusus</label><input type="text" value="${block.data.url || ''}" oninput="updateBlockData('${id}', 'url', this.value)"></div>`; }
             else if (block.type === 'newsletter') { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Widget Sinkronisasi:</b> Untuk mengubah teks/isi pengumuman, silakan tuju Menu "Berita & Pengumuman".</div>`; }
             else if (block.type === 'divider') { html += `<div class="prop-group"><label>Tipe Pola Garis</label><select onchange="updateBlockData('${id}', 'style', this.value)"><option value="solid" ${block.data.style==='solid'?'selected':''}>Garis Lurus Penuh</option><option value="dashed" ${block.data.style==='dashed'?'selected':''}>Garis Putus-putus</option><option value="dotted" ${block.data.style==='dotted'?'selected':''}>Titik-titik</option></select></div>`; }
-            else if (block.type === 'grid-news') { 
-                html += `<div class="prop-group"><label>Judul Section Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Jumlah Kolom (Grid Display)</label><select onchange="updateBlockData('${id}', 'columns', this.value)"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom</option></select></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Widget Live:</b> Jumlah item berita akan ditarik secara otomatis dari daftar Menu "Berita & Pengumuman" tanpa batasan.</div>`; 
-            } 
+            else if (block.type === 'grid-news') { html += `<div class="prop-group"><label>Judul Section Grid</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div class="prop-group"><label>Jumlah Kolom (Grid Display)</label><select onchange="updateBlockData('${id}', 'columns', this.value)"><option value="2" ${block.data.columns==='2'?'selected':''}>2 Kolom</option><option value="3" ${block.data.columns==='3'?'selected':''}>3 Kolom</option><option value="4" ${block.data.columns==='4'?'selected':''}>4 Kolom</option></select></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Widget Live:</b> Jumlah item berita akan ditarik secara otomatis dari daftar Menu "Berita & Pengumuman" tanpa batasan.</div>`; } 
             else if (block.type === 'struktur') { html += `<div class="prop-group"><label>Sematkan Judul Blok</label><input type="text" value="${block.data.title || ''}" oninput="updateBlockData('${id}', 'title', this.value)"></div><div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sinkronisasi Aktif:</b> Data profil dan jabatan anggota akan ditarik otomatis dari konfigurasi di menu "Struktur Organisasi".</div>`; } 
             else { html += `<div style="background:#e9f7ef; padding:15px; border-radius:8px; font-size:0.8rem; color:#27ae60; border:1px solid #2ecc71;"><b>Sistem Otomatis (Live):</b> Widget ini otomatis menyesuaikan datanya sesuai dengan rekapitulasi data asli di Dashboard Internal Workspace.</div>`; }
 
@@ -1988,19 +2041,13 @@
         function moveBlock(idx, dir) { if(idx + dir < 0 || idx + dir >= layoutBlocks.length) return; const temp = layoutBlocks[idx]; layoutBlocks[idx] = layoutBlocks[idx + dir]; layoutBlocks[idx + dir] = temp; renderCanvas(); }
         function removeBlock(id) { layoutBlocks = layoutBlocks.filter(b => b.id !== id); if(activeBlockId === id) { document.getElementById('prop-form').style.display='none'; document.getElementById('prop-empty').style.display='block'; activeBlockId = null; document.getElementById('resizer-right').style.display = 'none'; } renderCanvas(); }
 
-        // ==========================================
-        // ANALYTICS DATA FETCH & CHARTS
-        // ==========================================
         async function initChartsSafe() {
             const canvas1 = document.getElementById('publicTrafficChart');
             const canvas2 = document.getElementById('userActivityChart');
             
             if(canvas1 && canvas2) {
-                // BUG FIX: Hancurkan instance chart yang lama menggunakan registry bawaan Chart.js
-                // Ini mencegah error "Canvas is already in use" saat user klik menu bolak-balik
                 let existingChart1 = Chart.getChart(canvas1);
                 if (existingChart1) existingChart1.destroy();
-
                 let existingChart2 = Chart.getChart(canvas2);
                 if (existingChart2) existingChart2.destroy();
 
@@ -2009,42 +2056,18 @@
                 past7Days.setDate(today.getDate() - 6);
                 const startDateStr = past7Days.toISOString().split('T')[0];
 
-                const { data: trafficData } = await supabaseClient.from('attendances')
-                    .select('tanggal, user_id')
-                    .eq('workspace_id', currentWorkspaceId)
-                    .gte('tanggal', startDateStr);
-
+                const { data: trafficData } = await supabaseClient.from('attendances').select('tanggal, user_id').eq('workspace_id', currentWorkspaceId).gte('tanggal', startDateStr);
                 const dateCountsMap = {};
-                for(let i=6; i>=0; i--) {
-                    let d = new Date(today);
-                    d.setDate(today.getDate() - i);
-                    dateCountsMap[d.toISOString().split('T')[0]] = new Set();
-                }
+                for(let i=6; i>=0; i--) { let d = new Date(today); d.setDate(today.getDate() - i); dateCountsMap[d.toISOString().split('T')[0]] = new Set(); }
 
-                if(trafficData) {
-                    trafficData.forEach(row => {
-                        if(dateCountsMap[row.tanggal]) {
-                            dateCountsMap[row.tanggal].add(row.user_id);
-                        }
-                    });
-                }
+                if(trafficData) { trafficData.forEach(row => { if(dateCountsMap[row.tanggal]) { dateCountsMap[row.tanggal].add(row.user_id); } }); }
 
                 const labelsTraffic = Object.keys(dateCountsMap).map(d => { let p = d.split('-'); return `${p[2]}/${p[1]}`; });
                 const dataTraffic = Object.values(dateCountsMap).map(set => set.size);
 
                 chartTraffic = new Chart(canvas1.getContext('2d'), { 
                     type: 'line', 
-                    data: { 
-                        labels: labelsTraffic, 
-                        datasets: [{ 
-                            label: 'Pengurus Aktif (Unik)', 
-                            data: dataTraffic, 
-                            borderColor: '#F6B23B', 
-                            backgroundColor: 'rgba(246, 178, 59, 0.15)',
-                            fill: true,
-                            tension: 0.4
-                        }] 
-                    },
+                    data: { labels: labelsTraffic, datasets: [{ label: 'Pengurus Aktif (Unik)', data: dataTraffic, borderColor: '#F6B23B', backgroundColor: 'rgba(246, 178, 59, 0.15)', fill: true, tension: 0.4 }] },
                     options: { maintainAspectRatio: false }
                 });
 
@@ -2055,15 +2078,7 @@
 
                 chartActivity = new Chart(canvas2.getContext('2d'), { 
                     type: 'bar', 
-                    data: { 
-                        labels: ['KPI Target', 'Keuangan (RAB)', 'Program Kerja', 'Surat Digital'], 
-                        datasets: [{ 
-                            label: 'Total Dokumen Tersimpan', 
-                            data: [countKpi||0, countRab||0, countProg||0, countDO||0], 
-                            backgroundColor: '#0A3055',
-                            borderRadius: 6
-                        }] 
-                    },
+                    data: { labels: ['KPI Target', 'Keuangan (RAB)', 'Program Kerja', 'Surat Digital'], datasets: [{ label: 'Total Dokumen Tersimpan', data: [countKpi||0, countRab||0, countProg||0, countDO||0], backgroundColor: '#0A3055', borderRadius: 6 }] },
                     options: { maintainAspectRatio: false }
                 });
             }
