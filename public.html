@@ -13,8 +13,14 @@
     <style>
         :root { --theme-color: #0A3055; --bg-body: #f8fafc; --text: #1e293b; --secondary: #F6B23B; --green: #2ecc71; --red: #e74c3c;}
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
-        body { background: var(--bg-body); color: var(--text); overflow-x: hidden; }
+
+        /* ============================================
+           FIX BUG UTAMA: overflow-x: hidden dipindah
+           dari body ke html agar 100vw trick bekerja
+           dan position sticky navbar tidak rusak
+           ============================================ */
+        html { overflow-x: hidden; scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { background: var(--bg-body); color: var(--text); }
 
         /* CUSTOM TOAST NOTIFICATION */
         #toast-container { position: fixed; top: 90px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
@@ -49,7 +55,7 @@
 
         /* LAYOUT & UTILITIES */
         .page-container { max-width: 1150px; margin: 0 auto; padding: 0 20px; }
-        .dynamic-block { margin: 30px auto; overflow: hidden; position: relative; }
+        .dynamic-block { margin: 30px auto; position: relative; }
         
         /* SCROLL ANIMATION CLASS */
         .reveal { opacity: 0; transform: translateY(40px); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -67,62 +73,150 @@
         .section-heading::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--theme-color), transparent); opacity: 0.15; border-radius: 5px;}
 
         /* ==========================================
-           FIX BUGS: STRUKTUR ORGANISASI (NOTION AESTHETIC & PERFECT LINES)
+           FIX BUG STRUKTUR ORGANISASI
+           - Full width bleed (100vw) agar tidak terpotong
+           - Garis connector tetap rapi
            ========================================== */
+
+        /* Section struktur: padding kiri-kanan 0 agar tree bisa full-width */
+        .section-struktur-wrap {
+            width: 100%;
+            overflow: visible;
+        }
+
+        /* Heading struktur tetap ikut page-container */
+        .section-struktur-heading {
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Full-bleed wrapper: keluar dari page-container, mentok kiri-kanan viewport */
         .tree-preview-wrapper { 
-            width: 100%; overflow-x: auto; padding: 20px 0 40px 0; 
-            display: block; text-align: center; white-space: nowrap; 
+            width: 100vw;
+            position: relative;
+            left: 50%;
+            margin-left: -50vw;
+            overflow-x: auto; 
+            padding: 20px 60px 40px 60px;
+            display: block; 
+            text-align: center; 
+            white-space: nowrap;
+            box-sizing: border-box;
+            /* Background biar ada feel section tersendiri */
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
         }
         
         .tree-preview-wrapper::-webkit-scrollbar { height: 8px; }
         .tree-preview-wrapper::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .tree-preview-wrapper::-webkit-scrollbar-track { background: transparent; }
+        .tree-preview-wrapper::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
 
         .tree-container-inner {
-            display: inline-flex; flex-direction: column; align-items: center;
-            min-width: min-content; margin: 0 auto; padding: 0 20px;
+            display: inline-flex; 
+            flex-direction: column; 
+            align-items: center;
+            min-width: min-content; 
+            margin: 0 auto; 
+            padding: 10px 60px 10px 60px;
         }
 
         .tree-children-preview { 
-            display: flex; justify-content: center; position: relative; padding-top: 20px; 
+            display: flex; 
+            justify-content: center; 
+            position: relative; 
+            padding-top: 20px; 
         }
         
-        /* Garis vertikal yang turun dari Parent ke children container */
+        /* Garis vertikal turun dari parent ke row anak */
         .tree-children-preview::before { 
-            content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; transform: translateX(-50%); 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 50%; 
+            border-left: 2px solid #cbd5e1; 
+            width: 0; 
+            height: 20px; 
+            transform: translateX(-50%); 
         }
 
         .tree-node-preview { 
-            display: flex; flex-direction: column; align-items: center; position: relative; padding: 20px 10px 0 10px; transition: 0.3s;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            position: relative; 
+            padding: 20px 12px 0 12px; 
+            transition: 0.3s;
         }
-        /* Garis horizontal pembagi anak-anak */
+
+        /* Garis horizontal penghubung antar sibling */
         .tree-node-preview::before { 
-            content: ''; position: absolute; top: 0; left: 0; right: 0; border-top: 2px solid #cbd5e1; 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 0; right: 0; 
+            border-top: 2px solid #cbd5e1; 
         }
+
         /* Garis vertikal turun ke card anak */
         .tree-node-preview::after { 
-            content: ''; position: absolute; top: 0; left: 50%; border-left: 2px solid #cbd5e1; width: 0; height: 20px; transform: translateX(-50%); 
+            content: ''; 
+            position: absolute; 
+            top: 0; left: 50%; 
+            border-left: 2px solid #cbd5e1; 
+            width: 0; 
+            height: 20px; 
+            transform: translateX(-50%); 
         }
 
-        /* Logika memotong garis berlebih untuk anak pertama dan terakhir */
+        /* Potong garis horizontal di ujung kiri (anak pertama) dan kanan (anak terakhir) */
         .tree-node-preview:first-child::before { left: 50%; }
         .tree-node-preview:last-child::before { right: 50%; }
-        /* Jika hanya ada 1 anak, hilangkan garis horizontal */
+        
+        /* Kalau hanya 1 anak, hilangkan garis horizontal */
         .tree-node-preview:first-child:last-child::before { display: none; }
 
-        /* Membersihkan garis pada Root Node (Atasan Tertinggi) */
+        /* Root node: bersihkan semua garis connector atas */
         .tree-container-inner > .tree-children-preview > .tree-node-preview::before,
         .tree-container-inner > .tree-children-preview > .tree-node-preview::after { display: none; }
         .tree-container-inner > .tree-children-preview > .tree-node-preview { padding-top: 0; }
         .tree-container-inner > .tree-children-preview::before { display: none; }
         .tree-container-inner > .tree-children-preview { padding-top: 0; }
         
-        .tree-card-preview { background: white; padding: 20px 15px; border-radius: 12px; border: 1px solid #e2e8f0; text-align: center; min-width: 220px; position: relative; z-index: 2; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.02);}
-        .tree-card-preview:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.08); transform: translateY(-3px); border-color: var(--secondary);}
-        .tree-avatar-preview { width: 60px; height: 60px; background: #f8fafc; border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: #cbd5e1; border: 2px solid #e2e8f0;}
-        .tree-name-preview { font-weight: 800; font-size: 1rem; color: var(--theme-color); margin-bottom: 2px;}
-        .tree-role-preview { font-size: 0.75rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
-        .bph-badge-preview { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--theme-color); color:white; padding:4px 15px; border-radius:20px; font-weight:700; font-size:0.7rem; white-space:nowrap; letter-spacing:0.5px; box-shadow: 0 4px 10px rgba(10,48,85,0.2);}
+        /* Kartu anggota */
+        .tree-card-preview { 
+            background: white; 
+            padding: 22px 18px; 
+            border-radius: 14px; 
+            border: 1px solid #e2e8f0; 
+            text-align: center; 
+            min-width: 200px;
+            max-width: 220px;
+            position: relative; 
+            z-index: 2; 
+            transition: 0.25s ease; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+        }
+        .tree-card-preview:hover { 
+            box-shadow: 0 12px 30px rgba(10,48,85,0.12); 
+            transform: translateY(-4px); 
+            border-color: var(--secondary);
+        }
+        .tree-avatar-preview { 
+            width: 56px; height: 56px; 
+            background: linear-gradient(135deg, #eef2f7, #dde3ec); 
+            border-radius: 50%; 
+            margin: 0 auto 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.4rem; color: #94a3b8; 
+            border: 2px solid #e2e8f0;
+        }
+        .tree-name-preview { font-weight: 800; font-size: 0.95rem; color: var(--theme-color); margin-bottom: 4px; line-height: 1.3;}
+        .tree-role-preview { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; background: #f1f5f9; padding: 3px 10px; border-radius: 20px; display: inline-block;}
+        .bph-badge-preview { 
+            position: absolute; top: -12px; left: 50%; transform: translateX(-50%); 
+            background: var(--theme-color); color: white; 
+            padding: 4px 15px; border-radius: 20px; 
+            font-weight: 700; font-size: 0.68rem; white-space: nowrap; letter-spacing: 0.5px; 
+            box-shadow: 0 4px 12px rgba(10,48,85,0.25);
+        }
 
         /* WIDGETS KEUANGAN & KPI */
         .data-grid-2 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 30px; }
@@ -161,11 +255,10 @@
         .news-meta { font-size: 0.75rem; color: var(--theme-color); background: rgba(10,48,85,0.08); padding: 6px 15px; border-radius: 20px; font-weight: 800; text-transform: uppercase; margin-bottom: 15px; display: inline-block; align-self: flex-start; letter-spacing: 0.5px;}
         .news-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; line-height: 1.4; color: var(--theme-color); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; transition: 0.3s;}
         .news-card:hover .news-title { color: var(--secondary); }
-        /* RTE Supported News Desc */
         .news-desc { font-size: 0.95rem; color: #475569; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;}
         .news-desc ul, .news-desc ol { padding-left: 20px; margin-top: 5px;}
 
-        /* NEWS MODAL (POPUP WIDER & NEATER) */
+        /* NEWS MODAL */
         .modal-overlay { position: fixed; inset: 0; background: rgba(10,48,85,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: 0.4s ease; }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-content { background: white; width: 95%; max-width: 900px; max-height: 90vh; border-radius: 25px; overflow: hidden; display: flex; flex-direction: column; transform: scale(0.9) translateY(30px); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 30px 60px rgba(0,0,0,0.3); }
@@ -180,7 +273,6 @@
         .modal-close { position: absolute; top: 20px; right: 20px; width: 45px; height: 45px; background: rgba(255,255,255,0.2); backdrop-filter: blur(5px); color: white; border: none; border-radius: 50%; font-size: 1.5rem; cursor: pointer; transition: 0.3s; z-index: 2; display: flex; align-items: center; justify-content: center;}
         .modal-close:hover { background: var(--red); transform: rotate(90deg) scale(1.1);}
         
-        /* RTE Supported Modal Body */
         .modal-body { padding: 40px 50px; overflow-y: auto; flex-grow: 1; font-size: 1.1rem; line-height: 1.9; color: #334155;}
         .modal-body p { margin-bottom: 15px; }
         .modal-body ul, .modal-body ol { padding-left: 20px; margin-bottom: 15px; }
@@ -209,6 +301,12 @@
             .modal-header { height: 250px; }
             .modal-header-content h2 { font-size: 1.5rem; }
             .modal-body { padding: 25px 20px; font-size: 1rem; }
+            
+            /* Tree: padding lebih kecil di mobile */
+            .tree-preview-wrapper { padding: 20px 20px 30px 20px; }
+            .tree-container-inner { padding: 10px 20px; }
+            .tree-card-preview { min-width: 150px; max-width: 170px; padding: 16px 12px; }
+            .tree-name-preview { font-size: 0.85rem; }
             
             /* Navbar Mobile Style */
             .public-navbar { padding: 15px 20px; }
@@ -253,8 +351,7 @@
             <h3 style="color: white; margin-bottom: 15px; font-weight: 800; font-size: 1.8rem;" id="footer-org-name">Campus Innovate</h3>
             <p style="font-size: 1.1rem; max-width: 600px; margin: 0 auto; line-height: 1.6;">Mendukung digitalisasi dan transparansi sistem informasi organisasi kampus secara real-time.</p>
             
-            <div id="footer-social-links" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;">
-                </div>
+            <div id="footer-social-links" style="margin-top: 30px; display: flex; justify-content: center; gap: 20px; font-size: 1.5rem;"></div>
             
             <p style="margin-top: 40px; font-size: 0.85rem; opacity: 0.5;">&copy; <span id="year"></span> Hak Cipta Dilindungi. Powered by Campus Innovate Workspace.</p>
         </div>
@@ -341,7 +438,7 @@
                         entry.target.classList.add('active');
                     }
                 });
-            }, { threshold: 0.15 });
+            }, { threshold: 0.05 });
             
             reveals.forEach(el => observer.observe(el));
         }
@@ -353,7 +450,6 @@
             document.getElementById('modal-img').style.backgroundImage = `url('${escapeHtml(news.img)}')`;
             document.getElementById('modal-date').innerText = news.date;
             document.getElementById('modal-title').innerText = news.title;
-            
             document.getElementById('modal-desc').innerHTML = news.desc;
             
             document.getElementById('newsModal').classList.add('active');
@@ -366,7 +462,9 @@
             document.body.style.overflow = 'auto';
         }
 
-        // FUNGSI REKURSIF UNTUK TREE ORGANISASI (VERSI YANG SUDAH DIPERBAIKI)
+        // ============================================================
+        // FUNGSI REKURSIF UNTUK TREE ORGANISASI
+        // ============================================================
         function buildPublicOrgTreeHTML(parentId, orgStructureData, level = 0) {
             const children = orgStructureData.filter(o => o.parentId === parentId);
             if(children.length === 0) return '';
@@ -389,7 +487,9 @@
             return html;
         }
 
+        // ============================================================
         // MAIN INIT DENGAN URL ROUTING LOGIC
+        // ============================================================
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const orgNameParam = urlParams.get('org');
@@ -399,22 +499,16 @@
             let queryKey = '';
             let queryValue = '';
 
-            // Prioritas 1: Parameter ID Eksplisit
             if (workspaceIdParam) {
                 queryKey = 'id';
                 queryValue = workspaceIdParam;
-            } 
-            // Prioritas 2: Parameter Nama Eksplisit
-            else if (orgNameParam) {
+            } else if (orgNameParam) {
                 queryKey = 'nama_organisasi';
                 queryValue = orgNameParam.replace(/-/g, ' '); 
-            } 
-            // Prioritas 3: Custom Domain Mapping (Kecualikan .github.io dan .github.dev)
-            else if (currentDomain !== 'corevacampusinnovate.com' && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && !currentDomain.includes('github.io') && !currentDomain.includes('github.dev')) {
+            } else if (currentDomain !== 'corevacampusinnovate.com' && currentDomain !== 'localhost' && currentDomain !== '127.0.0.1' && !currentDomain.includes('github.io') && !currentDomain.includes('github.dev')) {
                 queryKey = 'custom_domain';
                 queryValue = currentDomain;
-            } 
-            else {
+            } else {
                 document.getElementById('loader').innerHTML = `<h2 style="color:var(--red);">Akses Ditolak: Parameter URL (org / workspace) Tidak Ditemukan!</h2><p style="color:#666; margin-top:10px;">Gunakan ?workspace=[ID] atau ?org=[Nama_Organisasi].</p>`; 
                 return;
             }
@@ -458,7 +552,6 @@
                 let logoUrl = '';
                 let globalIg = ''; let globalTiktok = ''; let globalEmail = '';
 
-                // EXTRACT GLOBAL CONFIG DATA
                 const configBlock = rawBlocks.find(b => b.type === 'global_data_config');
                 if (configBlock) {
                     orgName = configBlock.orgName || orgName;
@@ -495,7 +588,7 @@
                     return b;
                 });
                 
-                // 1. GENERATE BANNER DARURAT
+                // 1. BANNER DARURAT
                 if (announcementData && announcementData.active === 'true' && announcementData.title) {
                     const annBanner = document.getElementById('global-announcement');
                     document.getElementById('ann-title').innerText = announcementData.title;
@@ -519,7 +612,9 @@
                     }
                 });
 
-                let navBrandContent = logoUrl ? `<img src="${escapeHtml(logoUrl)}" style="height:35px; object-fit:contain;"> ${escapeHtml(orgName)}` : `<i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> ${escapeHtml(orgName)}`;
+                let navBrandContent = logoUrl 
+                    ? `<img src="${escapeHtml(logoUrl)}" style="height:35px; object-fit:contain;"> ${escapeHtml(orgName)}` 
+                    : `<i class="fa-solid fa-layer-group" style="color: var(--secondary);"></i> ${escapeHtml(orgName)}`;
 
                 let blocksHTMLString = `
                     <div class="public-navbar">
@@ -533,9 +628,20 @@
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
                     let bBg = b.styles.bg !== '#ffffff' ? b.styles.bg : 'transparent';
-                    let inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
+
+                    // ============================================================
+                    // FIX BUG: Block "struktur" pakai padding 0 di sisi kiri-kanan
+                    // agar tree-preview-wrapper bisa full-width 100vw dengan benar
+                    // ============================================================
+                    let inlineStyle;
+                    if (b.type === 'struktur') {
+                        // Padding atas-bawah tetap dari config, kiri-kanan 0
+                        inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 0; border-radius: ${b.styles.borderRadius}; overflow: visible;`;
+                    } else {
+                        inlineStyle = `background-color: ${bBg}; padding: ${b.styles.padding} 20px; border-radius: ${b.styles.borderRadius};`;
+                    }
                     
-                    let htmlChunk = `<section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}"><div class="page-container">`;
+                    let htmlChunk = '';
 
                     if (b.type === 'hero') {
                         let bgImg = b.data.url ? `background-image: url('${escapeHtml(b.data.url)}');` : `background-color: var(--theme-color);`;
@@ -546,34 +652,74 @@
                                 <p>${escapeHtml(b.data.subtitle) || ''}</p>
                             </div>
                         </section>`;
-                    } 
-                    else if (b.type === 'text') {
-                        htmlChunk += `<div style="font-size:1.15rem; line-height:1.8; color:#334155;">${b.data.content || ''}</div>`;
-                    }
-                    else if (b.type === 'image') {
-                        htmlChunk += `
-                        <div style="text-align:${escapeHtml(b.data.align) || 'center'};">
-                            <img src="${escapeHtml(b.data.url)}" style="width:${escapeHtml(b.data.width) || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 15px 40px rgba(0,0,0,0.1); max-height:600px; object-fit:cover; transition: transform 0.5s ease;">
-                        </div>`;
-                    }
-                    else if (b.type === 'video') {
-                        htmlChunk += `
-                        <div>
-                            <iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:450px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);"></iframe>
-                        </div>`;
-                    }
-                    else if (b.type === 'divider') {
-                        htmlChunk += `<hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #e2e8f0; margin: 10px 0;">`;
-                    }
-                    else if (b.type === 'grid-news') {
+
+                    } else if (b.type === 'struktur') {
+                        // ============================================================
+                        // FIX BUG STRUKTUR:
+                        // - Heading tetap di dalam page-container (max-width 1150px)
+                        // - Tree wrapper di LUAR page-container → full width 100vw
+                        // - Section tidak punya padding kiri-kanan (sudah di-override atas)
+                        // ============================================================
+                        let treeHtml = '';
+                        if (orgStructureData.length > 0) {
+                            treeHtml = buildPublicOrgTreeHTML(null, orgStructureData, 0); 
+                        } else {
+                            treeHtml = `<p style="color:#777; width:100%; text-align:center; padding: 40px 0;">Data struktur belum diatur oleh admin.</p>`;
+                        }
+                        
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Organisasi'}</h2>
+                            </div>
+                            <div class="tree-preview-wrapper">
+                                <div class="tree-container-inner">
+                                    ${treeHtml}
+                                </div>
+                            </div>
+                        </section>`;
+
+                    } else if (b.type === 'text') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <div style="font-size:1.15rem; line-height:1.8; color:#334155;">${b.data.content || ''}</div>
+                            </div>
+                        </section>`;
+
+                    } else if (b.type === 'image') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <div style="text-align:${escapeHtml(b.data.align) || 'center'};">
+                                    <img src="${escapeHtml(b.data.url)}" style="width:${escapeHtml(b.data.width) || '100%'}; border-radius:${b.styles.borderRadius}; box-shadow:0 15px 40px rgba(0,0,0,0.1); max-height:600px; object-fit:cover; transition: transform 0.5s ease;">
+                                </div>
+                            </div>
+                        </section>`;
+
+                    } else if (b.type === 'video') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <iframe src="${escapeHtml(b.data.url)}" style="width:100%; height:450px; border-radius:${b.styles.borderRadius}; border:none; box-shadow:0 10px 30px rgba(0,0,0,0.1);"></iframe>
+                            </div>
+                        </section>`;
+
+                    } else if (b.type === 'divider') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block" style="${inlineStyle}">
+                            <div class="page-container">
+                                <hr style="border:0; border-top: 3px ${escapeHtml(b.data.style) || 'solid'} #e2e8f0; margin: 10px 0;">
+                            </div>
+                        </section>`;
+
+                    } else if (b.type === 'grid-news') {
                         let cols = b.data.columns || '3';
-                        htmlChunk += `
-                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Berita Terkini'}</h2>
-                        <div class="news-grid" style="grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'230px':'300px'}, 1fr));">`;
+                        let newsCardsHtml = '';
                         
                         if (globalNewsData.length > 0) {
                             globalNewsData.forEach((it, index) => {
-                                htmlChunk += `
+                                newsCardsHtml += `
                                 <div class="news-card" style="border-radius: ${b.styles.borderRadius};" onclick="openNewsModal(${index})">
                                     <div class="news-img-wrapper">
                                         <div class="news-image" style="background-image: url('${escapeHtml(it.img)}');"></div>
@@ -586,132 +732,148 @@
                                 </div>`;
                             });
                         } else {
-                            htmlChunk += `<p style="color: #aaa;">Belum ada berita diterbitkan.</p>`;
+                            newsCardsHtml = `<p style="color: #aaa;">Belum ada berita diterbitkan.</p>`;
                         }
-                        htmlChunk += `</div>`;
-                    }
-                    else if (b.type === 'struktur') {
-                        let treeHtml = '';
-                        if (orgStructureData.length > 0) {
-                            treeHtml = buildPublicOrgTreeHTML(null, orgStructureData, 0); 
-                        } else {
-                            treeHtml = `<p style="color:#777; width:100%; text-align:center;">Data struktur belum diatur oleh admin.</p>`;
-                        }
-                        
-                        // IMPLEMENTASI PERBAIKAN BUG TAMPILAN (Tidak terpotong dan garis terhubung)
-                        htmlChunk += `
-                        <h2 class="section-heading">${escapeHtml(b.data.title) || 'Struktur Organisasi'}</h2>
-                        <div class="tree-preview-wrapper">
-                            <div class="tree-container-inner">
-                                ${treeHtml}
+
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <h2 class="section-heading">${escapeHtml(b.data.title) || 'Berita Terkini'}</h2>
+                                <div class="news-grid" style="grid-template-columns: repeat(auto-fit, minmax(${cols==='4'?'230px':'300px'}, 1fr));">
+                                    ${newsCardsHtml}
+                                </div>
                             </div>
-                        </div>`;
-                    }
-                    else if (b.type === 'finance') {
-                        htmlChunk += `
-                            <h2 class="section-heading"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
-                            <div class="data-grid-2">
-                                <div>
-                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #e2e8f0;">
-                                        <div>
-                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Total Anggaran Induk</h3>
-                                            <div class="amount" style="color:#1e293b;" id="fin-rab-${i}">...</div>
+                        </section>`;
+
+                    } else if (b.type === 'finance') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <h2 class="section-heading"><i class="fa-solid fa-wallet"></i> Transparansi Keuangan</h2>
+                                <div class="data-grid-2">
+                                    <div>
+                                        <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid #e2e8f0;">
+                                            <div>
+                                                <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Total Anggaran Induk</h3>
+                                                <div class="amount" style="color:#1e293b;" id="fin-rab-${i}">...</div>
+                                            </div>
+                                        </div>
+                                        <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid var(--green);">
+                                            <div>
+                                                <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Realisasi / Terserap</h3>
+                                                <div class="amount" style="color:var(--green);" id="fin-real-${i}">...</div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="stat-card" style="border-radius: ${b.styles.borderRadius}; border-left: 6px solid var(--green);">
-                                        <div>
-                                            <h3 style="color:#64748b; font-size:1.1rem; margin-bottom:5px;">Realisasi / Terserap</h3>
-                                            <div class="amount" style="color:var(--green);" id="fin-real-${i}">...</div>
+                                    <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius}; flex-direction: column;">
+                                        <h3 style="font-size:1rem; color:#64748b; margin-bottom:15px; text-align:center;">Grafik Serapan Dana</h3>
+                                        <div style="position: relative; height: 220px; width: 100%;">
+                                            <canvas id="chart-fin-${i}"></canvas>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="stat-card" style="justify-content:center; border-radius: ${b.styles.borderRadius}; flex-direction: column;">
-                                    <h3 style="font-size:1rem; color:#64748b; margin-bottom:15px; text-align:center;">Grafik Serapan Dana</h3>
-                                    <div style="position: relative; height: 220px; width: 100%;">
-                                        <canvas id="chart-fin-${i}"></canvas>
-                                    </div>
-                                </div>
-                            </div>`;
+                            </div>
+                        </section>`;
                         
-                        supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single().then(({data: fData}) => {
-                            let total = fData ? parseFloat(fData.total_rab) : 0; 
-                            let real = fData ? parseFloat(fData.realisasi_rab) : 0;
-                            
-                            let v1 = document.getElementById(`fin-rab-${i}`); 
-                            if(v1) v1.innerText = formatRp(total);
-                            
-                            let v2 = document.getElementById(`fin-real-${i}`); 
-                            if(v2) v2.innerText = formatRp(real);
-                            
-                            let ctx = document.getElementById(`chart-fin-${i}`);
-                            if(ctx) {
-                                new Chart(ctx.getContext('2d'), {
-                                    type: 'doughnut', 
-                                    data: { labels: ['Terpakai', 'Tersisa'], datasets: [{ data: [real, total-real<0?0:total-real], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] },
-                                    options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'}, datalabels: { display: false } } }
-                                });
-                            }
-                        });
-                    }
-                    else if (b.type === 'kpi') {
-                        htmlChunk += `
-                            <h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2>
-                            <div class="kpi-grid" id="kpi-container-${i}">Memuat KPI...</div>`;
+                        // Load finance data async
+                        (function(blockIndex) {
+                            supabaseClient.from('finance_summaries').select('*').eq('workspace_id', currentWorkspaceId).single().then(({data: fData}) => {
+                                let total = fData ? parseFloat(fData.total_rab) : 0; 
+                                let real = fData ? parseFloat(fData.realisasi_rab) : 0;
+                                
+                                let v1 = document.getElementById(`fin-rab-${blockIndex}`); 
+                                if(v1) v1.innerText = formatRp(total);
+                                
+                                let v2 = document.getElementById(`fin-real-${blockIndex}`); 
+                                if(v2) v2.innerText = formatRp(real);
+                                
+                                let ctx = document.getElementById(`chart-fin-${blockIndex}`);
+                                if(ctx) {
+                                    new Chart(ctx.getContext('2d'), {
+                                        type: 'doughnut', 
+                                        data: { labels: ['Terpakai', 'Tersisa'], datasets: [{ data: [real, total-real<0?0:total-real], backgroundColor: ['#2ecc71', '#e2e8f0'], borderWidth: 0 }] },
+                                        options: { maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom'}, datalabels: { display: false } } }
+                                    });
+                                }
+                            });
+                        })(i);
+
+                    } else if (b.type === 'kpi') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <h2 class="section-heading"><i class="fa-solid fa-bullseye"></i> Indikator Kinerja (KPI)</h2>
+                                <div class="kpi-grid" id="kpi-container-${i}">Memuat KPI...</div>
+                            </div>
+                        </section>`;
                         
-                        supabaseClient.from('kpi_items').select('*').eq('workspace_id', currentWorkspaceId).then(({data: kData}) => {
-                            let kpiHtml = '';
-                            if(!kData || kData.length === 0) {
-                                kpiHtml = '<p style="color:#aaa; grid-column: 1 / -1;">Belum ada target KPI yang ditetapkan.</p>';
-                            } else {
-                                kData.forEach(kpi => {
-                                    let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
-                                    if(persen > 100) persen = 100;
-                                    let colorClass = persen >= 100 ? '#2ecc71' : 'var(--theme-color)';
-                                    
-                                    kpiHtml += `
-                                    <div class="kpi-card" style="border-radius: ${b.styles.borderRadius};">
-                                        <strong style="color: #1e293b; font-size:1.15rem;">${escapeHtml(kpi.nama_kpi)}</strong>
-                                        <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top:15px; color:#64748b;">
-                                            <span>Target: <b>${escapeHtml(kpi.target)} ${escapeHtml(kpi.satuan)}</b></span>
-                                            <span style="color:${colorClass}; font-weight:800;">${escapeHtml(kpi.capaian)} ${escapeHtml(kpi.satuan)} (${persen.toFixed(1)}%)</span>
-                                        </div>
-                                        <div class="kpi-bar-bg">
-                                            <div class="kpi-bar-fill" style="width: ${persen}%; background: ${colorClass};"></div>
-                                        </div>
-                                    </div>`;
-                                });
-                            }
-                            let kc = document.getElementById(`kpi-container-${i}`); 
-                            if(kc) kc.innerHTML = kpiHtml;
-                        });
-                    }
-                    else if (b.type === 'program') {
-                        htmlChunk += `
-                            <h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
-                            <div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>`;
+                        // Load KPI data async
+                        (function(blockIndex, blockStyles) {
+                            supabaseClient.from('kpi_items').select('*').eq('workspace_id', currentWorkspaceId).then(({data: kData}) => {
+                                let kpiHtml = '';
+                                if(!kData || kData.length === 0) {
+                                    kpiHtml = '<p style="color:#aaa; grid-column: 1 / -1;">Belum ada target KPI yang ditetapkan.</p>';
+                                } else {
+                                    kData.forEach(kpi => {
+                                        let persen = kpi.target > 0 ? (kpi.capaian / kpi.target) * 100 : 0;
+                                        if(persen > 100) persen = 100;
+                                        let colorClass = persen >= 100 ? '#2ecc71' : 'var(--theme-color)';
+                                        
+                                        kpiHtml += `
+                                        <div class="kpi-card" style="border-radius: ${blockStyles.borderRadius};">
+                                            <strong style="color: #1e293b; font-size:1.15rem;">${escapeHtml(kpi.nama_kpi)}</strong>
+                                            <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-top:15px; color:#64748b;">
+                                                <span>Target: <b>${escapeHtml(kpi.target)} ${escapeHtml(kpi.satuan)}</b></span>
+                                                <span style="color:${colorClass}; font-weight:800;">${escapeHtml(kpi.capaian)} ${escapeHtml(kpi.satuan)} (${persen.toFixed(1)}%)</span>
+                                            </div>
+                                            <div class="kpi-bar-bg">
+                                                <div class="kpi-bar-fill" style="width: ${persen}%; background: ${colorClass};"></div>
+                                            </div>
+                                        </div>`;
+                                    });
+                                }
+                                let kc = document.getElementById(`kpi-container-${blockIndex}`); 
+                                if(kc) kc.innerHTML = kpiHtml;
+                            });
+                        })(i, b.styles);
+
+                    } else if (b.type === 'program') {
+                        htmlChunk = `
+                        <section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}">
+                            <div class="page-container">
+                                <h2 class="section-heading"><i class="fa-solid fa-list-check"></i> Status Program Kerja</h2>
+                                <div class="prog-grid" id="prog-container-${i}">Memuat Program...</div>
+                            </div>
+                        </section>`;
                         
-                        supabaseClient.from('programs').select('*').eq('workspace_id', currentWorkspaceId).then(({data: pData}) => {
-                            let pHtml = '';
-                            if(pData && pData.length > 0) {
-                                pData.forEach(p => {
-                                    let bg = p.status==='Selesai'?'rgba(46, 204, 113, 0.15)':(p.status==='Progress'?'rgba(246, 178, 59, 0.15)':'#f1f5f9');
-                                    let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
-                                    pHtml += `
-                                    <div class="prog-item" style="border-radius: ${b.styles.borderRadius};">
-                                        <h3 style="font-size:1.1rem; margin-bottom:8px; color:var(--theme-color);">${escapeHtml(p.nama_program)}</h3>
-                                        <p style="font-size:0.85rem; color:#64748b; margin-bottom: 12px; display:flex; align-items:center; gap:6px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
-                                        <span class="badge-status" style="background:${bg}; color:${col};">${escapeHtml(p.status)}</span>
-                                    </div>`;
-                                });
-                            } else { 
-                                pHtml = `<p style="color:#777; grid-column: 1 / -1;">Belum ada rekapitulasi data program kerja.</p>`; 
-                            }
-                            let pc = document.getElementById(`prog-container-${i}`); 
-                            if(pc) pc.innerHTML = pHtml;
-                        });
+                        // Load program data async
+                        (function(blockIndex, blockStyles) {
+                            supabaseClient.from('programs').select('*').eq('workspace_id', currentWorkspaceId).then(({data: pData}) => {
+                                let pHtml = '';
+                                if(pData && pData.length > 0) {
+                                    pData.forEach(p => {
+                                        let bg = p.status==='Selesai'?'rgba(46, 204, 113, 0.15)':(p.status==='Progress'?'rgba(246, 178, 59, 0.15)':'#f1f5f9');
+                                        let col = p.status==='Selesai'?'#166534':(p.status==='Progress'?'#92400e':'#475569');
+                                        pHtml += `
+                                        <div class="prog-item" style="border-radius: ${blockStyles.borderRadius};">
+                                            <h3 style="font-size:1.1rem; margin-bottom:8px; color:var(--theme-color);">${escapeHtml(p.nama_program)}</h3>
+                                            <p style="font-size:0.85rem; color:#64748b; margin-bottom: 12px; display:flex; align-items:center; gap:6px;"><i class="fa-regular fa-calendar"></i> ${escapeHtml(p.tanggal_pelaksanaan) || 'Belum diatur'}</p>
+                                            <span class="badge-status" style="background:${bg}; color:${col};">${escapeHtml(p.status)}</span>
+                                        </div>`;
+                                    });
+                                } else { 
+                                    pHtml = `<p style="color:#777; grid-column: 1 / -1;">Belum ada rekapitulasi data program kerja.</p>`; 
+                                }
+                                let pc = document.getElementById(`prog-container-${blockIndex}`); 
+                                if(pc) pc.innerHTML = pHtml;
+                            });
+                        })(i, b.styles);
+
+                    } else {
+                        // Fallback untuk block type yang tidak dikenal
+                        htmlChunk = `<section id="section-${b.id}" class="dynamic-block reveal" style="${inlineStyle}"><div class="page-container"></div></section>`;
                     }
 
-                    if(b.type !== 'hero') htmlChunk += `</div></section>`;
                     blocksHTMLString += htmlChunk;
                 }
 
