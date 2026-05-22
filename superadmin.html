@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin - Campus Innovate</title>
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -21,35 +22,169 @@
             --border: #e2e8f0;
         }
         
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { background: var(--bg); display: flex; color: var(--text); overflow-x: hidden; min-height: 100vh;}
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+        }
         
-        /* CUSTOM TOAST NOTIFICATION */
-        #toast-container { position: fixed; top: 30px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: white; padding: 15px 25px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 15px; font-weight: 600; font-size: 0.95rem; border-left: 5px solid var(--primary); transform: translateX(150%); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.show { transform: translateX(0); }
-        .toast i { font-size: 1.3rem; }
-        .toast.success { border-color: var(--green); color: #166534; }
-        .toast.success i { color: var(--green); }
-        .toast.error { border-color: var(--red); color: #991b1b; }
-        .toast.error i { color: var(--red); }
-        .toast.info { border-color: var(--blue); color: var(--blue); }
-        .toast.info i { color: var(--blue); }
+        body { 
+            background: var(--bg); 
+            display: flex; 
+            flex-direction: column; 
+            color: var(--text); 
+            overflow-x: hidden; 
+            height: 100vh;
+        }
         
-        /* SIDEBAR */
-        .sidebar { width: 270px; background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); height: 100vh; padding: 30px 20px; color: var(--white); position: fixed; box-shadow: 5px 0 20px rgba(0,0,0,0.05); z-index: 100; overflow-y: auto; transition: 0.3s;}
-        .sidebar h2 { color: var(--secondary); margin-bottom: 5px; font-size: 1.6rem; display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -0.5px;}
-        .sidebar-subtitle { font-size: 0.75rem; color: #cbd5e1; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); text-transform: uppercase; letter-spacing: 1px;}
+        .mobile-header { 
+            display: none; 
+            background: var(--primary); 
+            padding: 15px 20px; 
+            color: white; 
+            justify-content: space-between; 
+            align-items: center; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            z-index: 998; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+        }
         
-        .nav-item { padding: 14px 18px; margin-bottom: 10px; border-radius: 12px; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 0.95rem; color: #e2e8f0;}
-        .nav-item:hover { background: rgba(255,255,255,0.1); color: var(--white); transform: translateX(5px); }
-        .nav-item.active { background: var(--secondary); color: var(--primary); box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); font-weight: 800;}
+        .mobile-header h2 { 
+            font-size: 1.2rem; 
+            color: var(--secondary); 
+            margin: 0;
+        }
+        
+        .menu-toggle { 
+            background: transparent; 
+            border: none; 
+            color: white; 
+            font-size: 1.5rem; 
+            cursor: pointer; 
+        }
+        
+        .sidebar-overlay { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            z-index: 999; 
+            backdrop-filter: blur(3px); 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+        }
+        
+        .sidebar-overlay.active { 
+            display: block; 
+            opacity: 1; 
+        }
+
+        .sidebar { 
+            width: 260px; 
+            background: linear-gradient(180deg, var(--primary) 0%, #1a497d 100%); 
+            height: 100vh; 
+            padding: 30px 20px; 
+            color: var(--white); 
+            position: fixed; 
+            box-shadow: 5px 0 20px rgba(0,0,0,0.05); 
+            z-index: 100; 
+            overflow-y: auto; 
+            transition: 0.3s;
+        }
+        
+        .sidebar h2 { 
+            color: var(--secondary); 
+            margin-bottom: 5px; 
+            font-size: 1.6rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+        }
+        
+        .sidebar-subtitle { 
+            font-size: 0.75rem; 
+            color: #cbd5e1; 
+            margin-bottom: 30px; 
+            padding-bottom: 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        .nav-item { 
+            padding: 14px 18px; 
+            margin-bottom: 10px; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 600; 
+            font-size: 0.95rem; 
+            color: #e2e8f0;
+        }
+        
+        .nav-item:hover { 
+            background: rgba(255,255,255,0.1); 
+            color: var(--white); 
+            transform: translateX(5px); 
+        }
+        
+        .nav-item.active { 
+            background: var(--secondary); 
+            color: var(--primary); 
+            box-shadow: 0 5px 15px rgba(246, 178, 59, 0.25); 
+            font-weight: 800;
+        }
         
         /* MAIN CONTENT */
-        .main-content { margin-left: 270px; padding: 40px; width: calc(100% - 270px); min-height: 100vh; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 35px; background: white; padding: 25px 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.02);}
-        .header h1 { font-size: 1.8rem; font-weight: 800; color: var(--primary); margin: 0; letter-spacing: -0.5px;}
-        .admin-badge { background: rgba(10,48,85,0.05); color: var(--primary); padding: 10px 20px; border-radius: 30px; font-weight: 800; font-size: 0.95rem; display: flex; align-items: center; gap: 8px;}
+        .main-content { 
+            margin-left: 270px; 
+            padding: 40px; 
+            width: calc(100% - 270px); 
+            min-height: 100vh; 
+        }
+        
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 35px; 
+            background: white; 
+            padding: 25px 30px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        
+        .header h1 { 
+            font-size: 1.8rem; 
+            font-weight: 800; 
+            color: var(--primary); 
+            margin: 0; 
+            letter-spacing: -0.5px;
+        }
+        
+        .admin-badge { 
+            background: rgba(10,48,85,0.05); 
+            color: var(--primary); 
+            padding: 10px 20px; 
+            border-radius: 30px; 
+            font-weight: 800; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+        }
         
         /* VIEW SECTIONS */
         .view-section { display: none; animation: fadeUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
@@ -82,11 +217,18 @@
         .btn-toggle-eye { background: transparent; border: none; color: #64748b; font-size: 1.1rem; cursor: pointer; margin-left: 8px; transition: 0.2s;}
         .btn-toggle-eye:hover { color: var(--blue); transform: scale(1.1);}
         
-        .filter-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;}
+        .filter-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; align-items: center;}
         .filter-item { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 200px;}
         .filter-item label { font-size: 0.8rem; font-weight: 700; color: var(--primary);}
-        .filter-item select, .filter-item input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: 'Plus Jakarta Sans'; font-size: 0.9rem;}
-        .filter-item select:focus, .filter-item input:focus { border-color: var(--blue);}
+        .filter-item select, .filter-item input { padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; outline: none; font-family: 'Plus Jakarta Sans'; font-size: 0.9rem; transition: all 0.3s ease;}
+        .filter-item select:focus, .filter-item input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);}
+        
+        /* SEARCH BAR ANIMATION */
+        .search-wrapper { position: relative; width: 100%; display: flex; align-items: center;}
+        .search-wrapper i { position: absolute; left: 12px; color: #94a3b8; transition: 0.3s ease; }
+        .search-input { width: 100%; padding: 10px 10px 10px 35px !important; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important; }
+        .search-input:focus { transform: scale(1.02); }
+        .search-input:focus + i { color: var(--blue); transform: scale(1.1); }
 
         /* BUTTONS & BADGES */
         .btn-action { padding: 10px 18px; border: none; border-radius: 10px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;}
@@ -144,6 +286,9 @@
         
         /* CHART CONTAINER */
         .chart-wrapper { width: 100%; height: 400px; position: relative; padding-top: 20px;}
+
+        /* CUSTOM TOAST NOTIFICATION */
+        #toast-container { position: fixed; top: 30px; right: 20px; z-index: 100000; display: flex; flex-direction: column; gap: 10px; }
     </style>
 </head>
 <body>
@@ -241,18 +386,29 @@
                         <h2><i class="fa-solid fa-users-gear"></i> Kontrol Hak Akses Pengguna (Users)</h2>
                         <p style="font-size: 0.9rem; color: #64748b; margin-top: 5px;">Manajemen seluruh identitas, pengubahan strata *role*, dan penghapusan akses anggota dari sistem.</p>
                     </div>
-                    <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalDirectCreateUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-excel" style="background: var(--green); padding: 10px 20px;" onclick="exportUsersToCSV()"><i class="fa-solid fa-file-csv"></i> Export Data Pengguna</button>
+                        <button class="btn-excel" style="background: var(--blue); padding: 10px 20px;" onclick="openModal('modalDirectCreateUser')"><i class="fa-solid fa-user-plus"></i> Buat Pengguna Baru</button>
+                    </div>
                 </div>
 
                 <div class="filter-container">
+                    <div class="filter-item" style="flex: 2;">
+                        <label>Cari Pengguna</label>
+                        <div class="search-wrapper">
+                            <input type="text" id="search-user" class="search-input" onkeyup="applyUserFilter()" placeholder="Ketik nama, email, atau ID...">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </div>
+                    </div>
+
                     <div class="filter-item">
                         <label>Filter Workspace</label>
                         <select id="filter-workspace" onchange="applyUserFilter()">
                             <option value="all">Semua Organisasi</option>
-                            </select>
+                        </select>
                     </div>
                     <div class="filter-item">
-                        <label>Filter Role / Peran</label>
+                        <label>Filter Role</label>
                         <select id="filter-role" onchange="applyUserFilter()">
                             <option value="all">Semua Role</option>
                             <option value="admin">Admin Organisasi</option>
@@ -526,15 +682,18 @@
         }
 
         // FUNGSI JAVASCRIPT UNTUK COPY TEXT
-        function copyToClipboard(elementId) {
-            const span = document.getElementById(elementId);
-            const textToCopy = span.getAttribute('data-real');
-            
-            navigator.clipboard.writeText(textToCopy).then(() => {
+        function copyToClipboardText(text) {
+            navigator.clipboard.writeText(text).then(() => {
                 showToast("Tersalin", `Data telah disalin ke clipboard.`, "info");
             }).catch(err => {
                 showToast("Gagal menyalin", err, "error");
             });
+        }
+
+        function copyToClipboard(elementId) {
+            const span = document.getElementById(elementId);
+            const textToCopy = span.getAttribute('data-real');
+            copyToClipboardText(textToCopy);
         }
 
         // 1. KONEKSI SUPABASE
@@ -545,6 +704,7 @@
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Client Sekunder (Bypass Session)
+        // Diperlukan agar signUp dari frontend tidak menimpa cookie session Super Admin dan me-logout-nya
         const supabaseSecondary = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
             auth: {
                 persistSession: false,
@@ -592,6 +752,7 @@
                 return;
             }
 
+            // Validasi apakah user ini benar-benar Super Admin
             const { data: roleData } = await supabaseClient
                 .from('user_roles')
                 .select('role')
@@ -604,18 +765,22 @@
                 return;
             }
 
+            // Jika aman, muat data dashboard utama dan sambut admin
             loadDashboardData();
             showToast("Otentikasi Berhasil", "Selamat datang kembali, Tuan Super Admin.", "info");
         });
 
         // FUNGSI NAVIGASI TAB
         function switchMenu(menuId) {
+            // Update Sidebar UI
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
+            // Update View Content
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + menuId).classList.add('active');
 
+            // Trigger spesifik data fetch saat tab dibuka
             if (menuId === 'requests') loadRegistrationRequests();
             if (menuId === 'users') loadAllUsersData();
             if (menuId === 'features') renderFeaturesTable();
@@ -692,6 +857,7 @@
                     emailMap[u.user_id] = u.email || "Email tidak ditemukan";
                 });
             } else {
+                // Fallback darurat jika fungsi RPC belum dijalankan di SQL Editor
                 const { data: membersInfo } = await supabaseClient.from('workspace_members').select('user_id, nama_user');
                 if(membersInfo) membersInfo.forEach(m => nameMap[m.user_id] = m.nama_user);
             }
@@ -796,15 +962,23 @@
             tableBody.innerHTML = '';
 
             // Ambil Value dari Filter
+            const searchQuery = document.getElementById('search-user').value.toLowerCase();
             const wsFilter = document.getElementById('filter-workspace').value;
             const roleFilter = document.getElementById('filter-role').value;
             const statusFilter = document.getElementById('filter-status').value;
 
             // Proses Filter
             let filteredData = masterUsersData.filter(user => {
+                let passSearch = true;
                 let passWs = true;
                 let passRole = true;
                 let passStatus = true;
+
+                if(searchQuery) {
+                    passSearch = user.name.toLowerCase().includes(searchQuery) || 
+                                 user.email.toLowerCase().includes(searchQuery) || 
+                                 user.user_id.toLowerCase().includes(searchQuery);
+                }
 
                 if(wsFilter !== 'all') {
                     // Check if the user's workspaceIds array includes the filtered workspace
@@ -820,7 +994,7 @@
                     else if(statusFilter === 'inactive') passStatus = user.is_inactive;
                 }
 
-                return passWs && passRole && passStatus;
+                return passSearch && passWs && passRole && passStatus;
             });
 
             if (filteredData.length === 0) {
@@ -837,6 +1011,7 @@
                 else if(ur.role === 'user') selectClass += ' role-user';
                 else if(ur.role === 'superadmin') selectClass += ' role-superadmin';
                 
+                // Opsi Dropdown
                 let roleOptions = `
                     <option value="superadmin" ${ur.role === 'superadmin' ? 'selected' : ''}>Super Administrator</option>
                     <option value="admin" ${ur.role === 'admin' ? 'selected' : ''}>Admin Organisasi</option>
@@ -854,7 +1029,10 @@
                         <td style="font-family: monospace; font-size: 0.85rem; color: #64748b;">
                             <i class="fa-solid fa-fingerprint" style="margin-right: 5px;"></i> ${ur.user_id.substring(0,12)}...
                         </td>
-                        <td><strong style="color: var(--primary);">${ur.name}</strong></td>
+                        <td>
+                            <strong id="name-display-${ur.user_id}" style="color: var(--primary);">${ur.name}</strong>
+                            <button class="btn-toggle-eye" onclick="editUserName('${ur.user_id}', '${ur.name}')" title="Ubah Nama"><i class="fa-solid fa-pen" style="font-size: 0.8rem;"></i></button>
+                        </td>
                         
                         <td style="font-size: 0.85rem; max-width: 200px;">
                             ${ur.workspaces !== 'Belum terdaftar di Workspace mana pun' 
@@ -898,14 +1076,67 @@
         }
 
         function resetUserFilter() {
+            document.getElementById('search-user').value = '';
             document.getElementById('filter-workspace').value = 'all';
             document.getElementById('filter-role').value = 'all';
             document.getElementById('filter-status').value = 'all';
             renderFilteredUsersTable();
         }
 
+        // FUNGSI EXPORT EXCEL KHUSUS USERS
+        function exportUsersToCSV() {
+            if (masterUsersData.length === 0) {
+                showToast("Export Gagal", "Data pengguna kosong.", "error"); return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID User,Nama Pengguna,Email,Kata Sandi,Role,Workspace Terdaftar,Terakhir Aktif\n";
+
+            masterUsersData.forEach(u => {
+                let safeName = u.name.replace(/"/g, '""');
+                let safeWs = u.workspaces.replace(/"/g, '""');
+                let row = `"${u.user_id}","${safeName}","${u.email}","${u.password}","${u.role}","${safeWs}","${u.last_seen}"`;
+                csvContent += row + "\r\n";
+            });
+
+            var encodedUri = encodeURI(csvContent);
+            var link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "Audit_Pengguna_CampusInnovate.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("Sukses", "Data pengguna berhasil diekspor.", "success");
+        }
+
+        // FUNGSI EDIT NAMA PENGGUNA
+        async function editUserName(userId, currentName) {
+            const newName = prompt("Ubah nama pengguna:", currentName);
+            if (newName && newName.trim() !== "" && newName !== currentName) {
+                
+                // Update Optimistic UI
+                const nameSpan = document.getElementById(`name-display-${userId}`);
+                if (nameSpan) nameSpan.innerText = newName;
+                
+                // Update in master data
+                const userIdx = masterUsersData.findIndex(u => u.user_id === userId);
+                if (userIdx !== -1) masterUsersData[userIdx].name = newName;
+
+                // Update DB - Update di workspace_members sebagai representasi lokal
+                const { error } = await supabaseClient.from('workspace_members').update({ nama_user: newName }).eq('user_id', userId);
+                if (error) {
+                    showToast("Gagal mengubah nama di database", error.message, "error");
+                } else {
+                    showToast("Nama Diperbarui", "Nama pengguna berhasil diubah.", "success");
+                }
+            }
+        }
+
         async function changeUserRole(userId, newRole, selectElement) {
+            // Konfirmasi perubahan
             if(!confirm(`Anda yakin ingin mengubah strata otoritas pengguna ini menjadi [${newRole.toUpperCase()}]?`)) {
+                // Revert seleksi jika dibatalkan
                 renderFilteredUsersTable(); 
                 return;
             }
@@ -923,8 +1154,9 @@
                 if(userIdx !== -1) masterUsersData[userIdx].role = newRole;
             }
             
+            // Render ulang untuk memperbaiki style warnanya
             renderFilteredUsersTable();
-            loadDashboardData(); 
+            loadDashboardData(); // Refresh statistik angka admin/user di dashboard
         }
 
         async function revokeUserAccess(userId) {
@@ -932,19 +1164,25 @@
                 showToast("Pemrosesan Penghapusan", "Mencabut izin role dari database...", "info");
                 
                 try {
+                    // 1. Hapus dari keanggotaan workspace
                     await supabaseClient.from('workspace_members').delete().eq('user_id', userId);
+                    
+                    // 2. Hapus workspace yang DIBUAT oleh orang ini (Cascade delete semua isinya)
                     await supabaseClient.from('workspaces').delete().eq('admin_id', userId);
 
+                    // 3. Cabut hak akses utamanya (Mencegah dia login selamanya)
                     const { data: deletedRole, error: roleErr } = await supabaseClient.from('user_roles').delete().eq('user_id', userId).select();
 
                     if(roleErr) throw roleErr;
 
+                    // Validasi apakah baris benar-benar terhapus (Menghindari Silent Fail RLS)
                     if (!deletedRole || deletedRole.length === 0) {
                         throw new Error("Gagal: Database menolak penghapusan. Pastikan RLS Policy 'DELETE' untuk tabel user_roles, workspaces, & workspace_members sudah aktif (true).");
                     }
 
                     showToast("Akses Dicabut", "Pengguna tersebut telah dihapus secara paksa dari sistem.", "success");
                     
+                    // HAPUS LANGSUNG DARI TAMPILAN (DOM) AGAR INSTAN
                     const rowToRemove = document.getElementById(`row-user-${userId}`);
                     if (rowToRemove) {
                         rowToRemove.style.transition = "0.5s";
@@ -953,7 +1191,10 @@
                         setTimeout(() => rowToRemove.remove(), 500);
                     }
                     
+                    // Hapus dari state lokal
                     masterUsersData = masterUsersData.filter(u => u.user_id !== userId);
+                    
+                    // Refresh statistik dashboard
                     loadDashboardData();
 
                 } catch (err) {
@@ -975,10 +1216,13 @@
             btn.disabled = true;
 
             try {
+                // Gunakan secondary client agar sesi Super Admin tidak tergantikan oleh akun yang baru dibuat!
                 const { data: newAuthData, error: authError } = await supabaseSecondary.auth.signUp({
                     email: email,
                     password: password,
-                    options: { data: { full_name: name } }
+                    options: {
+                        data: { full_name: name }
+                    }
                 });
 
                 if(authError) throw authError;
@@ -987,6 +1231,7 @@
                     throw new Error("Gagal menerima ID User dari server. Cek apakah limit tercapai.");
                 }
 
+                // Masukkan ke tabel user_roles sebagai referensi akses sistem
                 const { error: insertError } = await supabaseClient.from('user_roles').insert([{ 
                     user_id: newAuthData.user.id, 
                     role: role 
@@ -994,11 +1239,12 @@
 
                 if (insertError) throw insertError;
 
+                // Tambahan: Logika agar masuk track list registration dummy untuk visual history
                 await supabaseClient.from('registration_requests').insert([{
                     nama: name, 
                     dob: "Bypass Buat Langsung", 
                     email: email, 
-                    password: password,
+                    password: password, // Menyimpan histori plain text sebagaimana alur request index
                     organisasi: "Instalasi Mandiri Super Admin", 
                     status: 'approved'
                 }]);
@@ -1025,6 +1271,7 @@
             const tableBody = document.getElementById('requestTableBody');
             tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i> Menyinkronkan antrean masuk...</td></tr>';
 
+            // Menampilkan request yang murni pending dari pendaftaran index.html
             const { data, error } = await supabaseClient.from('registration_requests').select('*').eq('status', 'pending').order('created_at', { ascending: false });
             
             if (error) {
@@ -1067,6 +1314,7 @@
             const req = pendingRequests.find(r => r.id === id);
             if(!req) return;
 
+            // Catatan: Asumsi index.html mengirim dan menyimpan data `password` pada tabel registration_requests
             let passToDisplay = req.password ? req.password : "Tidak Dilampirkan / Tersembunyi";
 
             document.getElementById('approve-info-box').innerHTML = `
@@ -1084,7 +1332,7 @@
                 </div>
             `;
             
-            document.getElementById('approve-role-select').value = 'admin'; 
+            document.getElementById('approve-role-select').value = 'admin'; // Default suggestion
             openModal('modalApproveRequest');
         }
 
@@ -1104,6 +1352,7 @@
                     throw new Error("Password pemohon tidak tercatat dalam database. Buat akun melalui menu Manajemen Pengguna saja.");
                 }
 
+                // MENGGUNAKAN SECONDARY CLIENT AGAR SESSION SUPER ADMIN TIDAK LOGOUT
                 const { data: newUser, error: authError } = await supabaseSecondary.auth.signUp({
                     email: req.email,
                     password: req.password,
@@ -1112,13 +1361,16 @@
 
                 if (authError) throw authError;
 
+                // Masukkan Hak Akses ke user_roles
                 await supabaseClient.from('user_roles').insert([{ user_id: newUser.user.id, role: selectedRole }]);
+
+                // Update status in registration_requests table
                 await supabaseClient.from('registration_requests').update({ status: 'approved' }).eq('id', activeRequestId);
 
                 showToast("By-Pass Akun Berhasil!", `Sistem sukses mencetak identitas untuk ${req.email} dan mengubah status registrasi.`, "success");
 
                 closeModal('modalApproveRequest');
-                loadRegistrationRequests(); 
+                loadRegistrationRequests(); // refresh table view
 
             } catch (err) {
                 console.error(err);
@@ -1163,7 +1415,10 @@
                     tableBody.innerHTML += `
                         <tr>
                             <td><strong style="color: var(--primary); font-size: 1.05rem;">${ws.nama_organisasi}</strong></td>
-                            <td style="font-family: monospace; font-size: 0.85rem; color: #64748b; background: #f8fafc; padding: 5px; border-radius: 5px;">${ws.id.substring(0, 15)}...</td>
+                            <td style="font-family: monospace; font-size: 0.85rem; color: #64748b; background: #f8fafc; padding: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center;">
+                                ${ws.id.substring(0, 15)}...
+                                <button class="btn-toggle-eye" onclick="copyToClipboardText('${ws.id}')" title="Copy Full ID"><i class="fa-regular fa-copy"></i></button>
+                            </td>
                             <td>${statusHtml}</td>
                             <td style="text-align: center;">
                                 <button class="btn-action btn-lock" onclick="openFeatureModal('${ws.id}')" title="Modifikasi Konfigurasi Modul"><i class="fa-solid fa-sliders"></i> Atur Konfigurasi</button>
@@ -1184,6 +1439,7 @@
             document.getElementById('modal-org-title').innerText = ws.nama_organisasi;
             document.getElementById('modal-ws-id').innerText = ws.id;
 
+            // In our UX Logic: Checked (true) means Unlocked/Tersedia. Unchecked (false) means Locked/Tidak Tersedia.
             let currentLocks = ws.locked_features || { finance: true, kpi: true, do: true, web: true };
 
             document.getElementById('lock-finance').checked = currentLocks.finance !== false;
@@ -1217,6 +1473,7 @@
                 showToast("Patch Berhasil Diterapkan", "Konfigurasi ketersediaan fitur (locks) berhasil diamankan di database.", "success");
                 closeModal('featureModal');
                 
+                // Update local memory
                 const idx = globalData.findIndex(w => w.id === activeModalWsId);
                 if(idx !== -1) globalData[idx].locked_features = newLocks;
                 renderFeaturesTable();
@@ -1233,6 +1490,7 @@
             const tableBody = document.getElementById('serverTableBody');
             tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px;"><i class="fa-solid fa-wifi fa-fade" style="font-size:2rem; margin-bottom:15px; display:block; color:var(--blue);"></i> Mengukur packet loss dan node network...</td></tr>';
             
+            // Visual simulated ping wait time to give the "feel" of a network trace
             await new Promise(r => setTimeout(r, 1200));
 
             const { data: landingPages } = await supabaseClient.from('landing_pages').select('workspace_id, is_published');
@@ -1248,11 +1506,12 @@
                     const webBadge = isWebUp ? '<span class="badge badge-active"><i class="fa-solid fa-satellite-dish"></i> 200 OK (Live)</span>' : '<span class="badge badge-down"><i class="fa-solid fa-triangle-exclamation"></i> 404/Draft (Down)</span>';
                     const dashBadge = '<span class="badge badge-active"><i class="fa-solid fa-server"></i> Responding</span>';
 
+                    // Ping Logic Simulation (More realistic range: 12ms - 75ms)
                     const pingMs = Math.floor(Math.random() * 63) + 12;
                     totalPing += pingMs;
                     
                     let pingColor = 'var(--blue)';
-                    if(pingMs > 50) pingColor = 'var(--secondary)';
+                    if(pingMs > 50) pingColor = 'var(--secondary)'; // Yellow if a bit high
                     
                     const timeNow = new Date().toLocaleTimeString('id-ID', { hour12: false });
 
@@ -1319,7 +1578,7 @@
                     datasets: [{
                         label: 'Total Kuantitas Activity (Absensi/Login)',
                         data: dataCounts,
-                        backgroundColor: '#0A3055',
+                        backgroundColor: '#0A3055', // Ganti ke primary color agar lebih elegan
                         hoverBackgroundColor: '#F6B23B',
                         borderRadius: 8,
                         borderWidth: 0
@@ -1364,6 +1623,7 @@
         // 8. FUNGSI HAPUS WORKSPACE (DESTRUKTIF)
         // ==========================================
         async function deleteWorkspace(workspaceId, namaOrg) {
+            // Kita harus sangat berhati-hati, ini fungsi destruktif (ON DELETE CASCADE di DB)
             const confirmName = prompt(`PERINGATAN BAHAYA: Tindakan ini akan melenyapkan secara permanen seluruh data database (RAB, Program, Surat, Web Publik, dll) milik organisasi "${namaOrg}".\n\nUntuk melanjutkan, ketik persis nama organisasi di bawah ini:`);
             
             if (confirmName === namaOrg) {
@@ -1393,7 +1653,7 @@
         }
 
         // ==========================================
-        // 9. FUNGSI EXPORT KE EXCEL CSV
+        // 9. FUNGSI EXPORT KE EXCEL CSV (WORKSPACE)
         // ==========================================
         function exportToCSV() {
             if (globalData.length === 0) {
